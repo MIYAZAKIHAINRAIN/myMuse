@@ -491,6 +491,7 @@ function render() {
   
   if (!state.user) {
     app.innerHTML = renderLoginPage();
+    attachEventListeners(); // Attach listeners for login/signup forms
     return;
   }
   
