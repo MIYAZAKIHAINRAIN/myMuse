@@ -1213,8 +1213,11 @@ function renderMobileFAB() {
 function renderModals() {
   return `
     <!-- New Project Modal -->
-    <div id="modal-newProject" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in">
+    <div id="modal-newProject" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'newProject')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in relative" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('newProject')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
         <h3 class="text-lg font-semibold mb-4">${t('sidebar.newProject')}</h3>
         <form id="new-project-form" class="space-y-4">
           <div>
@@ -1233,7 +1236,7 @@ function renderModals() {
             </select>
           </div>
           <div class="flex justify-end gap-2">
-            <button type="button" onclick="closeModal('newProject')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+            <button type="button" onclick="closeModal('newProject')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
               ${t('common.cancel')}
             </button>
             <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
@@ -1245,17 +1248,20 @@ function renderModals() {
     </div>
     
     <!-- Settings Modal -->
-    <div id="modal-settings" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in">
+    <div id="modal-settings" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'settings')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in relative" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('settings')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
         <h3 class="text-lg font-semibold mb-4"><i class="fas fa-cog mr-2"></i>${t('nav.settings')}</h3>
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-2">${t('settings.theme')}</label>
             <div class="flex gap-2">
-              <button onclick="setTheme('light')" class="flex-1 px-4 py-2 rounded-lg ${state.theme === 'light' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700'}">
+              <button type="button" onclick="setTheme('light')" class="flex-1 px-4 py-2 rounded-lg ${state.theme === 'light' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700'}">
                 <i class="fas fa-sun mr-1"></i>${t('settings.lightMode')}
               </button>
-              <button onclick="setTheme('dark')" class="flex-1 px-4 py-2 rounded-lg ${state.theme === 'dark' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700'}">
+              <button type="button" onclick="setTheme('dark')" class="flex-1 px-4 py-2 rounded-lg ${state.theme === 'dark' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700'}">
                 <i class="fas fa-moon mr-1"></i>${t('settings.darkMode')}
               </button>
             </div>
@@ -1269,60 +1275,101 @@ function renderModals() {
           
           <hr class="border-gray-200 dark:border-gray-700">
           
-          <button onclick="logout()" class="w-full px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+          <button type="button" onclick="logout()" class="w-full px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
             <i class="fas fa-sign-out-alt mr-1"></i>${t('settings.logout')}
           </button>
         </div>
-        <button onclick="closeModal('settings')" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
-          <i class="fas fa-times"></i>
-        </button>
       </div>
     </div>
     
     <!-- Calendar Modal -->
-    <div id="modal-calendar" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-2xl m-4 animate-fade-in max-h-[90vh] overflow-y-auto">
-        <h3 class="text-lg font-semibold mb-4"><i class="fas fa-calendar-alt mr-2"></i>${t('sidebar.calendar')}</h3>
-        <div id="calendar-container"></div>
-        <button onclick="closeModal('calendar')" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+    <div id="modal-calendar" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'calendar')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-2xl m-4 animate-fade-in max-h-[90vh] overflow-y-auto relative" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('calendar')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition z-10">
           <i class="fas fa-times"></i>
         </button>
+        <h3 class="text-lg font-semibold mb-4"><i class="fas fa-calendar-alt mr-2"></i>${t('sidebar.calendar')}</h3>
+        <div id="calendar-container"></div>
       </div>
     </div>
     
     <!-- Trash Modal -->
-    <div id="modal-trash" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in">
+    <div id="modal-trash" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'trash')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in relative" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('trash')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
         <h3 class="text-lg font-semibold mb-4"><i class="fas fa-trash mr-2"></i>${t('sidebar.trash')}</h3>
         <div id="trash-container" class="space-y-2 max-h-64 overflow-y-auto">
           ${state.trash.length === 0 ? '<p class="text-gray-500 text-sm">ゴミ箱は空です</p>' : state.trash.map(p => `
             <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <span class="text-sm">${p.title}</span>
               <div class="flex gap-2">
-                <button onclick="restoreProject('${p.id}')" class="text-sm text-indigo-600 hover:underline">${t('common.restore')}</button>
-                <button onclick="deleteProject('${p.id}', true)" class="text-sm text-red-600 hover:underline">${t('common.delete')}</button>
+                <button type="button" onclick="restoreProject('${p.id}')" class="text-sm text-indigo-600 hover:underline">${t('common.restore')}</button>
+                <button type="button" onclick="deleteProject('${p.id}', true)" class="text-sm text-red-600 hover:underline">${t('common.delete')}</button>
               </div>
             </div>
           `).join('')}
         </div>
-        <button onclick="closeModal('trash')" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
-          <i class="fas fa-times"></i>
-        </button>
       </div>
     </div>
     
     <!-- AI Result Modal -->
-    <div id="modal-aiResult" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-2xl m-4 animate-fade-in max-h-[80vh] overflow-y-auto">
+    <div id="modal-aiResult" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'aiResult')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-2xl m-4 animate-fade-in max-h-[80vh] overflow-y-auto relative" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('aiResult')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
         <h3 class="text-lg font-semibold mb-4"><i class="fas fa-magic mr-2 text-indigo-500"></i>AI生成結果</h3>
         <div id="ai-result-content" class="prose dark:prose-invert max-w-none"></div>
         <div class="flex justify-end gap-2 mt-4">
-          <button onclick="closeModal('aiResult')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+          <button type="button" onclick="closeModal('aiResult')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
             閉じる
           </button>
-          <button onclick="applyAIResult()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+          <button type="button" onclick="applyAIResult()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
             適用する
           </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Calendar Event Edit Modal -->
+    <div id="modal-calendarEvent" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[60] modal-backdrop" onclick="handleModalBackdropClick(event, 'calendarEvent')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in relative" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('calendarEvent')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3 class="text-lg font-semibold mb-4"><i class="fas fa-edit mr-2"></i>イベント編集</h3>
+        <div id="calendar-event-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">日付</label>
+            <input type="date" id="event-date" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" readonly>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">タイトル</label>
+            <input type="text" id="event-title" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" placeholder="イベント名">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">説明</label>
+            <textarea id="event-description" rows="3" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none" placeholder="メモ（任意）"></textarea>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="event-is-deadline" class="w-4 h-4 text-indigo-600 rounded">
+            <label for="event-is-deadline" class="text-sm">締め切りとして設定</label>
+          </div>
+          <div class="flex justify-between gap-2 pt-2">
+            <button type="button" id="event-delete-btn" onclick="deleteCalendarEvent()" class="px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg hidden">
+              <i class="fas fa-trash mr-1"></i>削除
+            </button>
+            <div class="flex gap-2 ml-auto">
+              <button type="button" onclick="closeModal('calendarEvent')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                キャンセル
+              </button>
+              <button type="button" onclick="saveCalendarEvent()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                保存
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1465,7 +1512,109 @@ window.openModal = async (name) => {
 };
 
 window.closeModal = (name) => {
+  console.log('closeModal called:', name);
   $(`#modal-${name}`)?.classList.add('hidden');
+};
+
+// Handle backdrop click to close modal
+window.handleModalBackdropClick = (event, name) => {
+  // Only close if clicking directly on the backdrop (not on the modal content)
+  if (event.target === event.currentTarget) {
+    console.log('Backdrop clicked, closing modal:', name);
+    closeModal(name);
+  }
+};
+
+// ============================================
+// Calendar Event Functions
+// ============================================
+let currentEditingEvent = null;
+
+window.openCalendarDay = async (dateStr) => {
+  // Check if there's an existing event for this date
+  const existingEvent = state.calendarEvents.find(e => e.event_date === dateStr);
+  
+  if (existingEvent) {
+    // Edit existing event
+    currentEditingEvent = existingEvent;
+    $('#event-date').value = dateStr;
+    $('#event-title').value = existingEvent.title || '';
+    $('#event-description').value = existingEvent.description || '';
+    $('#event-is-deadline').checked = existingEvent.is_deadline || false;
+    $('#event-delete-btn')?.classList.remove('hidden');
+  } else {
+    // Create new event
+    currentEditingEvent = null;
+    $('#event-date').value = dateStr;
+    $('#event-title').value = '';
+    $('#event-description').value = '';
+    $('#event-is-deadline').checked = false;
+    $('#event-delete-btn')?.classList.add('hidden');
+  }
+  
+  $(`#modal-calendarEvent`)?.classList.remove('hidden');
+};
+
+window.saveCalendarEvent = async () => {
+  const dateStr = $('#event-date').value;
+  const title = $('#event-title').value.trim();
+  const description = $('#event-description').value.trim();
+  const isDeadline = $('#event-is-deadline').checked;
+  
+  if (!title) {
+    alert('タイトルを入力してください');
+    return;
+  }
+  
+  try {
+    if (currentEditingEvent) {
+      // Update existing event
+      await api.put(`/calendar/${currentEditingEvent.id}`, {
+        title,
+        description,
+        is_deadline: isDeadline
+      });
+    } else {
+      // Create new event
+      await api.post('/calendar', {
+        user_id: state.user.id,
+        project_id: state.currentProject?.id,
+        event_date: dateStr,
+        title,
+        description,
+        is_deadline: isDeadline
+      });
+    }
+    
+    // Reload calendar events
+    const date = new Date(dateStr);
+    await loadCalendarEvents(date.getFullYear(), date.getMonth() + 1);
+    renderCalendar();
+    closeModal('calendarEvent');
+  } catch (error) {
+    console.error('Failed to save calendar event:', error);
+    alert('イベントの保存に失敗しました');
+  }
+};
+
+window.deleteCalendarEvent = async () => {
+  if (!currentEditingEvent) return;
+  
+  if (!confirm('このイベントを削除しますか？')) return;
+  
+  try {
+    await api.delete(`/calendar/${currentEditingEvent.id}`);
+    
+    // Reload calendar events
+    const date = new Date(currentEditingEvent.event_date);
+    await loadCalendarEvents(date.getFullYear(), date.getMonth() + 1);
+    renderCalendar();
+    closeModal('calendarEvent');
+    currentEditingEvent = null;
+  } catch (error) {
+    console.error('Failed to delete calendar event:', error);
+    alert('イベントの削除に失敗しました');
+  }
 };
 
 window.handleGenerateIdeas = async () => {
@@ -1846,21 +1995,7 @@ window.changeCalendarMonth = async (delta) => {
   renderCalendar();
 };
 
-window.openCalendarDay = (dateStr) => {
-  const title = prompt('イベントを追加:', '');
-  if (title) {
-    const isDeadline = confirm('締め切りとして設定しますか？');
-    api.post('/calendar', {
-      user_id: state.user.id,
-      project_id: state.currentProject?.id,
-      event_date: dateStr,
-      title,
-      is_deadline: isDeadline,
-    }).then(() => {
-      loadCalendarEvents(state.calendarDate.getFullYear(), state.calendarDate.getMonth() + 1).then(renderCalendar);
-    });
-  }
-};
+// Old openCalendarDay removed - using new modal-based version defined earlier
 
 // ============================================
 // Initialize

@@ -516,6 +516,18 @@ api.post('/calendar', async (c) => {
   return c.json({ event });
 });
 
+api.put('/calendar/:id', async (c) => {
+  const id = c.req.param('id');
+  const { title, description, is_deadline } = await c.req.json();
+  
+  await c.env.DB.prepare(
+    `UPDATE calendar_events SET title = ?, description = ?, is_deadline = ? WHERE id = ?`
+  ).bind(title, description || '', is_deadline ? 1 : 0, id).run();
+  
+  const event = await c.env.DB.prepare('SELECT * FROM calendar_events WHERE id = ?').bind(id).first();
+  return c.json({ event });
+});
+
 api.delete('/calendar/:id', async (c) => {
   const id = c.req.param('id');
   await c.env.DB.prepare('DELETE FROM calendar_events WHERE id = ?').bind(id).run();
