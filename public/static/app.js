@@ -87,6 +87,14 @@ function t(key) {
 }
 
 // ============================================
+// Early Global Functions (needed for onclick handlers)
+// ============================================
+window.switchAuthMode = function(mode) {
+  state.authMode = mode;
+  render();
+};
+
+// ============================================
 // API Helpers
 // ============================================
 const api = axios.create({ baseURL: '/api' });
@@ -202,11 +210,6 @@ async function loadTrash() {
 // ============================================
 // Auth Functions
 // ============================================
-function switchAuthMode(mode) {
-  state.authMode = mode;
-  render();
-}
-
 async function login(email, password) {
   try {
     const res = await api.post('/auth/login', { email, password });
@@ -530,11 +533,11 @@ function renderLoginPage() {
         
         <!-- Tab Switcher -->
         <div class="flex mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-          <button onclick="switchAuthMode('login')" 
+          <button type="button" onclick="window.switchAuthMode('login')" 
             class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${!isSignup ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}">
             <i class="fas fa-sign-in-alt mr-1"></i>${t('auth.login')}
           </button>
-          <button onclick="switchAuthMode('signup')" 
+          <button type="button" onclick="window.switchAuthMode('signup')" 
             class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${isSignup ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}">
             <i class="fas fa-user-plus mr-1"></i>${t('auth.signup')}
           </button>
@@ -1377,10 +1380,6 @@ function attachEventListeners() {
 }
 
 // Global functions
-window.switchAuthMode = (mode) => {
-  switchAuthMode(mode);
-};
-
 window.toggleSidebar = (side) => {
   state.sidebarOpen[side] = !state.sidebarOpen[side];
   render();
