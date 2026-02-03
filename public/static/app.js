@@ -90,9 +90,35 @@ function t(key) {
 // Early Global Functions (needed for onclick handlers)
 // ============================================
 window.switchAuthMode = function(mode) {
+  console.log('switchAuthMode called with mode:', mode);
   state.authMode = mode;
+  console.log('state.authMode set to:', state.authMode);
   render();
+  console.log('render() completed');
 };
+
+// Debug: allow checking state from console
+window.debugState = function() {
+  console.log('Current state:', JSON.stringify({
+    authMode: state.authMode,
+    user: state.user,
+    sessionId: state.sessionId
+  }));
+  return state;
+};
+
+// Debug: dump HTML  
+window.debugHTML = function() {
+  const app = document.querySelector('#app');
+  console.log('App innerHTML length:', app?.innerHTML?.length);
+  const buttons = app?.querySelectorAll('button');
+  console.log('Buttons found:', buttons?.length);
+  buttons?.forEach((b, i) => {
+    console.log(`Button ${i}:`, b.outerHTML.substring(0, 200));
+  });
+};
+
+console.log('window.switchAuthMode defined');
 
 // ============================================
 // API Helpers
@@ -490,9 +516,11 @@ function readAloud() {
 // Render Functions
 // ============================================
 function render() {
+  console.log('render() called, state.authMode:', state.authMode, 'state.user:', state.user);
   const app = $('#app');
   
   if (!state.user) {
+    console.log('Rendering login page, isSignup:', state.authMode === 'signup');
     app.innerHTML = renderLoginPage();
     attachEventListeners(); // Attach listeners for login/signup forms
     return;
@@ -532,12 +560,12 @@ function renderLoginPage() {
         </div>
         
         <!-- Tab Switcher -->
-        <div class="flex mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-          <button type="button" onclick="window.switchAuthMode('login')" 
+        <div class="flex mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-1" id="auth-tabs">
+          <button type="button" id="login-tab-btn"
             class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${!isSignup ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}">
             <i class="fas fa-sign-in-alt mr-1"></i>${t('auth.login')}
           </button>
-          <button type="button" onclick="window.switchAuthMode('signup')" 
+          <button type="button" id="signup-tab-btn"
             class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${isSignup ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}">
             <i class="fas fa-user-plus mr-1"></i>${t('auth.signup')}
           </button>
@@ -1313,6 +1341,27 @@ function attachEventListeners() {
       const email = $('#login-email').value;
       const password = $('#login-password').value;
       login(email, password);
+    });
+  }
+  
+  // Auth tab buttons (login/signup switcher)
+  const loginTabBtn = $('#login-tab-btn');
+  if (loginTabBtn) {
+    loginTabBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Login tab clicked');
+      state.authMode = 'login';
+      render();
+    });
+  }
+  
+  const signupTabBtn = $('#signup-tab-btn');
+  if (signupTabBtn) {
+    signupTabBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Signup tab clicked');
+      state.authMode = 'signup';
+      render();
     });
   }
   
