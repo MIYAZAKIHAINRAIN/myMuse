@@ -1,0 +1,244 @@
+// Gemini 3 Pro API Integration
+// Unified Context: プロット、設定、チャット履歴、カレンダー予定を統合
+
+export interface GeminiContext {
+  plot?: string;
+  characters?: { name: string; description: string }[];
+  worldSettings?: { category: string; title: string; content: string }[];
+  chatHistory?: { role: string; content: string }[];
+  calendarEvents?: { date: string; title: string; is_deadline: boolean }[];
+  currentWriting?: string;
+}
+
+export interface GeminiRequest {
+  action: string;
+  content: string;
+  context?: GeminiContext;
+  options?: {
+    style?: string;
+    targetLanguage?: string;
+    targetWordCount?: number;
+    customPrompt?: string;
+    genre?: string;
+    count?: number;
+  };
+}
+
+function buildSystemPrompt(context: GeminiContext): string {
+  let prompt = `あなたは「myMuse」の執筆支援AIです。作家の創作活動を全面的にサポートします。
+ユーザーのプライバシーを尊重し、入力されたデータは学習に使用しません。
+
+【あなたの役割】
+- 物語の続きを自然に紡ぐ
+- 適切な表現や文体を提案する
+- プロットや設定に矛盾がないか確認する
+- 創作上の悩みに寄り添い、建設的なアドバイスをする
+
+`;
+
+  if (context.plot) {
+    prompt += `【現在のプロット】\n${context.plot}\n\n`;
+  }
+
+  if (context.characters && context.characters.length > 0) {
+    prompt += `【登場人物】\n`;
+    context.characters.forEach(c => {
+      prompt += `- ${c.name}: ${c.description}\n`;
+    });
+    prompt += `\n`;
+  }
+
+  if (context.worldSettings && context.worldSettings.length > 0) {
+    prompt += `【世界観設定】\n`;
+    context.worldSettings.forEach(w => {
+      prompt += `- [${w.category}] ${w.title}: ${w.content}\n`;
+    });
+    prompt += `\n`;
+  }
+
+  if (context.calendarEvents && context.calendarEvents.length > 0) {
+    prompt += `【スケジュール】\n`;
+    context.calendarEvents.forEach(e => {
+      const deadlineTag = e.is_deadline ? '【締切】' : '';
+      prompt += `- ${e.date}: ${deadlineTag}${e.title}\n`;
+    });
+    prompt += `\n`;
+  }
+
+  if (context.currentWriting) {
+    prompt += `【現在の執筆内容】\n${context.currentWriting}\n\n`;
+  }
+
+  return prompt;
+}
+
+function buildUserPrompt(request: GeminiRequest): string {
+  const { action, content, options } = request;
+  
+  switch (action) {
+    case 'continue':
+      return `以下の文章の続きを書いてください。文体と世界観を維持し、自然な流れで物語を展開してください。${options?.targetWordCount ? `目標: 約${options.targetWordCount}文字` : ''}\n\n${content}`;
+    
+    case 'rewrite':
+      return `以下の文章を書き直してください。${options?.style ? `文体: ${options.style}` : ''}より良い表現を使い、読みやすく改善してください。\n\n${content}`;
+    
+    case 'expand':
+      return `以下の文章を拡張してください。描写を豊かにし、感情や情景をより詳細に表現してください。${options?.targetWordCount ? `目標: 約${options.targetWordCount}文字` : ''}\n\n${content}`;
+    
+    case 'proofread':
+      return `以下の文章を校正してください。誤字脱字、文法の誤り、表現の改善点を指摘し、修正案を提示してください。\n\n${content}`;
+    
+    case 'summarize':
+      return `以下の文章を要約してください。主要なポイントを押さえつつ、簡潔にまとめてください。\n\n${content}`;
+    
+    case 'translate':
+      return `以下の文章を${options?.targetLanguage || '英語'}に翻訳してください。原文のニュアンスを保ちつつ、自然な表現にしてください。\n\n${content}`;
+    
+    case 'title':
+      return `以下の文章に適したタイトル案を5つ提案してください。ジャンルや雰囲気に合った魅力的なタイトルをお願いします。\n\n${content}`;
+    
+    case 'style_formal':
+      return `以下の文章を敬語・丁寧語に変換してください。\n\n${content}`;
+    
+    case 'style_casual':
+      return `以下の文章をカジュアルな文体に変換してください。\n\n${content}`;
+    
+    case 'style_literary':
+      return `以下の文章を文学的・詩的な文体に変換してください。比喩や情景描写を豊かにしてください。\n\n${content}`;
+    
+    case 'generate_ideas':
+      return `以下の条件でストーリーのアイデアを${options?.count || 5}個提案してください。
+ジャンル: ${options?.genre || 'ファンタジー'}
+キーワード: ${content}
+
+各アイデアは以下の形式でJSON配列として出力してください:
+[{"title": "タイトル", "content": "概要説明（100〜200文字）", "genre": "ジャンル"}]`;
+    
+    case 'analyze':
+      return `以下の文章を分析し、以下の形式でJSON出力してください:
+{
+  "emotionCurve": [{"point": 0-100の位置, "emotion": -100〜100の感情値, "label": "場面説明"}],
+  "radarChart": [
+    {"axis": "アクション", "value": 0-100},
+    {"axis": "ロマンス", "value": 0-100},
+    {"axis": "ミステリー", "value": 0-100},
+    {"axis": "コメディ", "value": 0-100},
+    {"axis": "ドラマ", "value": 0-100},
+    {"axis": "ファンタジー", "value": 0-100}
+  ],
+  "reviews": [
+    {"persona": "general", "name": "一般読者A", "rating": 1-5, "comment": "コメント"},
+    {"persona": "harsh", "name": "辛口評論家B", "rating": 1-5, "comment": "コメント"},
+    {"persona": "fan", "name": "熱狂的ファンC", "rating": 1-5, "comment": "コメント"}
+  ]
+}
+
+分析対象:\n${content}`;
+    
+    case 'plot_complete':
+      return `以下のプロットの空欄を埋めて完成させてください。物語として整合性があり、魅力的な展開になるようにしてください。\n\n${content}`;
+    
+    case 'custom':
+      return `${options?.customPrompt || ''}\n\n${content}`;
+    
+    case 'consultation':
+      return content;
+    
+    case 'achievement':
+      return `以下の執筆データを分析し、ユーザーの執筆傾向に基づいた独自の実績バッジを3つ提案してください。
+JSON形式で出力: [{"badge_type": "タイプID", "badge_title": "バッジ名", "badge_description": "獲得理由の説明"}]
+
+執筆データ:\n${content}`;
+    
+    default:
+      return content;
+  }
+}
+
+export async function callGemini(
+  apiKey: string,
+  request: GeminiRequest
+): Promise<string> {
+  const systemPrompt = buildSystemPrompt(request.context || {});
+  const userPrompt = buildUserPrompt(request);
+  
+  // Build chat history for context
+  const messages: { role: string; parts: { text: string }[] }[] = [];
+  
+  if (request.context?.chatHistory) {
+    request.context.chatHistory.slice(-10).forEach(msg => {
+      messages.push({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }]
+      });
+    });
+  }
+  
+  // Add current user message
+  messages.push({
+    role: 'user',
+    parts: [{ text: userPrompt }]
+  });
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: systemPrompt }]
+        },
+        contents: messages,
+        generationConfig: {
+          temperature: 0.8,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 8192,
+        },
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+        ],
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error('Gemini API Error:', error);
+    throw new Error(`Gemini API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  
+  if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+    return data.candidates[0].content.parts[0].text;
+  }
+  
+  throw new Error('Invalid response from Gemini API');
+}
+
+// Calculate daily word target based on deadline
+export function calculateDailyTarget(
+  currentWordCount: number,
+  targetWordCount: number,
+  deadlineDate: string
+): { daysLeft: number; dailyTarget: number } {
+  const today = new Date();
+  const deadline = new Date(deadlineDate);
+  const daysLeft = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (daysLeft <= 0) {
+    return { daysLeft: 0, dailyTarget: targetWordCount - currentWordCount };
+  }
+  
+  const remainingWords = targetWordCount - currentWordCount;
+  const dailyTarget = Math.ceil(remainingWords / daysLeft);
+  
+  return { daysLeft, dailyTarget: Math.max(0, dailyTarget) };
+}
