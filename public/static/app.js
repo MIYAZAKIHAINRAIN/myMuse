@@ -30,6 +30,7 @@ const state = {
   trash: [],
   isLoading: false,
   aiGenerating: false,
+  authMode: 'login', // 'login' or 'signup'
 };
 
 // ============================================
@@ -201,6 +202,11 @@ async function loadTrash() {
 // ============================================
 // Auth Functions
 // ============================================
+function switchAuthMode(mode) {
+  state.authMode = mode;
+  render();
+}
+
 async function login(email, password) {
   try {
     const res = await api.post('/auth/login', { email, password });
@@ -214,6 +220,24 @@ async function login(email, password) {
     render();
   } catch (e) {
     alert(t('common.error'));
+  }
+}
+
+async function signup(name, email, password) {
+  try {
+    const res = await api.post('/auth/signup', { name, email, password });
+    state.user = res.data.user;
+    state.sessionId = res.data.sessionId;
+    localStorage.setItem('sessionId', state.sessionId);
+    await loadProjects();
+    render();
+    alert('アカウントを作成しました！myMuseへようこそ！');
+  } catch (e) {
+    if (e.response?.data?.error) {
+      alert(e.response.data.error);
+    } else {
+      alert(t('common.error'));
+    }
   }
 }
 
@@ -492,6 +516,7 @@ function render() {
 }
 
 function renderLoginPage() {
+  const isSignup = state.authMode === 'signup';
   return `
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4">
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in">
@@ -502,6 +527,52 @@ function renderLoginPage() {
           <p class="text-gray-600 dark:text-gray-400">${t('app.tagline')}</p>
         </div>
         
+        <!-- Tab Switcher -->
+        <div class="flex mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          <button onclick="switchAuthMode('login')" 
+            class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${!isSignup ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}">
+            <i class="fas fa-sign-in-alt mr-1"></i>${t('auth.login')}
+          </button>
+          <button onclick="switchAuthMode('signup')" 
+            class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${isSignup ? 'bg-white dark:bg-gray-600 shadow text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}">
+            <i class="fas fa-user-plus mr-1"></i>${t('auth.signup')}
+          </button>
+        </div>
+        
+        ${isSignup ? `
+        <!-- Signup Form -->
+        <form id="signup-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">${t('auth.name')}</label>
+            <input type="text" id="signup-name" required
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700"
+              placeholder="あなたの名前">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">${t('auth.email')}</label>
+            <input type="email" id="signup-email" required
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700"
+              placeholder="your@email.com">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">${t('auth.password')}</label>
+            <input type="password" id="signup-password" required minlength="6"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700"
+              placeholder="6文字以上">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">パスワード確認</label>
+            <input type="password" id="signup-password-confirm" required minlength="6"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700"
+              placeholder="パスワードを再入力">
+          </div>
+          <button type="submit"
+            class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 rounded-lg font-medium hover:opacity-90 transition">
+            <i class="fas fa-user-plus mr-2"></i>${t('auth.signup')}
+          </button>
+        </form>
+        ` : `
+        <!-- Login Form -->
         <form id="login-form" class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-1">${t('auth.email')}</label>
@@ -517,12 +588,13 @@ function renderLoginPage() {
           </div>
           <button type="submit"
             class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-medium hover:opacity-90 transition">
-            ${t('auth.login')}
+            <i class="fas fa-sign-in-alt mr-2"></i>${t('auth.login')}
           </button>
         </form>
+        `}
         
         <p class="mt-6 text-center text-sm text-gray-500">
-          <i class="fas fa-info-circle mr-1"></i>
+          <i class="fas fa-gift mr-1"></i>
           ${t('settings.betaNote')}
         </p>
       </div>
@@ -1240,6 +1312,30 @@ function attachEventListeners() {
     });
   }
   
+  // Signup form
+  const signupForm = $('#signup-form');
+  if (signupForm) {
+    signupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = $('#signup-name').value;
+      const email = $('#signup-email').value;
+      const password = $('#signup-password').value;
+      const passwordConfirm = $('#signup-password-confirm').value;
+      
+      if (password !== passwordConfirm) {
+        alert('パスワードが一致しません');
+        return;
+      }
+      
+      if (password.length < 6) {
+        alert('パスワードは6文字以上で入力してください');
+        return;
+      }
+      
+      signup(name, email, password);
+    });
+  }
+  
   // New project form
   const newProjectForm = $('#new-project-form');
   if (newProjectForm) {
@@ -1280,6 +1376,10 @@ function attachEventListeners() {
 }
 
 // Global functions
+window.switchAuthMode = (mode) => {
+  switchAuthMode(mode);
+};
+
 window.toggleSidebar = (side) => {
   state.sidebarOpen[side] = !state.sidebarOpen[side];
   render();

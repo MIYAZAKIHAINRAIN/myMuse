@@ -15,23 +15,50 @@ const generateId = () => crypto.randomUUID();
 // User & Auth Routes
 // ============================================
 
-// Demo login (simplified for beta)
+// Signup - Create new account
+api.post('/auth/signup', async (c) => {
+  const { name, email, password } = await c.req.json();
+  
+  // Check if email already exists
+  const existingUser = await c.env.DB.prepare(
+    'SELECT id FROM users WHERE email = ?'
+  ).bind(email).first();
+  
+  if (existingUser) {
+    return c.json({ error: 'このメールアドレスは既に登録されています' }, 400);
+  }
+  
+  // Create new user
+  const userId = generateId();
+  await c.env.DB.prepare(
+    'INSERT INTO users (id, email, name, ai_credits) VALUES (?, ?, ?, ?)'
+  ).bind(userId, email, name, 10000).run();
+  
+  const user = await c.env.DB.prepare(
+    'SELECT * FROM users WHERE id = ?'
+  ).bind(userId).first();
+  
+  // Create session
+  const sessionId = generateId();
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  await c.env.DB.prepare(
+    'INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)'
+  ).bind(sessionId, user!.id, expiresAt).run();
+  
+  return c.json({ user, sessionId });
+});
+
+// Login - Existing user login
 api.post('/auth/login', async (c) => {
   const { email, password } = await c.req.json();
   
-  // For demo: auto-create or get user
+  // Check if user exists
   let user = await c.env.DB.prepare(
     'SELECT * FROM users WHERE email = ?'
   ).bind(email).first();
   
   if (!user) {
-    const userId = generateId();
-    await c.env.DB.prepare(
-      'INSERT INTO users (id, email, name) VALUES (?, ?, ?)'
-    ).bind(userId, email, email.split('@')[0]).run();
-    user = await c.env.DB.prepare(
-      'SELECT * FROM users WHERE id = ?'
-    ).bind(userId).first();
+    return c.json({ error: 'メールアドレスまたはパスワードが正しくありません' }, 401);
   }
   
   // Create session
