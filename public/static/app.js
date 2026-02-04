@@ -1342,20 +1342,20 @@ function renderAchievementsTab() {
   // Determine badge tier
   const badgeTier = getBadgeTier(progressPercent);
   
-  return \`
+  return `
     <div class="max-w-4xl mx-auto space-y-6">
       <!-- Header with Trophy Animation -->
       <div class="text-center py-6">
         <div class="inline-block relative">
-          <i class="fas fa-trophy text-6xl \${badgeTier.color} animate-pulse-slow"></i>
-          <span class="absolute -top-2 -right-2 bg-\${badgeTier.bgColor} text-white text-xs px-2 py-1 rounded-full font-bold">
-            \${badgeTier.name}
+          <i class="fas fa-trophy text-6xl ${badgeTier.color} animate-pulse-slow"></i>
+          <span class="absolute -top-2 -right-2 bg-${badgeTier.bgColor} text-white text-xs px-2 py-1 rounded-full font-bold">
+            ${badgeTier.name}
           </span>
         </div>
         <h2 class="text-2xl font-bold mt-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-          \${t('achievement.title')}
+          ${t('achievement.title')}
         </h2>
-        <p class="text-gray-600 dark:text-gray-400 mt-2">\${currentMonth}</p>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">${currentMonth}</p>
       </div>
       
       <!-- Monthly Progress Card -->
@@ -1363,47 +1363,47 @@ function renderAchievementsTab() {
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-semibold flex items-center gap-2">
             <i class="fas fa-calendar-check text-yellow-500"></i>
-            \${t('achievement.monthly')}
+            ${t('achievement.monthly')}
           </h3>
           <button onclick="generateMonthlyAchievements()" 
             class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition text-sm"
-            \${state.aiGenerating ? 'disabled' : ''}>
-            <i class="fas \${state.aiGenerating ? 'fa-spinner fa-spin' : 'fa-magic'}"></i>
-            \${t('achievement.generateNew')}
+            ${state.aiGenerating ? 'disabled' : ''}>
+            <i class="fas ${state.aiGenerating ? 'fa-spinner fa-spin' : 'fa-magic'}"></i>
+            ${t('achievement.generateNew')}
           </button>
         </div>
         
         <!-- Progress Bar -->
         <div class="mb-6">
           <div class="flex justify-between text-sm mb-2">
-            <span class="text-gray-600 dark:text-gray-400">\${t('achievement.progress')}</span>
-            <span class="font-bold text-\${badgeTier.textColor}">\${completedCount}/\${totalCount} (\${progressPercent}%)</span>
+            <span class="text-gray-600 dark:text-gray-400">${t('achievement.progress')}</span>
+            <span class="font-bold text-${badgeTier.textColor}">${completedCount}/${totalCount} (${progressPercent}%)</span>
           </div>
           <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div class="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 transition-all duration-500 rounded-full"
-              style="width: \${progressPercent}%"></div>
+              style="width: ${progressPercent}%"></div>
           </div>
         </div>
         
         <!-- Badge Display -->
         <div class="grid grid-cols-5 gap-2 mb-6">
-          \${renderBadgeTiers(progressPercent)}
+          ${renderBadgeTiers(progressPercent)}
         </div>
         
         <!-- Monthly Goals List -->
         <div class="space-y-3">
-          \${monthlyGoals.map((goal, index) => \`
-            <div class="flex items-center gap-3 p-3 rounded-lg \${goal.completed ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-700'}">
-              <button onclick="toggleAchievement(\${index})" class="w-8 h-8 flex items-center justify-center rounded-full \${goal.completed ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-400'}">
-                <i class="fas \${goal.completed ? 'fa-check' : 'fa-circle'}"></i>
+          ${monthlyGoals.map((goal, index) => `
+            <div class="flex items-center gap-3 p-3 rounded-lg ${goal.completed ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-700'}">
+              <button onclick="toggleAchievement(${index})" class="w-8 h-8 flex items-center justify-center rounded-full ${goal.completed ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-400'}">
+                <i class="fas ${goal.completed ? 'fa-check' : 'fa-circle'}"></i>
               </button>
               <div class="flex-1">
-                <p class="font-medium \${goal.completed ? 'text-green-700 dark:text-green-300 line-through' : ''}">\${goal.title}</p>
-                <p class="text-sm text-gray-500">\${goal.description}</p>
+                <p class="font-medium ${goal.completed ? 'text-green-700 dark:text-green-300 line-through' : ''}">${goal.title}</p>
+                <p class="text-sm text-gray-500">${goal.description}</p>
               </div>
-              <span class="text-2xl">\${goal.emoji}</span>
+              <span class="text-2xl">${goal.emoji}</span>
             </div>
-          \`).join('')}
+          `).join('')}
         </div>
       </div>
       
@@ -1411,14 +1411,14 @@ function renderAchievementsTab() {
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
         <h3 class="text-lg font-semibold flex items-center gap-2 mb-4">
           <i class="fas fa-medal text-purple-500"></i>
-          \${t('achievement.all')}
+          ${t('achievement.all')}
         </h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          \${renderAllTimeBadges()}
+          ${renderAllTimeBadges()}
         </div>
       </div>
     </div>
-  \`;
+  `;
 }
 
 function getDefaultMonthlyGoals() {
@@ -1451,13 +1451,13 @@ function renderBadgeTiers(currentPercent) {
   
   return tiers.map(tier => {
     const isUnlocked = currentPercent >= tier.minPercent;
-    return \`
-      <div class="text-center p-2 rounded-lg \${isUnlocked ? 'bg-gradient-to-b from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 shadow' : 'opacity-40'}">
-        <i class="fas \${tier.icon} text-2xl text-\${tier.color} \${isUnlocked ? 'animate-bounce' : ''}"></i>
-        <p class="text-xs mt-1 font-medium">\${tier.name}</p>
-        <p class="text-xs text-gray-500">\${tier.minPercent}%</p>
+    return `
+      <div class="text-center p-2 rounded-lg ${isUnlocked ? 'bg-gradient-to-b from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 shadow' : 'opacity-40'}">
+        <i class="fas ${tier.icon} text-2xl text-${tier.color} ${isUnlocked ? 'animate-bounce' : ''}"></i>
+        <p class="text-xs mt-1 font-medium">${tier.name}</p>
+        <p class="text-xs text-gray-500">${tier.minPercent}%</p>
       </div>
-    \`;
+    `;
   }).join('');
 }
 
@@ -1473,26 +1473,26 @@ function renderAllTimeBadges() {
       { title: '10000文字達成', icon: 'fa-scroll', color: 'green' },
     ];
     
-    return exampleBadges.map(badge => \`
+    return exampleBadges.map(badge => `
       <div class="text-center p-4 bg-gray-100 dark:bg-gray-700 rounded-xl opacity-50">
         <div class="w-12 h-12 mx-auto bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
-          <i class="fas \${badge.icon} text-xl text-gray-400"></i>
+          <i class="fas ${badge.icon} text-xl text-gray-400"></i>
         </div>
-        <p class="text-sm mt-2 font-medium text-gray-500">\${badge.title}</p>
-        <p class="text-xs text-gray-400">\${t('achievement.locked')}</p>
+        <p class="text-sm mt-2 font-medium text-gray-500">${badge.title}</p>
+        <p class="text-xs text-gray-400">${t('achievement.locked')}</p>
       </div>
-    \`).join('');
+    `).join('');
   }
   
-  return badges.map(badge => \`
-    <div class="text-center p-4 bg-gradient-to-b from-\${badge.color}-50 to-\${badge.color}-100 dark:from-\${badge.color}-900/20 dark:to-\${badge.color}-800/20 rounded-xl border border-\${badge.color}-200 dark:border-\${badge.color}-800">
-      <div class="w-12 h-12 mx-auto bg-\${badge.color}-500 rounded-full flex items-center justify-center shadow-lg">
-        <i class="fas \${badge.icon} text-xl text-white"></i>
+  return badges.map(badge => `
+    <div class="text-center p-4 bg-gradient-to-b from-${badge.color}-50 to-${badge.color}-100 dark:from-${badge.color}-900/20 dark:to-${badge.color}-800/20 rounded-xl border border-${badge.color}-200 dark:border-${badge.color}-800">
+      <div class="w-12 h-12 mx-auto bg-${badge.color}-500 rounded-full flex items-center justify-center shadow-lg">
+        <i class="fas ${badge.icon} text-xl text-white"></i>
       </div>
-      <p class="text-sm mt-2 font-medium">\${badge.title}</p>
-      <p class="text-xs text-gray-500">\${badge.earnedAt ? formatDate(badge.earnedAt) : ''}</p>
+      <p class="text-sm mt-2 font-medium">${badge.title}</p>
+      <p class="text-xs text-gray-500">${badge.earnedAt ? formatDate(badge.earnedAt) : ''}</p>
     </div>
-  \`).join('');
+  `).join('');
 }
 
 window.toggleAchievement = (index) => {
