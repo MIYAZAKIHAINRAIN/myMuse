@@ -31,6 +31,10 @@ const state = {
   isLoading: false,
   aiGenerating: false,
   authMode: 'login', // 'login' or 'signup'
+  // Achievement System
+  achievements: [],
+  monthlyAchievements: [],
+  currentMonthProgress: null,
 };
 
 // ============================================
@@ -44,7 +48,12 @@ const i18n = {
     'sidebar.trash': 'ゴミ箱', 'sidebar.search': '全文検索', 'sidebar.calendar': '創作カレンダー',
     'sidebar.language': '言語', 'sidebar.aiCredits': 'AI利用量',
     'tab.ideas': 'ネタ考案', 'tab.plot': 'プロット', 'tab.writing': 'ライティング',
-    'tab.analysis': '分析・批評', 'tab.consultation': '相談AI',
+    'tab.analysis': '分析・批評', 'tab.consultation': '相談AI', 'tab.achievements': '実績',
+    'achievement.title': '実績・バッジ', 'achievement.monthly': '今月の実績', 'achievement.all': '獲得バッジ',
+    'achievement.progress': '進捗', 'achievement.unlocked': '解除済み', 'achievement.locked': '未解除',
+    'achievement.generateNew': 'AIで実績を更新', 'achievement.lastUpdate': '最終更新',
+    'achievement.platinum': 'プラチナ', 'achievement.gold': 'ゴールド', 'achievement.silver': 'シルバー',
+    'achievement.bronze': 'ブロンズ', 'achievement.encouragement': '頑張ってね',
     'ai.continue': '続きを書く', 'ai.rewrite': '書き直す', 'ai.expand': '拡張', 'ai.proofread': '校正',
     'ai.summarize': '要約', 'ai.translate': '翻訳', 'ai.titleSuggestion': 'タイトル案',
     'ai.formal': '敬語', 'ai.casual': 'カジュアル', 'ai.literary': '文学的',
@@ -77,7 +86,12 @@ const i18n = {
     'sidebar.trash': 'Trash', 'sidebar.search': 'Search', 'sidebar.calendar': 'Calendar',
     'sidebar.language': 'Language', 'sidebar.aiCredits': 'AI Credits',
     'tab.ideas': 'Ideas', 'tab.plot': 'Plot', 'tab.writing': 'Writing',
-    'tab.analysis': 'Analysis', 'tab.consultation': 'AI Chat',
+    'tab.analysis': 'Analysis', 'tab.consultation': 'AI Chat', 'tab.achievements': 'Achievements',
+    'achievement.title': 'Achievements', 'achievement.monthly': 'Monthly Goals', 'achievement.all': 'Badges',
+    'achievement.progress': 'Progress', 'achievement.unlocked': 'Unlocked', 'achievement.locked': 'Locked',
+    'achievement.generateNew': 'Update with AI', 'achievement.lastUpdate': 'Last Update',
+    'achievement.platinum': 'Platinum', 'achievement.gold': 'Gold', 'achievement.silver': 'Silver',
+    'achievement.bronze': 'Bronze', 'achievement.encouragement': 'Keep Going',
     'ai.continue': 'Continue', 'ai.rewrite': 'Rewrite', 'ai.expand': 'Expand', 'ai.proofread': 'Proofread',
     'ai.summarize': 'Summarize', 'ai.translate': 'Translate', 'ai.titleSuggestion': 'Title Ideas',
     'ai.formal': 'Formal', 'ai.casual': 'Casual', 'ai.literary': 'Literary',
@@ -977,10 +991,10 @@ function renderMainContent() {
     <div class="h-full flex flex-col">
       <!-- Tabs -->
       <div class="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4">
-        ${['ideas', 'plot', 'writing', 'analysis', 'consultation'].map(tab => `
+        ${['ideas', 'plot', 'writing', 'analysis', 'consultation', 'achievements'].map(tab => `
           <button onclick="switchTab('${tab}')" 
-            class="px-4 py-3 text-sm font-medium transition ${state.currentTab === tab ? 'tab-active' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}">
-            <i class="fas ${getTabIcon(tab)} mr-1"></i>
+            class="px-4 py-3 text-sm font-medium transition ${state.currentTab === tab ? 'tab-active' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'} ${tab === 'achievements' ? 'ml-auto bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent' : ''}">
+            <i class="fas ${getTabIcon(tab)} mr-1 ${tab === 'achievements' ? 'text-yellow-500' : ''}"></i>
             ${t(`tab.${tab}`)}
           </button>
         `).join('')}
@@ -995,7 +1009,7 @@ function renderMainContent() {
 }
 
 function getTabIcon(tab) {
-  const icons = { ideas: 'fa-lightbulb', plot: 'fa-sitemap', writing: 'fa-pen-fancy', analysis: 'fa-chart-pie', consultation: 'fa-comments' };
+  const icons = { ideas: 'fa-lightbulb', plot: 'fa-sitemap', writing: 'fa-pen-fancy', analysis: 'fa-chart-pie', consultation: 'fa-comments', achievements: 'fa-trophy' };
   return icons[tab] || 'fa-circle';
 }
 
@@ -1006,6 +1020,7 @@ function renderTabContent() {
     case 'writing': return renderWritingTab();
     case 'analysis': return renderAnalysisTab();
     case 'consultation': return renderConsultationTab();
+    case 'achievements': return renderAchievementsTab();
     default: return renderWritingTab();
   }
 }
@@ -1244,7 +1259,7 @@ function renderAnalysisTab() {
         class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2"
         ${state.aiGenerating ? 'disabled' : ''}>
         ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-search-plus"></i>'}
-        <span>作品を分析する</span>
+        <span>${t('analysis.analyze')}</span>
       </button>
     </div>
   `;
@@ -1310,6 +1325,271 @@ function renderChatMessages() {
       </div>
     </div>
   `).join('');
+}
+
+// ============================================
+// Achievements Tab
+// ============================================
+function renderAchievementsTab() {
+  const currentMonth = new Date().toLocaleString(state.language === 'ja' ? 'ja-JP' : 'en-US', { month: 'long', year: 'numeric' });
+  
+  // Calculate monthly progress
+  const monthlyGoals = state.monthlyAchievements || getDefaultMonthlyGoals();
+  const completedCount = monthlyGoals.filter(g => g.completed).length;
+  const totalCount = monthlyGoals.length;
+  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  
+  // Determine badge tier
+  const badgeTier = getBadgeTier(progressPercent);
+  
+  return \`
+    <div class="max-w-4xl mx-auto space-y-6">
+      <!-- Header with Trophy Animation -->
+      <div class="text-center py-6">
+        <div class="inline-block relative">
+          <i class="fas fa-trophy text-6xl \${badgeTier.color} animate-pulse-slow"></i>
+          <span class="absolute -top-2 -right-2 bg-\${badgeTier.bgColor} text-white text-xs px-2 py-1 rounded-full font-bold">
+            \${badgeTier.name}
+          </span>
+        </div>
+        <h2 class="text-2xl font-bold mt-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+          \${t('achievement.title')}
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">\${currentMonth}</p>
+      </div>
+      
+      <!-- Monthly Progress Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border-2 border-yellow-400">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold flex items-center gap-2">
+            <i class="fas fa-calendar-check text-yellow-500"></i>
+            \${t('achievement.monthly')}
+          </h3>
+          <button onclick="generateMonthlyAchievements()" 
+            class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition text-sm"
+            \${state.aiGenerating ? 'disabled' : ''}>
+            <i class="fas \${state.aiGenerating ? 'fa-spinner fa-spin' : 'fa-magic'}"></i>
+            \${t('achievement.generateNew')}
+          </button>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="mb-6">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-gray-600 dark:text-gray-400">\${t('achievement.progress')}</span>
+            <span class="font-bold text-\${badgeTier.textColor}">\${completedCount}/\${totalCount} (\${progressPercent}%)</span>
+          </div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 transition-all duration-500 rounded-full"
+              style="width: \${progressPercent}%"></div>
+          </div>
+        </div>
+        
+        <!-- Badge Display -->
+        <div class="grid grid-cols-5 gap-2 mb-6">
+          \${renderBadgeTiers(progressPercent)}
+        </div>
+        
+        <!-- Monthly Goals List -->
+        <div class="space-y-3">
+          \${monthlyGoals.map((goal, index) => \`
+            <div class="flex items-center gap-3 p-3 rounded-lg \${goal.completed ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-700'}">
+              <button onclick="toggleAchievement(\${index})" class="w-8 h-8 flex items-center justify-center rounded-full \${goal.completed ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-400'}">
+                <i class="fas \${goal.completed ? 'fa-check' : 'fa-circle'}"></i>
+              </button>
+              <div class="flex-1">
+                <p class="font-medium \${goal.completed ? 'text-green-700 dark:text-green-300 line-through' : ''}">\${goal.title}</p>
+                <p class="text-sm text-gray-500">\${goal.description}</p>
+              </div>
+              <span class="text-2xl">\${goal.emoji}</span>
+            </div>
+          \`).join('')}
+        </div>
+      </div>
+      
+      <!-- All-time Badges -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+        <h3 class="text-lg font-semibold flex items-center gap-2 mb-4">
+          <i class="fas fa-medal text-purple-500"></i>
+          \${t('achievement.all')}
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          \${renderAllTimeBadges()}
+        </div>
+      </div>
+    </div>
+  \`;
+}
+
+function getDefaultMonthlyGoals() {
+  return [
+    { id: 1, title: '1日1000文字執筆', description: '毎日コツコツ書き続けよう', emoji: '✍️', completed: false },
+    { id: 2, title: '週5日ログイン', description: '習慣化が成功の鍵', emoji: '📅', completed: false },
+    { id: 3, title: 'AIと10回相談', description: 'AIをパートナーとして活用', emoji: '🤖', completed: false },
+    { id: 4, title: 'プロット完成', description: '物語の骨格を作ろう', emoji: '📝', completed: false },
+    { id: 5, title: '5つのアイデア採用', description: '創作の種を育てる', emoji: '💡', completed: false },
+    { id: 6, title: '作品を1回分析', description: '客観的な視点を得る', emoji: '📊', completed: false },
+  ];
+}
+
+function getBadgeTier(percent) {
+  if (percent >= 100) return { name: t('achievement.platinum'), color: 'text-cyan-400', bgColor: 'cyan-500', textColor: 'cyan-500', icon: 'fa-gem' };
+  if (percent >= 80) return { name: t('achievement.gold'), color: 'text-yellow-400', bgColor: 'yellow-500', textColor: 'yellow-500', icon: 'fa-crown' };
+  if (percent >= 60) return { name: t('achievement.silver'), color: 'text-gray-400', bgColor: 'gray-400', textColor: 'gray-400', icon: 'fa-star' };
+  if (percent >= 40) return { name: t('achievement.bronze'), color: 'text-orange-600', bgColor: 'orange-600', textColor: 'orange-600', icon: 'fa-medal' };
+  return { name: t('achievement.encouragement'), color: 'text-pink-400', bgColor: 'pink-400', textColor: 'pink-400', icon: 'fa-heart' };
+}
+
+function renderBadgeTiers(currentPercent) {
+  const tiers = [
+    { name: t('achievement.encouragement'), minPercent: 0, color: 'pink-400', icon: 'fa-heart' },
+    { name: t('achievement.bronze'), minPercent: 40, color: 'orange-600', icon: 'fa-medal' },
+    { name: t('achievement.silver'), minPercent: 60, color: 'gray-400', icon: 'fa-star' },
+    { name: t('achievement.gold'), minPercent: 80, color: 'yellow-400', icon: 'fa-crown' },
+    { name: t('achievement.platinum'), minPercent: 100, color: 'cyan-400', icon: 'fa-gem' },
+  ];
+  
+  return tiers.map(tier => {
+    const isUnlocked = currentPercent >= tier.minPercent;
+    return \`
+      <div class="text-center p-2 rounded-lg \${isUnlocked ? 'bg-gradient-to-b from-white to-gray-100 dark:from-gray-700 dark:to-gray-800 shadow' : 'opacity-40'}">
+        <i class="fas \${tier.icon} text-2xl text-\${tier.color} \${isUnlocked ? 'animate-bounce' : ''}"></i>
+        <p class="text-xs mt-1 font-medium">\${tier.name}</p>
+        <p class="text-xs text-gray-500">\${tier.minPercent}%</p>
+      </div>
+    \`;
+  }).join('');
+}
+
+function renderAllTimeBadges() {
+  const badges = state.achievements || [];
+  
+  if (badges.length === 0) {
+    // Show some example/locked badges
+    const exampleBadges = [
+      { title: '初めての執筆', icon: 'fa-feather', color: 'blue' },
+      { title: 'AI活用マスター', icon: 'fa-robot', color: 'purple' },
+      { title: '連続7日ログイン', icon: 'fa-fire', color: 'red' },
+      { title: '10000文字達成', icon: 'fa-scroll', color: 'green' },
+    ];
+    
+    return exampleBadges.map(badge => \`
+      <div class="text-center p-4 bg-gray-100 dark:bg-gray-700 rounded-xl opacity-50">
+        <div class="w-12 h-12 mx-auto bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+          <i class="fas \${badge.icon} text-xl text-gray-400"></i>
+        </div>
+        <p class="text-sm mt-2 font-medium text-gray-500">\${badge.title}</p>
+        <p class="text-xs text-gray-400">\${t('achievement.locked')}</p>
+      </div>
+    \`).join('');
+  }
+  
+  return badges.map(badge => \`
+    <div class="text-center p-4 bg-gradient-to-b from-\${badge.color}-50 to-\${badge.color}-100 dark:from-\${badge.color}-900/20 dark:to-\${badge.color}-800/20 rounded-xl border border-\${badge.color}-200 dark:border-\${badge.color}-800">
+      <div class="w-12 h-12 mx-auto bg-\${badge.color}-500 rounded-full flex items-center justify-center shadow-lg">
+        <i class="fas \${badge.icon} text-xl text-white"></i>
+      </div>
+      <p class="text-sm mt-2 font-medium">\${badge.title}</p>
+      <p class="text-xs text-gray-500">\${badge.earnedAt ? formatDate(badge.earnedAt) : ''}</p>
+    </div>
+  \`).join('');
+}
+
+window.toggleAchievement = (index) => {
+  if (!state.monthlyAchievements) {
+    state.monthlyAchievements = getDefaultMonthlyGoals();
+  }
+  state.monthlyAchievements[index].completed = !state.monthlyAchievements[index].completed;
+  
+  // Save to localStorage for persistence
+  localStorage.setItem('monthlyAchievements', JSON.stringify(state.monthlyAchievements));
+  localStorage.setItem('achievementMonth', new Date().getMonth().toString());
+  
+  render();
+};
+
+window.generateMonthlyAchievements = async () => {
+  if (!state.user) return;
+  
+  state.aiGenerating = true;
+  render();
+  
+  try {
+    // Get writing stats
+    const stats = {
+      totalWords: state.currentWriting?.content?.length || 0,
+      projectCount: state.projects?.length || 0,
+      ideasCount: state.ideas?.length || 0,
+      plotCompleted: state.plot?.structure ? true : false,
+    };
+    
+    const res = await api.post('/ai/generate', {
+      action: 'achievement',
+      content: JSON.stringify(stats),
+      projectId: state.currentProject?.id,
+      userId: state.user.id,
+    });
+    
+    // Parse AI response to create personalized achievements
+    const aiResponse = res.data.result;
+    console.log('AI Achievement Response:', aiResponse);
+    
+    // Try to extract JSON from response
+    const jsonMatch = aiResponse.match(/\\[.*\\]/s);
+    if (jsonMatch) {
+      try {
+        const newAchievements = JSON.parse(jsonMatch[0]);
+        state.monthlyAchievements = newAchievements.map((a, i) => ({
+          id: i + 1,
+          title: a.badge_title || a.title,
+          description: a.badge_description || a.description,
+          emoji: getEmojiForAchievement(a.badge_type || a.type),
+          completed: false,
+        }));
+        localStorage.setItem('monthlyAchievements', JSON.stringify(state.monthlyAchievements));
+        localStorage.setItem('achievementMonth', new Date().getMonth().toString());
+      } catch (e) {
+        console.error('Failed to parse AI achievements:', e);
+        // Use default goals on parse failure
+        state.monthlyAchievements = getDefaultMonthlyGoals();
+      }
+    } else {
+      state.monthlyAchievements = getDefaultMonthlyGoals();
+    }
+  } catch (error) {
+    console.error('Achievement generation error:', error);
+    state.monthlyAchievements = getDefaultMonthlyGoals();
+  }
+  
+  state.aiGenerating = false;
+  render();
+};
+
+function getEmojiForAchievement(type) {
+  const emojiMap = {
+    'writing': '✍️', 'words': '📝', 'login': '📅', 'ai': '🤖', 
+    'plot': '📖', 'idea': '💡', 'analysis': '📊', 'streak': '🔥',
+    'milestone': '🏆', 'creative': '🎨', 'completion': '✅', 'challenge': '💪'
+  };
+  return emojiMap[type] || '⭐';
+}
+
+// Load achievements from localStorage on init
+function loadAchievements() {
+  const savedMonth = localStorage.getItem('achievementMonth');
+  const currentMonth = new Date().getMonth().toString();
+  
+  if (savedMonth === currentMonth) {
+    const saved = localStorage.getItem('monthlyAchievements');
+    if (saved) {
+      state.monthlyAchievements = JSON.parse(saved);
+    }
+  } else {
+    // New month, reset achievements
+    state.monthlyAchievements = getDefaultMonthlyGoals();
+    localStorage.setItem('monthlyAchievements', JSON.stringify(state.monthlyAchievements));
+    localStorage.setItem('achievementMonth', currentMonth);
+  }
 }
 
 function renderChat() {
@@ -1536,13 +1816,42 @@ function renderModals() {
           <i class="fas fa-times"></i>
         </button>
         <h3 class="text-lg font-semibold mb-4"><i class="fas fa-magic mr-2 text-indigo-500"></i>AI生成結果</h3>
-        <div id="ai-result-content" class="prose dark:prose-invert max-w-none"></div>
-        <div class="flex justify-end gap-2 mt-4">
-          <button type="button" onclick="closeModal('aiResult')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-            閉じる
+        <div id="ai-result-content" class="prose dark:prose-invert max-w-none mb-4"></div>
+        
+        <!-- Copy button -->
+        <div class="flex items-center gap-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg mb-4">
+          <button type="button" onclick="copyAIResult()" class="flex items-center gap-2 px-3 py-1 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded">
+            <i class="fas fa-copy"></i> コピー
           </button>
-          <button type="button" onclick="applyAIResult()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-            適用する
+          <span id="copy-feedback" class="text-sm text-green-600 hidden">コピーしました！</span>
+        </div>
+        
+        <!-- Apply options -->
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            <i class="fas fa-exclamation-triangle text-yellow-500 mr-1"></i>
+            適用方法を選択してください（既存の文章に影響します）
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+            <button type="button" onclick="applyAIResult('append')" class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+              <i class="fas fa-plus-circle"></i>
+              <span class="text-sm">末尾に追加</span>
+            </button>
+            <button type="button" onclick="applyAIResult('prepend')" class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+              <i class="fas fa-arrow-up"></i>
+              <span class="text-sm">先頭に追加</span>
+            </button>
+            <button type="button" onclick="applyAIResult('cursor')" class="flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+              <i class="fas fa-i-cursor"></i>
+              <span class="text-sm">カーソル位置に挿入</span>
+            </button>
+            <button type="button" onclick="applyAIResult('replace')" class="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+              <i class="fas fa-exchange-alt"></i>
+              <span class="text-sm">全て置換（注意）</span>
+            </button>
+          </div>
+          <button type="button" onclick="closeModal('aiResult')" class="w-full px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+            キャンセル
           </button>
         </div>
       </div>
@@ -1673,7 +1982,8 @@ function attachEventListeners() {
     newChatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       console.log('Chat form submitted');
-      const input = $('#chat-input');
+      // Get input from the new cloned form, not the old one
+      const input = newChatForm.querySelector('#chat-input');
       if (input && input.value.trim()) {
         console.log('Sending message:', input.value);
         const message = input.value;
@@ -2012,9 +2322,25 @@ window.handleAnalyze = async () => {
   }
 };
 
-window.startNewThread = () => {
+window.startNewThread = async () => {
+  // Reload chat threads to include the previous conversation
+  if (state.currentProject) {
+    try {
+      const res = await api.get(`/projects/${state.currentProject.id}/chat/threads`);
+      state.chatThreads = res.data.threads || [];
+    } catch (e) {
+      console.error('Failed to reload chat threads:', e);
+    }
+  }
+  
+  // Start fresh conversation
   state.currentThread = null;
   state.chatMessages = [];
+  render();
+};
+
+window.loadChatMessages = async (threadId) => {
+  await loadChatMessages(threadId);
   render();
 };
 
@@ -2035,8 +2361,15 @@ window.openMobileAI = () => {
 };
 
 let lastAIResult = '';
+let editorCursorPosition = 0;
+
 function showAIResult(result) {
   lastAIResult = result;
+  // Save cursor position before showing modal
+  const editor = $('#editor');
+  if (editor) {
+    editorCursorPosition = editor.selectionStart || 0;
+  }
   const content = $('#ai-result-content');
   if (content) {
     content.innerHTML = marked.parse(result);
@@ -2044,15 +2377,75 @@ function showAIResult(result) {
   openModal('aiResult');
 }
 
-window.applyAIResult = () => {
-  if (lastAIResult && state.currentWriting) {
-    const editor = $('#editor');
-    if (editor) {
-      editor.value = lastAIResult;
-      autoSave(lastAIResult);
+window.copyAIResult = () => {
+  navigator.clipboard.writeText(lastAIResult).then(() => {
+    const feedback = $('#copy-feedback');
+    if (feedback) {
+      feedback.classList.remove('hidden');
+      setTimeout(() => feedback.classList.add('hidden'), 2000);
     }
+  });
+};
+
+window.applyAIResult = (mode = 'append') => {
+  if (!lastAIResult) {
+    closeModal('aiResult');
+    return;
   }
+  
+  const editor = $('#editor');
+  if (!editor) {
+    closeModal('aiResult');
+    return;
+  }
+  
+  const currentContent = editor.value || '';
+  let newContent = '';
+  
+  switch (mode) {
+    case 'append':
+      // Add to end with line break
+      newContent = currentContent + (currentContent ? '\n\n' : '') + lastAIResult;
+      break;
+    case 'prepend':
+      // Add to beginning with line break
+      newContent = lastAIResult + (currentContent ? '\n\n' : '') + currentContent;
+      break;
+    case 'cursor':
+      // Insert at cursor position
+      const before = currentContent.substring(0, editorCursorPosition);
+      const after = currentContent.substring(editorCursorPosition);
+      newContent = before + lastAIResult + after;
+      break;
+    case 'replace':
+      // Full replacement - confirm first
+      if (!confirm('現在の文章をすべて置き換えます。この操作は取り消せません。よろしいですか？')) {
+        return;
+      }
+      newContent = lastAIResult;
+      break;
+    default:
+      newContent = currentContent + '\n\n' + lastAIResult;
+  }
+  
+  editor.value = newContent;
+  
+  // Update state and save
+  if (state.currentWriting) {
+    state.currentWriting.content = newContent;
+    autoSave(newContent);
+  }
+  
   closeModal('aiResult');
+  
+  // Show success message
+  const modeLabels = {
+    append: '末尾に追加しました',
+    prepend: '先頭に追加しました',
+    cursor: 'カーソル位置に挿入しました',
+    replace: '置き換えました'
+  };
+  console.log('AI result applied:', modeLabels[mode]);
 };
 
 function addToAIHistory(action, result) {
