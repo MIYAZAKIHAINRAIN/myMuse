@@ -34,12 +34,11 @@ const state = {
 };
 
 // ============================================
-// Translations
+// Translations - 12 Languages Support
 // ============================================
 const i18n = {
   ja: {
-    'app.title': 'myMuse',
-    'app.tagline': '執筆のすべてを把握し、寄り添う全知の相棒',
+    'app.title': 'myMuse', 'app.tagline': '執筆のすべてを把握し、寄り添う全知の相棒',
     'nav.home': 'ホーム', 'nav.write': '執筆', 'nav.manage': '管理', 'nav.settings': '設定',
     'sidebar.projects': 'プロジェクト', 'sidebar.newProject': '新規プロジェクト', 'sidebar.newFolder': '新規フォルダ',
     'sidebar.trash': 'ゴミ箱', 'sidebar.search': '全文検索', 'sidebar.calendar': '創作カレンダー',
@@ -51,35 +50,219 @@ const i18n = {
     'ai.formal': '敬語', 'ai.casual': 'カジュアル', 'ai.literary': '文学的',
     'ai.customPrompt': 'カスタム指示', 'ai.targetWords': '目標文字数', 'ai.generate': '生成',
     'writing.zenMode': 'ZENモード', 'writing.vertical': '縦書き', 'writing.horizontal': '横書き',
-    'writing.export': 'エクスポート', 'writing.readAloud': '音声読み上げ',
+    'writing.export': 'エクスポート', 'writing.readAloud': '音声読み上げ', 'writing.characters': '文字数',
     'analysis.emotionCurve': '感情曲線', 'analysis.radar': '作品成分チャート', 'analysis.reviews': 'ペルソナ評価',
+    'analysis.analyze': '作品を分析する', 'analysis.noContent': '分析するコンテンツがありません',
     'calendar.memo': 'メモ', 'calendar.deadline': '締め切り', 'calendar.daysLeft': '残り日数',
     'settings.profile': 'プロフィール', 'settings.theme': 'テーマ', 'settings.lightMode': 'ライトモード',
     'settings.darkMode': 'ダークモード', 'settings.plan': 'プラン管理', 'settings.betaNote': 'ベータ版につき全機能無料',
     'settings.logout': 'ログアウト', 'settings.deleteAccount': 'アカウント削除',
     'auth.login': 'ログイン', 'auth.signup': '新規登録', 'auth.email': 'メールアドレス',
-    'auth.password': 'パスワード', 'auth.name': '名前',
+    'auth.password': 'パスワード', 'auth.passwordConfirm': 'パスワード（確認）', 'auth.name': '名前',
     'common.save': '保存', 'common.cancel': 'キャンセル', 'common.delete': '削除',
     'common.restore': '復元', 'common.adopt': '採用', 'common.loading': '読み込み中...', 'common.error': 'エラーが発生しました',
+    'common.generate': '生成', 'common.close': '閉じる', 'common.apply': '適用する',
     'plot.kishotenketsu': '起承転結', 'plot.threeAct': '三幕構成', 'plot.blakeSnyder': 'ブレイク・スナイダー',
     'plot.ki': '起', 'plot.sho': '承', 'plot.ten': '転', 'plot.ketsu': '結',
     'plot.act1': '第一幕', 'plot.act2': '第二幕', 'plot.act3': '第三幕',
     'genre.fantasy': 'ファンタジー', 'genre.romance': '恋愛', 'genre.mystery': 'ミステリー',
     'genre.scifi': 'SF', 'genre.horror': 'ホラー', 'genre.literary': '純文学',
-    'idea.generate': 'アイデアを生成', 'idea.count': '生成数',
+    'idea.generate': 'アイデアを生成', 'idea.count': '生成数', 'idea.keywords': 'キーワード', 'idea.genre': 'ジャンル',
+    'chat.placeholder': '相談したいことを入力...', 'chat.empty': 'AIに相談してみましょう', 'chat.hint': 'プロット、キャラクター、文章の悩みなど何でも相談できます',
   },
   en: {
     'app.title': 'myMuse', 'app.tagline': 'Your all-knowing writing companion',
     'nav.home': 'Home', 'nav.write': 'Write', 'nav.manage': 'Manage', 'nav.settings': 'Settings',
     'sidebar.projects': 'Projects', 'sidebar.newProject': 'New Project', 'sidebar.newFolder': 'New Folder',
-    'sidebar.trash': 'Trash', 'sidebar.search': 'Global Search', 'sidebar.calendar': 'Creative Calendar',
+    'sidebar.trash': 'Trash', 'sidebar.search': 'Search', 'sidebar.calendar': 'Calendar',
+    'sidebar.language': 'Language', 'sidebar.aiCredits': 'AI Credits',
     'tab.ideas': 'Ideas', 'tab.plot': 'Plot', 'tab.writing': 'Writing',
-    'tab.analysis': 'Analysis', 'tab.consultation': 'AI Consultation',
+    'tab.analysis': 'Analysis', 'tab.consultation': 'AI Chat',
     'ai.continue': 'Continue', 'ai.rewrite': 'Rewrite', 'ai.expand': 'Expand', 'ai.proofread': 'Proofread',
     'ai.summarize': 'Summarize', 'ai.translate': 'Translate', 'ai.titleSuggestion': 'Title Ideas',
-    'ai.generate': 'Generate', 'common.save': 'Save', 'common.cancel': 'Cancel', 'common.delete': 'Delete',
-    'common.loading': 'Loading...', 'common.error': 'An error occurred',
-  }
+    'ai.formal': 'Formal', 'ai.casual': 'Casual', 'ai.literary': 'Literary',
+    'ai.customPrompt': 'Custom Prompt', 'ai.targetWords': 'Target Words', 'ai.generate': 'Generate',
+    'writing.zenMode': 'ZEN Mode', 'writing.vertical': 'Vertical', 'writing.horizontal': 'Horizontal',
+    'writing.export': 'Export', 'writing.readAloud': 'Read Aloud', 'writing.characters': 'Characters',
+    'analysis.emotionCurve': 'Emotion Curve', 'analysis.radar': 'Genre Chart', 'analysis.reviews': 'Reviews',
+    'analysis.analyze': 'Analyze Work', 'analysis.noContent': 'No content to analyze',
+    'calendar.memo': 'Memo', 'calendar.deadline': 'Deadline', 'calendar.daysLeft': 'Days Left',
+    'settings.profile': 'Profile', 'settings.theme': 'Theme', 'settings.lightMode': 'Light Mode',
+    'settings.darkMode': 'Dark Mode', 'settings.plan': 'Plan', 'settings.betaNote': 'All features free during beta',
+    'settings.logout': 'Logout', 'settings.deleteAccount': 'Delete Account',
+    'auth.login': 'Login', 'auth.signup': 'Sign Up', 'auth.email': 'Email',
+    'auth.password': 'Password', 'auth.passwordConfirm': 'Confirm Password', 'auth.name': 'Name',
+    'common.save': 'Save', 'common.cancel': 'Cancel', 'common.delete': 'Delete',
+    'common.restore': 'Restore', 'common.adopt': 'Adopt', 'common.loading': 'Loading...', 'common.error': 'An error occurred',
+    'common.generate': 'Generate', 'common.close': 'Close', 'common.apply': 'Apply',
+    'plot.kishotenketsu': 'Ki-Sho-Ten-Ketsu', 'plot.threeAct': 'Three Act', 'plot.blakeSnyder': 'Blake Snyder',
+    'plot.ki': 'Setup', 'plot.sho': 'Development', 'plot.ten': 'Twist', 'plot.ketsu': 'Conclusion',
+    'plot.act1': 'Act 1', 'plot.act2': 'Act 2', 'plot.act3': 'Act 3',
+    'genre.fantasy': 'Fantasy', 'genre.romance': 'Romance', 'genre.mystery': 'Mystery',
+    'genre.scifi': 'Sci-Fi', 'genre.horror': 'Horror', 'genre.literary': 'Literary',
+    'idea.generate': 'Generate Ideas', 'idea.count': 'Count', 'idea.keywords': 'Keywords', 'idea.genre': 'Genre',
+    'chat.placeholder': 'Ask your writing assistant...', 'chat.empty': 'Chat with AI', 'chat.hint': 'Ask about plot, characters, writing style, and more',
+  },
+  zh: {
+    'app.title': 'myMuse', 'app.tagline': '全知全能的写作伙伴',
+    'nav.home': '首页', 'nav.write': '写作', 'nav.manage': '管理', 'nav.settings': '设置',
+    'sidebar.projects': '项目', 'sidebar.newProject': '新建项目', 'sidebar.newFolder': '新建文件夹',
+    'sidebar.trash': '回收站', 'sidebar.search': '搜索', 'sidebar.calendar': '日历',
+    'sidebar.language': '语言', 'sidebar.aiCredits': 'AI额度',
+    'tab.ideas': '创意', 'tab.plot': '情节', 'tab.writing': '写作', 'tab.analysis': '分析', 'tab.consultation': 'AI咨询',
+    'ai.continue': '续写', 'ai.rewrite': '重写', 'ai.expand': '扩展', 'ai.proofread': '校对',
+    'ai.summarize': '总结', 'ai.translate': '翻译', 'ai.titleSuggestion': '标题建议',
+    'ai.formal': '正式', 'ai.casual': '随意', 'ai.literary': '文学',
+    'ai.customPrompt': '自定义指令', 'ai.targetWords': '目标字数', 'ai.generate': '生成',
+    'writing.zenMode': 'ZEN模式', 'writing.vertical': '竖排', 'writing.horizontal': '横排',
+    'writing.export': '导出', 'writing.readAloud': '朗读', 'writing.characters': '字数',
+    'analysis.emotionCurve': '情感曲线', 'analysis.radar': '类型图', 'analysis.reviews': '评价',
+    'analysis.analyze': '分析作品', 'analysis.noContent': '没有可分析的内容',
+    'settings.profile': '个人资料', 'settings.theme': '主题', 'settings.lightMode': '浅色模式',
+    'settings.darkMode': '深色模式', 'settings.logout': '登出', 'settings.betaNote': '测试期间所有功能免费',
+    'auth.login': '登录', 'auth.signup': '注册', 'auth.email': '邮箱', 'auth.password': '密码', 'auth.name': '姓名',
+    'common.save': '保存', 'common.cancel': '取消', 'common.delete': '删除', 'common.restore': '恢复',
+    'common.loading': '加载中...', 'common.error': '发生错误', 'common.generate': '生成', 'common.close': '关闭',
+    'chat.placeholder': '输入您的问题...', 'chat.empty': '与AI对话', 'chat.hint': '询问情节、人物、写作风格等',
+  },
+  ko: {
+    'app.title': 'myMuse', 'app.tagline': '모든 것을 아는 글쓰기 동반자',
+    'nav.home': '홈', 'nav.write': '집필', 'nav.manage': '관리', 'nav.settings': '설정',
+    'sidebar.projects': '프로젝트', 'sidebar.newProject': '새 프로젝트', 'sidebar.newFolder': '새 폴더',
+    'sidebar.trash': '휴지통', 'sidebar.search': '검색', 'sidebar.calendar': '캘린더',
+    'sidebar.language': '언어', 'sidebar.aiCredits': 'AI 크레딧',
+    'tab.ideas': '아이디어', 'tab.plot': '플롯', 'tab.writing': '집필', 'tab.analysis': '분석', 'tab.consultation': 'AI 상담',
+    'ai.continue': '계속 쓰기', 'ai.rewrite': '다시 쓰기', 'ai.expand': '확장', 'ai.proofread': '교정',
+    'ai.summarize': '요약', 'ai.translate': '번역', 'ai.titleSuggestion': '제목 제안',
+    'ai.formal': '격식체', 'ai.casual': '비격식체', 'ai.literary': '문학적',
+    'ai.customPrompt': '사용자 정의', 'ai.targetWords': '목표 글자 수', 'ai.generate': '생성',
+    'writing.zenMode': 'ZEN 모드', 'writing.export': '내보내기', 'writing.readAloud': '읽어주기', 'writing.characters': '글자 수',
+    'analysis.analyze': '작품 분석', 'analysis.noContent': '분석할 내용이 없습니다',
+    'settings.lightMode': '라이트 모드', 'settings.darkMode': '다크 모드', 'settings.logout': '로그아웃', 'settings.betaNote': '베타 기간 모든 기능 무료',
+    'auth.login': '로그인', 'auth.signup': '회원가입', 'auth.email': '이메일', 'auth.password': '비밀번호', 'auth.name': '이름',
+    'common.save': '저장', 'common.cancel': '취소', 'common.delete': '삭제', 'common.loading': '로딩 중...', 'common.error': '오류가 발생했습니다',
+    'chat.placeholder': '질문을 입력하세요...', 'chat.empty': 'AI와 대화하기',
+  },
+  es: {
+    'app.title': 'myMuse', 'app.tagline': 'Tu compañero de escritura omnisciente',
+    'nav.home': 'Inicio', 'nav.write': 'Escribir', 'nav.manage': 'Gestionar', 'nav.settings': 'Ajustes',
+    'sidebar.projects': 'Proyectos', 'sidebar.newProject': 'Nuevo proyecto', 'sidebar.trash': 'Papelera',
+    'sidebar.search': 'Buscar', 'sidebar.calendar': 'Calendario', 'sidebar.language': 'Idioma',
+    'tab.ideas': 'Ideas', 'tab.plot': 'Trama', 'tab.writing': 'Escritura', 'tab.analysis': 'Análisis', 'tab.consultation': 'Chat AI',
+    'ai.continue': 'Continuar', 'ai.rewrite': 'Reescribir', 'ai.expand': 'Expandir', 'ai.proofread': 'Corregir',
+    'ai.summarize': 'Resumir', 'ai.translate': 'Traducir', 'ai.titleSuggestion': 'Ideas de título', 'ai.generate': 'Generar',
+    'writing.zenMode': 'Modo ZEN', 'writing.export': 'Exportar', 'writing.characters': 'Caracteres',
+    'analysis.analyze': 'Analizar obra', 'analysis.noContent': 'No hay contenido para analizar',
+    'settings.lightMode': 'Modo claro', 'settings.darkMode': 'Modo oscuro', 'settings.logout': 'Cerrar sesión', 'settings.betaNote': 'Todas las funciones gratis durante la beta',
+    'auth.login': 'Iniciar sesión', 'auth.signup': 'Registrarse', 'auth.email': 'Correo', 'auth.password': 'Contraseña', 'auth.name': 'Nombre',
+    'common.save': 'Guardar', 'common.cancel': 'Cancelar', 'common.delete': 'Eliminar', 'common.loading': 'Cargando...', 'common.error': 'Ha ocurrido un error',
+    'chat.placeholder': 'Escribe tu pregunta...', 'chat.empty': 'Chatea con AI',
+  },
+  fr: {
+    'app.title': 'myMuse', 'app.tagline': 'Votre compagnon d\'écriture omniscient',
+    'nav.home': 'Accueil', 'nav.write': 'Écrire', 'nav.manage': 'Gérer', 'nav.settings': 'Paramètres',
+    'sidebar.projects': 'Projets', 'sidebar.newProject': 'Nouveau projet', 'sidebar.trash': 'Corbeille',
+    'sidebar.search': 'Rechercher', 'sidebar.calendar': 'Calendrier', 'sidebar.language': 'Langue',
+    'tab.ideas': 'Idées', 'tab.plot': 'Intrigue', 'tab.writing': 'Écriture', 'tab.analysis': 'Analyse', 'tab.consultation': 'Chat AI',
+    'ai.continue': 'Continuer', 'ai.rewrite': 'Réécrire', 'ai.expand': 'Développer', 'ai.proofread': 'Corriger',
+    'ai.summarize': 'Résumer', 'ai.translate': 'Traduire', 'ai.titleSuggestion': 'Idées de titre', 'ai.generate': 'Générer',
+    'writing.zenMode': 'Mode ZEN', 'writing.export': 'Exporter', 'writing.characters': 'Caractères',
+    'analysis.analyze': 'Analyser l\'œuvre', 'analysis.noContent': 'Aucun contenu à analyser',
+    'settings.lightMode': 'Mode clair', 'settings.darkMode': 'Mode sombre', 'settings.logout': 'Déconnexion', 'settings.betaNote': 'Toutes les fonctionnalités gratuites pendant la bêta',
+    'auth.login': 'Connexion', 'auth.signup': 'Inscription', 'auth.email': 'Email', 'auth.password': 'Mot de passe', 'auth.name': 'Nom',
+    'common.save': 'Enregistrer', 'common.cancel': 'Annuler', 'common.delete': 'Supprimer', 'common.loading': 'Chargement...', 'common.error': 'Une erreur est survenue',
+    'chat.placeholder': 'Posez votre question...', 'chat.empty': 'Discutez avec l\'AI',
+  },
+  de: {
+    'app.title': 'myMuse', 'app.tagline': 'Ihr allwissender Schreibbegleiter',
+    'nav.home': 'Startseite', 'nav.write': 'Schreiben', 'nav.manage': 'Verwalten', 'nav.settings': 'Einstellungen',
+    'sidebar.projects': 'Projekte', 'sidebar.newProject': 'Neues Projekt', 'sidebar.trash': 'Papierkorb',
+    'sidebar.search': 'Suchen', 'sidebar.calendar': 'Kalender', 'sidebar.language': 'Sprache',
+    'tab.ideas': 'Ideen', 'tab.plot': 'Handlung', 'tab.writing': 'Schreiben', 'tab.analysis': 'Analyse', 'tab.consultation': 'AI-Chat',
+    'ai.continue': 'Fortsetzen', 'ai.rewrite': 'Umschreiben', 'ai.expand': 'Erweitern', 'ai.proofread': 'Korrektur',
+    'ai.summarize': 'Zusammenfassen', 'ai.translate': 'Übersetzen', 'ai.titleSuggestion': 'Titelvorschläge', 'ai.generate': 'Generieren',
+    'writing.zenMode': 'ZEN-Modus', 'writing.export': 'Exportieren', 'writing.characters': 'Zeichen',
+    'analysis.analyze': 'Werk analysieren', 'analysis.noContent': 'Kein Inhalt zum Analysieren',
+    'settings.lightMode': 'Heller Modus', 'settings.darkMode': 'Dunkler Modus', 'settings.logout': 'Abmelden', 'settings.betaNote': 'Alle Funktionen während der Beta kostenlos',
+    'auth.login': 'Anmelden', 'auth.signup': 'Registrieren', 'auth.email': 'E-Mail', 'auth.password': 'Passwort', 'auth.name': 'Name',
+    'common.save': 'Speichern', 'common.cancel': 'Abbrechen', 'common.delete': 'Löschen', 'common.loading': 'Laden...', 'common.error': 'Ein Fehler ist aufgetreten',
+    'chat.placeholder': 'Stellen Sie Ihre Frage...', 'chat.empty': 'Mit AI chatten',
+  },
+  pt: {
+    'app.title': 'myMuse', 'app.tagline': 'Seu companheiro de escrita onisciente',
+    'nav.home': 'Início', 'nav.write': 'Escrever', 'nav.manage': 'Gerenciar', 'nav.settings': 'Configurações',
+    'sidebar.projects': 'Projetos', 'sidebar.newProject': 'Novo projeto', 'sidebar.trash': 'Lixeira',
+    'sidebar.search': 'Pesquisar', 'sidebar.calendar': 'Calendário', 'sidebar.language': 'Idioma',
+    'tab.ideas': 'Ideias', 'tab.plot': 'Enredo', 'tab.writing': 'Escrita', 'tab.analysis': 'Análise', 'tab.consultation': 'Chat AI',
+    'ai.continue': 'Continuar', 'ai.rewrite': 'Reescrever', 'ai.expand': 'Expandir', 'ai.proofread': 'Revisar',
+    'ai.summarize': 'Resumir', 'ai.translate': 'Traduzir', 'ai.titleSuggestion': 'Sugestões de título', 'ai.generate': 'Gerar',
+    'writing.zenMode': 'Modo ZEN', 'writing.export': 'Exportar', 'writing.characters': 'Caracteres',
+    'analysis.analyze': 'Analisar obra', 'analysis.noContent': 'Sem conteúdo para analisar',
+    'settings.lightMode': 'Modo claro', 'settings.darkMode': 'Modo escuro', 'settings.logout': 'Sair', 'settings.betaNote': 'Todas as funcionalidades grátis durante o beta',
+    'auth.login': 'Entrar', 'auth.signup': 'Cadastrar', 'auth.email': 'Email', 'auth.password': 'Senha', 'auth.name': 'Nome',
+    'common.save': 'Salvar', 'common.cancel': 'Cancelar', 'common.delete': 'Excluir', 'common.loading': 'Carregando...', 'common.error': 'Ocorreu um erro',
+    'chat.placeholder': 'Digite sua pergunta...', 'chat.empty': 'Converse com AI',
+  },
+  ru: {
+    'app.title': 'myMuse', 'app.tagline': 'Ваш всезнающий помощник в писательстве',
+    'nav.home': 'Главная', 'nav.write': 'Писать', 'nav.manage': 'Управление', 'nav.settings': 'Настройки',
+    'sidebar.projects': 'Проекты', 'sidebar.newProject': 'Новый проект', 'sidebar.trash': 'Корзина',
+    'sidebar.search': 'Поиск', 'sidebar.calendar': 'Календарь', 'sidebar.language': 'Язык',
+    'tab.ideas': 'Идеи', 'tab.plot': 'Сюжет', 'tab.writing': 'Написание', 'tab.analysis': 'Анализ', 'tab.consultation': 'Чат AI',
+    'ai.continue': 'Продолжить', 'ai.rewrite': 'Переписать', 'ai.expand': 'Расширить', 'ai.proofread': 'Корректура',
+    'ai.summarize': 'Резюме', 'ai.translate': 'Перевести', 'ai.titleSuggestion': 'Идеи названия', 'ai.generate': 'Создать',
+    'writing.zenMode': 'Режим ZEN', 'writing.export': 'Экспорт', 'writing.characters': 'Символы',
+    'analysis.analyze': 'Анализировать', 'analysis.noContent': 'Нет содержимого для анализа',
+    'settings.lightMode': 'Светлая тема', 'settings.darkMode': 'Тёмная тема', 'settings.logout': 'Выход', 'settings.betaNote': 'Все функции бесплатны в бета-версии',
+    'auth.login': 'Вход', 'auth.signup': 'Регистрация', 'auth.email': 'Email', 'auth.password': 'Пароль', 'auth.name': 'Имя',
+    'common.save': 'Сохранить', 'common.cancel': 'Отмена', 'common.delete': 'Удалить', 'common.loading': 'Загрузка...', 'common.error': 'Произошла ошибка',
+    'chat.placeholder': 'Введите вопрос...', 'chat.empty': 'Чат с AI',
+  },
+  ar: {
+    'app.title': 'myMuse', 'app.tagline': 'رفيقك الكتابي العليم',
+    'nav.home': 'الرئيسية', 'nav.write': 'كتابة', 'nav.manage': 'إدارة', 'nav.settings': 'الإعدادات',
+    'sidebar.projects': 'المشاريع', 'sidebar.newProject': 'مشروع جديد', 'sidebar.trash': 'سلة المهملات',
+    'sidebar.search': 'بحث', 'sidebar.calendar': 'التقويم', 'sidebar.language': 'اللغة',
+    'tab.ideas': 'أفكار', 'tab.plot': 'الحبكة', 'tab.writing': 'الكتابة', 'tab.analysis': 'تحليل', 'tab.consultation': 'دردشة AI',
+    'ai.continue': 'متابعة', 'ai.rewrite': 'إعادة كتابة', 'ai.expand': 'توسيع', 'ai.proofread': 'تدقيق',
+    'ai.summarize': 'تلخيص', 'ai.translate': 'ترجمة', 'ai.titleSuggestion': 'اقتراحات العنوان', 'ai.generate': 'توليد',
+    'writing.zenMode': 'وضع ZEN', 'writing.export': 'تصدير', 'writing.characters': 'الأحرف',
+    'analysis.analyze': 'تحليل العمل', 'analysis.noContent': 'لا يوجد محتوى للتحليل',
+    'settings.lightMode': 'الوضع الفاتح', 'settings.darkMode': 'الوضع الداكن', 'settings.logout': 'تسجيل الخروج', 'settings.betaNote': 'جميع الميزات مجانية خلال الإصدار التجريبي',
+    'auth.login': 'تسجيل الدخول', 'auth.signup': 'إنشاء حساب', 'auth.email': 'البريد الإلكتروني', 'auth.password': 'كلمة المرور', 'auth.name': 'الاسم',
+    'common.save': 'حفظ', 'common.cancel': 'إلغاء', 'common.delete': 'حذف', 'common.loading': 'جاري التحميل...', 'common.error': 'حدث خطأ',
+    'chat.placeholder': 'اكتب سؤالك...', 'chat.empty': 'تحدث مع AI',
+  },
+  hi: {
+    'app.title': 'myMuse', 'app.tagline': 'आपका सर्वज्ञ लेखन साथी',
+    'nav.home': 'होम', 'nav.write': 'लिखें', 'nav.manage': 'प्रबंधन', 'nav.settings': 'सेटिंग्स',
+    'sidebar.projects': 'प्रोजेक्ट्स', 'sidebar.newProject': 'नया प्रोजेक्ट', 'sidebar.trash': 'ट्रैश',
+    'sidebar.search': 'खोजें', 'sidebar.calendar': 'कैलेंडर', 'sidebar.language': 'भाषा',
+    'tab.ideas': 'विचार', 'tab.plot': 'कथानक', 'tab.writing': 'लेखन', 'tab.analysis': 'विश्लेषण', 'tab.consultation': 'AI चैट',
+    'ai.continue': 'जारी रखें', 'ai.rewrite': 'पुनः लिखें', 'ai.expand': 'विस्तार', 'ai.proofread': 'प्रूफ़रीड',
+    'ai.summarize': 'सारांश', 'ai.translate': 'अनुवाद', 'ai.titleSuggestion': 'शीर्षक सुझाव', 'ai.generate': 'उत्पन्न करें',
+    'writing.zenMode': 'ZEN मोड', 'writing.export': 'निर्यात', 'writing.characters': 'अक्षर',
+    'analysis.analyze': 'कार्य का विश्लेषण', 'analysis.noContent': 'विश्लेषण के लिए कोई सामग्री नहीं',
+    'settings.lightMode': 'लाइट मोड', 'settings.darkMode': 'डार्क मोड', 'settings.logout': 'लॉग आउट', 'settings.betaNote': 'बीटा के दौरान सभी सुविधाएं मुफ्त',
+    'auth.login': 'लॉगिन', 'auth.signup': 'साइन अप', 'auth.email': 'ईमेल', 'auth.password': 'पासवर्ड', 'auth.name': 'नाम',
+    'common.save': 'सहेजें', 'common.cancel': 'रद्द करें', 'common.delete': 'हटाएं', 'common.loading': 'लोड हो रहा है...', 'common.error': 'त्रुटि हुई',
+    'chat.placeholder': 'अपना प्रश्न लिखें...', 'chat.empty': 'AI से चैट करें',
+  },
+  th: {
+    'app.title': 'myMuse', 'app.tagline': 'ผู้ช่วยเขียนที่รอบรู้ของคุณ',
+    'nav.home': 'หน้าแรก', 'nav.write': 'เขียน', 'nav.manage': 'จัดการ', 'nav.settings': 'ตั้งค่า',
+    'sidebar.projects': 'โปรเจกต์', 'sidebar.newProject': 'โปรเจกต์ใหม่', 'sidebar.trash': 'ถังขยะ',
+    'sidebar.search': 'ค้นหา', 'sidebar.calendar': 'ปฏิทิน', 'sidebar.language': 'ภาษา',
+    'tab.ideas': 'ไอเดีย', 'tab.plot': 'พล็อต', 'tab.writing': 'การเขียน', 'tab.analysis': 'วิเคราะห์', 'tab.consultation': 'แชท AI',
+    'ai.continue': 'เขียนต่อ', 'ai.rewrite': 'เขียนใหม่', 'ai.expand': 'ขยาย', 'ai.proofread': 'ตรวจทาน',
+    'ai.summarize': 'สรุป', 'ai.translate': 'แปล', 'ai.titleSuggestion': 'แนะนำชื่อเรื่อง', 'ai.generate': 'สร้าง',
+    'writing.zenMode': 'โหมด ZEN', 'writing.export': 'ส่งออก', 'writing.characters': 'ตัวอักษร',
+    'analysis.analyze': 'วิเคราะห์งาน', 'analysis.noContent': 'ไม่มีเนื้อหาที่จะวิเคราะห์',
+    'settings.lightMode': 'โหมดสว่าง', 'settings.darkMode': 'โหมดมืด', 'settings.logout': 'ออกจากระบบ', 'settings.betaNote': 'ฟีเจอร์ทั้งหมดฟรีในช่วงเบต้า',
+    'auth.login': 'เข้าสู่ระบบ', 'auth.signup': 'สมัครสมาชิก', 'auth.email': 'อีเมล', 'auth.password': 'รหัสผ่าน', 'auth.name': 'ชื่อ',
+    'common.save': 'บันทึก', 'common.cancel': 'ยกเลิก', 'common.delete': 'ลบ', 'common.loading': 'กำลังโหลด...', 'common.error': 'เกิดข้อผิดพลาด',
+    'chat.placeholder': 'พิมพ์คำถามของคุณ...', 'chat.empty': 'แชทกับ AI',
+  },
 };
 
 function t(key) {
@@ -422,37 +605,69 @@ async function analyzeWriting() {
 // Chat Functions
 // ============================================
 async function sendChatMessage(content, tabContext = 'consultation') {
-  if (!state.currentProject || !content.trim()) return;
+  console.log('sendChatMessage called:', { content, tabContext, currentProject: state.currentProject });
+  
+  if (!state.currentProject) {
+    console.error('No current project selected');
+    alert('プロジェクトを選択してください');
+    return;
+  }
+  
+  if (!content.trim()) {
+    console.error('Empty message');
+    return;
+  }
   
   const threadId = state.currentThread || crypto.randomUUID();
   state.currentThread = threadId;
   
-  // Add user message
+  // Add user message immediately to UI
   const userMsg = { id: crypto.randomUUID(), role: 'user', content, created_at: new Date().toISOString() };
   state.chatMessages.push(userMsg);
   renderChat();
   
-  // Save user message
-  await api.post(`/projects/${state.currentProject.id}/chat`, {
-    thread_id: threadId,
-    role: 'user',
-    content,
-    tab_context: tabContext,
-  });
-  
-  // Get AI response
-  const response = await callAI('consultation', content);
-  
-  if (response) {
-    const aiMsg = { id: crypto.randomUUID(), role: 'assistant', content: response, created_at: new Date().toISOString() };
-    state.chatMessages.push(aiMsg);
-    
-    // Save AI message
+  try {
+    // Save user message
     await api.post(`/projects/${state.currentProject.id}/chat`, {
       thread_id: threadId,
-      role: 'assistant',
-      content: response,
+      role: 'user',
+      content,
       tab_context: tabContext,
+    });
+    
+    console.log('Calling AI...');
+    // Get AI response
+    const response = await callAI('consultation', content);
+    console.log('AI response:', response);
+    
+    if (response) {
+      const aiMsg = { id: crypto.randomUUID(), role: 'assistant', content: response, created_at: new Date().toISOString() };
+      state.chatMessages.push(aiMsg);
+      
+      // Save AI message
+      await api.post(`/projects/${state.currentProject.id}/chat`, {
+        thread_id: threadId,
+        role: 'assistant',
+        content: response,
+        tab_context: tabContext,
+      });
+    } else {
+      console.error('No response from AI');
+      // Add error message
+      state.chatMessages.push({ 
+        id: crypto.randomUUID(), 
+        role: 'assistant', 
+        content: 'AIからの応答を取得できませんでした。もう一度お試しください。', 
+        created_at: new Date().toISOString() 
+      });
+    }
+  } catch (error) {
+    console.error('Chat error:', error);
+    state.chatMessages.push({ 
+      id: crypto.randomUUID(), 
+      role: 'assistant', 
+      content: 'エラーが発生しました: ' + error.message, 
+      created_at: new Date().toISOString() 
     });
   }
   
@@ -1451,12 +1666,23 @@ function attachEventListeners() {
   // Chat form
   const chatForm = $('#chat-form');
   if (chatForm) {
-    chatForm.addEventListener('submit', (e) => {
+    // Remove any existing listener to prevent duplicates
+    const newChatForm = chatForm.cloneNode(true);
+    chatForm.parentNode.replaceChild(newChatForm, chatForm);
+    
+    newChatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('Chat form submitted');
       const input = $('#chat-input');
-      if (input.value.trim()) {
-        sendChatMessage(input.value, 'consultation');
+      if (input && input.value.trim()) {
+        console.log('Sending message:', input.value);
+        const message = input.value;
         input.value = '';
+        try {
+          await sendChatMessage(message, 'consultation');
+        } catch (error) {
+          console.error('Chat error:', error);
+        }
       }
     });
   }
@@ -1762,9 +1988,27 @@ window.handleCustomAction = async () => {
 };
 
 window.handleAnalyze = async () => {
-  const analysis = await analyzeWriting();
-  if (analysis) {
-    renderAnalysisResults(analysis);
+  console.log('handleAnalyze called, currentWriting:', state.currentWriting);
+  
+  if (!state.currentWriting?.content) {
+    alert(t('analysis.noContent'));
+    return;
+  }
+  
+  console.log('Analyzing content of length:', state.currentWriting.content.length);
+  
+  try {
+    const analysis = await analyzeWriting();
+    console.log('Analysis result:', analysis);
+    
+    if (analysis) {
+      renderAnalysisResults(analysis);
+    } else {
+      alert('分析に失敗しました。もう一度お試しください。');
+    }
+  } catch (error) {
+    console.error('Analysis error:', error);
+    alert('分析エラー: ' + error.message);
   }
 };
 
