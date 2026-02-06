@@ -1,5 +1,5 @@
 // Gemini 3 Pro API Integration
-// Unified Context: プロット、設定、チャット履歴、カレンダー予定を統合
+// Unified Context: プロット、設定、チャット履歴、カレンダー予定、採用アイデアを統合
 
 export interface GeminiContext {
   plot?: string;
@@ -8,6 +8,8 @@ export interface GeminiContext {
   chatHistory?: { role: string; content: string }[];
   calendarEvents?: { date: string; title: string; is_deadline: boolean }[];
   currentWriting?: string;
+  adoptedIdeas?: { title: string; content: string }[];
+  projectGenres?: string;
 }
 
 export interface GeminiRequest {
@@ -35,6 +37,18 @@ function buildSystemPrompt(context: GeminiContext): string {
 - 創作上の悩みに寄り添い、建設的なアドバイスをする
 
 `;
+
+  if (context.projectGenres) {
+    prompt += `【作品ジャンル】\n${context.projectGenres}\nこのジャンルの特性を活かした提案をしてください。\n\n`;
+  }
+
+  if (context.adoptedIdeas && context.adoptedIdeas.length > 0) {
+    prompt += `【採用済みアイデア】\nユーザーが採用した以下のアイデアを作品に活かしてください：\n`;
+    context.adoptedIdeas.forEach((idea, i) => {
+      prompt += `${i + 1}. ${idea.title}: ${idea.content}\n`;
+    });
+    prompt += `\n`;
+  }
 
   if (context.plot) {
     prompt += `【現在のプロット】\n${context.plot}\n\n`;

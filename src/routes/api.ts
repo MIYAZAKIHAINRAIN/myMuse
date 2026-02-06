@@ -628,12 +628,14 @@ api.post('/ai/generate', async (c) => {
     let context: any = {};
     
     if (projectId) {
-      const [plot, characters, worldSettings, chatHistory, calendarEvents] = await Promise.all([
+      const [plot, characters, worldSettings, chatHistory, calendarEvents, adoptedIdeas, project] = await Promise.all([
         c.env.DB.prepare('SELECT structure FROM plots WHERE project_id = ?').bind(projectId).first(),
         c.env.DB.prepare('SELECT name, description FROM characters WHERE project_id = ?').bind(projectId).all(),
         c.env.DB.prepare('SELECT category, title, content FROM world_settings WHERE project_id = ?').bind(projectId).all(),
         c.env.DB.prepare('SELECT role, content FROM chat_history WHERE project_id = ? ORDER BY created_at DESC LIMIT 20').bind(projectId).all(),
         c.env.DB.prepare('SELECT event_date as date, title, is_deadline FROM calendar_events WHERE project_id = ? OR (user_id = (SELECT user_id FROM projects WHERE id = ?) AND event_date >= date("now"))').bind(projectId, projectId).all(),
+        c.env.DB.prepare('SELECT title, content FROM ideas WHERE project_id = ? AND adopted = 1').bind(projectId).all(),
+        c.env.DB.prepare('SELECT genre FROM projects WHERE id = ?').bind(projectId).first(),
       ]);
       
       context = {
@@ -643,6 +645,8 @@ api.post('/ai/generate', async (c) => {
         chatHistory: chatHistory.results.reverse(),
         calendarEvents: calendarEvents.results,
         currentWriting: data.currentWriting,
+        adoptedIdeas: adoptedIdeas.results,
+        projectGenres: project?.genre,
       };
     }
     

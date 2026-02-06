@@ -74,8 +74,14 @@ const i18n = {
     'plot.kishotenketsu': '起承転結', 'plot.threeAct': '三幕構成', 'plot.blakeSnyder': 'ブレイク・スナイダー',
     'plot.ki': '起', 'plot.sho': '承', 'plot.ten': '転', 'plot.ketsu': '結',
     'plot.act1': '第一幕', 'plot.act2': '第二幕', 'plot.act3': '第三幕',
-    'genre.fantasy': 'ファンタジー', 'genre.romance': '恋愛', 'genre.mystery': 'ミステリー',
-    'genre.scifi': 'SF', 'genre.horror': 'ホラー', 'genre.literary': '純文学',
+    'genre.literary': '純文学', 'genre.contemporary': '現代文学', 'genre.fantasy': 'ファンタジー',
+    'genre.scifi': 'SF', 'genre.mystery': 'ミステリー', 'genre.suspense': 'サスペンス',
+    'genre.horror': 'ホラー', 'genre.romance': '恋愛小説', 'genre.historical': '歴史小説',
+    'genre.adventure': '冒険・アクション', 'genre.lightnovel': 'ライトノベル', 'genre.children': '児童文学',
+    'genre.essay': 'エッセイ', 'genre.critique': '評論・批評', 'genre.business': 'ビジネス書',
+    'genre.selfhelp': '自己啓発書', 'genre.philosophy': '哲学書', 'genre.sociology': '社会学・文化論',
+    'genre.historyNF': '歴史書', 'genre.science': '科学解説書', 'genre.journalism': 'ジャーナリズム',
+    'genre.biography': '伝記・自伝',
     'idea.generate': 'アイデアを生成', 'idea.count': '生成数', 'idea.keywords': 'キーワード', 'idea.genre': 'ジャンル',
     'chat.placeholder': '相談したいことを入力...', 'chat.empty': 'AIに相談してみましょう', 'chat.hint': 'プロット、キャラクター、文章の悩みなど何でも相談できます',
   },
@@ -112,8 +118,14 @@ const i18n = {
     'plot.kishotenketsu': 'Ki-Sho-Ten-Ketsu', 'plot.threeAct': 'Three Act', 'plot.blakeSnyder': 'Blake Snyder',
     'plot.ki': 'Setup', 'plot.sho': 'Development', 'plot.ten': 'Twist', 'plot.ketsu': 'Conclusion',
     'plot.act1': 'Act 1', 'plot.act2': 'Act 2', 'plot.act3': 'Act 3',
-    'genre.fantasy': 'Fantasy', 'genre.romance': 'Romance', 'genre.mystery': 'Mystery',
-    'genre.scifi': 'Sci-Fi', 'genre.horror': 'Horror', 'genre.literary': 'Literary',
+    'genre.literary': 'Literary Fiction', 'genre.contemporary': 'Contemporary', 'genre.fantasy': 'Fantasy',
+    'genre.scifi': 'Sci-Fi', 'genre.mystery': 'Mystery', 'genre.suspense': 'Suspense',
+    'genre.horror': 'Horror', 'genre.romance': 'Romance', 'genre.historical': 'Historical',
+    'genre.adventure': 'Adventure/Action', 'genre.lightnovel': 'Light Novel', 'genre.children': 'Children\'s',
+    'genre.essay': 'Essay', 'genre.critique': 'Critique', 'genre.business': 'Business',
+    'genre.selfhelp': 'Self-Help', 'genre.philosophy': 'Philosophy', 'genre.sociology': 'Sociology',
+    'genre.historyNF': 'History (NF)', 'genre.science': 'Science', 'genre.journalism': 'Journalism',
+    'genre.biography': 'Biography',
     'idea.generate': 'Generate Ideas', 'idea.count': 'Count', 'idea.keywords': 'Keywords', 'idea.genre': 'Genre',
     'chat.placeholder': 'Ask your writing assistant...', 'chat.empty': 'Chat with AI', 'chat.hint': 'Ask about plot, characters, writing style, and more',
   },
@@ -359,6 +371,34 @@ function countWords(text) {
   return text.replace(/\s/g, '').length;
 }
 
+// Genre options helper
+function getGenreOptions() {
+  return [
+    { value: 'literary', label: t('genre.literary') },
+    { value: 'contemporary', label: t('genre.contemporary') },
+    { value: 'fantasy', label: t('genre.fantasy') },
+    { value: 'scifi', label: t('genre.scifi') },
+    { value: 'mystery', label: t('genre.mystery') },
+    { value: 'suspense', label: t('genre.suspense') },
+    { value: 'horror', label: t('genre.horror') },
+    { value: 'romance', label: t('genre.romance') },
+    { value: 'historical', label: t('genre.historical') },
+    { value: 'adventure', label: t('genre.adventure') },
+    { value: 'lightnovel', label: t('genre.lightnovel') },
+    { value: 'children', label: t('genre.children') },
+    { value: 'essay', label: t('genre.essay') },
+    { value: 'critique', label: t('genre.critique') },
+    { value: 'business', label: t('genre.business') },
+    { value: 'selfhelp', label: t('genre.selfhelp') },
+    { value: 'philosophy', label: t('genre.philosophy') },
+    { value: 'sociology', label: t('genre.sociology') },
+    { value: 'historyNF', label: t('genre.historyNF') },
+    { value: 'science', label: t('genre.science') },
+    { value: 'journalism', label: t('genre.journalism') },
+    { value: 'biography', label: t('genre.biography') },
+  ];
+}
+
 function debounce(fn, delay) {
   let timeout;
   return (...args) => {
@@ -565,6 +605,7 @@ const autoSaveDebounced = debounce(async (content) => {
   if (!state.currentWriting) return;
   updateSaveIndicator('saving');
   try {
+    const previousLength = state.currentWriting.content?.length || 0;
     await api.put(`/writings/${state.currentWriting.id}`, {
       content,
       chapter_title: state.currentWriting.chapter_title,
@@ -575,6 +616,12 @@ const autoSaveDebounced = debounce(async (content) => {
     state.currentWriting.word_count = countWords(content);
     updateWordCount();
     updateSaveIndicator('saved');
+    
+    // Track words written
+    const wordsAdded = content.length - previousLength;
+    if (wordsAdded > 0 && typeof trackActivity === 'function') {
+      trackActivity('words', wordsAdded);
+    }
   } catch (e) { 
     console.error('Auto-save error:', e);
     updateSaveIndicator('unsaved');
@@ -621,8 +668,13 @@ function updateWordCount() {
 // ============================================
 // AI Functions
 // ============================================
+let aiAbortController = null;
+
 async function callAI(action, content, options = {}) {
   if (!state.currentProject) return null;
+  
+  // Create new abort controller for this request
+  aiAbortController = new AbortController();
   state.aiGenerating = true;
   renderAISidebar();
   
@@ -636,13 +688,33 @@ async function callAI(action, content, options = {}) {
       options,
     });
     state.aiGenerating = false;
+    aiAbortController = null;
     return res.data.result;
   } catch (e) {
     state.aiGenerating = false;
+    aiAbortController = null;
+    if (e.name === 'AbortError') {
+      console.log('AI generation cancelled');
+      return null;
+    }
     console.error('AI error:', e);
     return null;
   }
 }
+
+window.cancelAIGeneration = () => {
+  if (!state.aiGenerating) return;
+  
+  if (confirm('AI生成をキャンセルしますか？')) {
+    if (aiAbortController) {
+      aiAbortController.abort();
+    }
+    state.aiGenerating = false;
+    aiAbortController = null;
+    render();
+    alert('AI生成をキャンセルしました');
+  }
+};
 
 async function generateIdeas(genre, keywords, count) {
   state.aiGenerating = true;
@@ -723,6 +795,11 @@ async function sendChatMessage(content, tabContext = 'consultation') {
         content: response,
         tab_context: tabContext,
       });
+      
+      // Track AI consultation for achievements
+      if (typeof trackActivity === 'function') {
+        trackActivity('aiConsultation', 1);
+      }
     } else {
       console.error('No response from AI');
       // Add error message
@@ -1096,23 +1173,52 @@ function renderTabContent() {
 }
 
 function renderIdeasTab() {
+  const allGenres = [
+    { value: 'literary', label: t('genre.literary') },
+    { value: 'contemporary', label: t('genre.contemporary') },
+    { value: 'fantasy', label: t('genre.fantasy') },
+    { value: 'scifi', label: t('genre.scifi') },
+    { value: 'mystery', label: t('genre.mystery') },
+    { value: 'suspense', label: t('genre.suspense') },
+    { value: 'horror', label: t('genre.horror') },
+    { value: 'romance', label: t('genre.romance') },
+    { value: 'historical', label: t('genre.historical') },
+    { value: 'adventure', label: t('genre.adventure') },
+    { value: 'lightnovel', label: t('genre.lightnovel') },
+    { value: 'children', label: t('genre.children') },
+    { value: 'essay', label: t('genre.essay') },
+    { value: 'critique', label: t('genre.critique') },
+    { value: 'business', label: t('genre.business') },
+    { value: 'selfhelp', label: t('genre.selfhelp') },
+    { value: 'philosophy', label: t('genre.philosophy') },
+    { value: 'sociology', label: t('genre.sociology') },
+    { value: 'historyNF', label: t('genre.historyNF') },
+    { value: 'science', label: t('genre.science') },
+    { value: 'journalism', label: t('genre.journalism') },
+    { value: 'biography', label: t('genre.biography') },
+  ];
+  
   return `
     <div class="max-w-4xl mx-auto space-y-6">
       <!-- Idea Generator -->
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         <h3 class="text-lg font-semibold mb-4"><i class="fas fa-magic mr-2 text-indigo-500"></i>${t('idea.generate')}</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div>
-            <label class="block text-sm font-medium mb-1">ジャンル</label>
-            <select id="idea-genre" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-              <option value="fantasy">${t('genre.fantasy')}</option>
-              <option value="romance">${t('genre.romance')}</option>
-              <option value="mystery">${t('genre.mystery')}</option>
-              <option value="scifi">${t('genre.scifi')}</option>
-              <option value="horror">${t('genre.horror')}</option>
-              <option value="literary">${t('genre.literary')}</option>
-            </select>
+        
+        <!-- Genre Multi-Select -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">ジャンル（複数選択可）</label>
+          <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 max-h-40 overflow-y-auto p-2 border rounded-lg dark:border-gray-600">
+            ${allGenres.map(g => `
+              <label class="flex items-center gap-1 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">
+                <input type="checkbox" name="idea-genre" value="${g.value}" class="genre-checkbox rounded">
+                <span class="truncate">${g.label}</span>
+              </label>
+            `).join('')}
           </div>
+          <p class="text-xs text-gray-500 mt-1">選択したジャンルを組み合わせたアイデアを生成します</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label class="block text-sm font-medium mb-1">キーワード</label>
             <input type="text" id="idea-keywords" placeholder="例: 魔法、冒険、友情"
@@ -1432,11 +1538,8 @@ function renderAchievementsTab() {
     <div class="max-w-4xl mx-auto space-y-6">
       <!-- Header with Trophy Animation -->
       <div class="text-center py-6">
-        <div class="inline-block relative">
-          <i class="fas fa-trophy text-6xl ${badgeTier.color} animate-pulse-slow"></i>
-          <span class="absolute -top-2 -right-2 bg-${badgeTier.bgColor} text-white text-xs px-2 py-1 rounded-full font-bold">
-            ${badgeTier.name}
-          </span>
+        <div class="inline-block">
+          <i class="fas fa-trophy text-7xl ${badgeTier.color} drop-shadow-lg"></i>
         </div>
         <h2 class="text-2xl font-bold mt-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
           ${t('achievement.title')}
@@ -1630,8 +1733,182 @@ window.toggleAchievement = (index) => {
   localStorage.setItem('monthlyAchievements', JSON.stringify(state.monthlyAchievements));
   localStorage.setItem('achievementMonth', new Date().getMonth().toString());
   
+  // Check if all achievements completed and update badge history
+  checkAndUpdateBadgeHistory();
+  
   render();
 };
+
+// Activity log for automatic achievement tracking
+function getActivityLog() {
+  try {
+    const saved = localStorage.getItem('activityLog');
+    return saved ? JSON.parse(saved) : {
+      wordsWrittenToday: 0,
+      loginDaysThisWeek: [],
+      aiConsultations: 0,
+      plotCompleted: false,
+      ideasAdopted: 0,
+      analysisPerformed: 0,
+      lastUpdated: new Date().toDateString()
+    };
+  } catch (e) {
+    return { wordsWrittenToday: 0, loginDaysThisWeek: [], aiConsultations: 0, plotCompleted: false, ideasAdopted: 0, analysisPerformed: 0, lastUpdated: new Date().toDateString() };
+  }
+}
+
+function saveActivityLog(log) {
+  log.lastUpdated = new Date().toDateString();
+  localStorage.setItem('activityLog', JSON.stringify(log));
+}
+
+// Track activity and auto-unlock achievements
+function trackActivity(activityType, value = 1) {
+  const log = getActivityLog();
+  const today = new Date().toDateString();
+  
+  // Reset daily counters if new day
+  if (log.lastUpdated !== today) {
+    log.wordsWrittenToday = 0;
+    log.lastUpdated = today;
+  }
+  
+  switch(activityType) {
+    case 'words':
+      log.wordsWrittenToday += value;
+      break;
+    case 'login':
+      if (!log.loginDaysThisWeek.includes(today)) {
+        log.loginDaysThisWeek.push(today);
+        // Keep only last 7 days
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        log.loginDaysThisWeek = log.loginDaysThisWeek.filter(d => new Date(d) >= weekAgo);
+      }
+      break;
+    case 'aiConsultation':
+      log.aiConsultations += value;
+      break;
+    case 'plotComplete':
+      log.plotCompleted = true;
+      break;
+    case 'ideaAdopt':
+      log.ideasAdopted += value;
+      break;
+    case 'analysis':
+      log.analysisPerformed += value;
+      break;
+  }
+  
+  saveActivityLog(log);
+  checkAchievementsFromLog(log);
+}
+
+// Check achievements based on activity log
+function checkAchievementsFromLog(log) {
+  if (!state.monthlyAchievements) {
+    state.monthlyAchievements = getDefaultMonthlyGoals();
+  }
+  
+  let unlockedAchievements = [];
+  
+  state.monthlyAchievements.forEach((goal, index) => {
+    if (goal.completed) return; // Already completed
+    
+    let shouldUnlock = false;
+    
+    // Check conditions based on goal id
+    switch(goal.id) {
+      case 1: // 1日1000文字
+        shouldUnlock = log.wordsWrittenToday >= 1000;
+        break;
+      case 2: // 週5日ログイン
+        shouldUnlock = log.loginDaysThisWeek.length >= 5;
+        break;
+      case 3: // AIと10回相談
+        shouldUnlock = log.aiConsultations >= 10;
+        break;
+      case 4: // プロット完成
+        shouldUnlock = log.plotCompleted;
+        break;
+      case 5: // 5つのアイデア採用
+        shouldUnlock = log.ideasAdopted >= 5;
+        break;
+      case 6: // 作品を1回分析
+        shouldUnlock = log.analysisPerformed >= 1;
+        break;
+    }
+    
+    if (shouldUnlock) {
+      state.monthlyAchievements[index].completed = true;
+      unlockedAchievements.push(goal.title);
+    }
+  });
+  
+  // Show notification if achievements were unlocked
+  if (unlockedAchievements.length > 0) {
+    localStorage.setItem('monthlyAchievements', JSON.stringify(state.monthlyAchievements));
+    localStorage.setItem('achievementMonth', new Date().getMonth().toString());
+    
+    const message = unlockedAchievements.map(t => `実績『${t}』を解除しました！`).join('\n');
+    setTimeout(() => alert(message), 100);
+    
+    // Check if all completed and update badge history
+    checkAndUpdateBadgeHistory();
+    render();
+  }
+  
+  return unlockedAchievements.length > 0 ? unlockedAchievements : '更新なし';
+}
+
+// Check completion and update badge history
+function checkAndUpdateBadgeHistory() {
+  const monthlyGoals = state.monthlyAchievements || getDefaultMonthlyGoals();
+  const completedCount = monthlyGoals.filter(g => g.completed).length;
+  const totalCount = monthlyGoals.length;
+  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  
+  const history = getBadgeHistory();
+  const currentMonth = new Date().getMonth().toString() + '-' + new Date().getFullYear().toString();
+  const lastBadgeMonth = localStorage.getItem('lastBadgeMonth');
+  const lastBadgeTier = localStorage.getItem('lastBadgeTier') || '';
+  
+  // Determine current tier
+  let currentTier = '';
+  if (progressPercent >= 100) currentTier = 'platinum';
+  else if (progressPercent >= 80) currentTier = 'gold';
+  else if (progressPercent >= 60) currentTier = 'silver';
+  else if (progressPercent >= 40) currentTier = 'bronze';
+  else if (progressPercent > 0) currentTier = 'encouragement';
+  
+  // Only award badge when:
+  // 1. It's a new month, OR
+  // 2. User just reached a higher tier in the same month
+  const isNewMonth = lastBadgeMonth !== currentMonth;
+  const isHigherTier = currentTier && getTierRank(currentTier) > getTierRank(lastBadgeTier);
+  
+  if (currentTier && (isNewMonth || isHigherTier)) {
+    // If same month but higher tier, remove old tier badge first
+    if (!isNewMonth && isHigherTier && lastBadgeTier) {
+      history[lastBadgeTier] = Math.max(0, (history[lastBadgeTier] || 0) - 1);
+    }
+    
+    // Add new tier badge
+    history[currentTier]++;
+    localStorage.setItem('lastBadgeMonth', currentMonth);
+    localStorage.setItem('lastBadgeTier', currentTier);
+    saveBadgeHistory(history);
+    
+    // Show congratulation message
+    const tierNames = { platinum: 'プラチナ', gold: 'ゴールド', silver: 'シルバー', bronze: 'ブロンズ', encouragement: '頑張ってね' };
+    alert(`🎉 おめでとうございます！「${tierNames[currentTier]}」バッジを獲得しました！`);
+  }
+}
+
+function getTierRank(tier) {
+  const ranks = { '': 0, encouragement: 1, bronze: 2, silver: 3, gold: 4, platinum: 5 };
+  return ranks[tier] || 0;
+}
 
 window.generateMonthlyAchievements = async () => {
   if (!state.user) return;
@@ -1736,8 +2013,23 @@ function renderRightSidebar() {
           <i class="fas fa-robot mr-1"></i>AIパートナー
         </h3>
         
+        <!-- AI Generating Status / Cancel -->
+        ${state.aiGenerating ? `
+        <div class="bg-indigo-100 dark:bg-indigo-900/30 rounded-lg p-4 space-y-2">
+          <div class="flex items-center gap-2">
+            <div class="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-indigo-700 dark:text-indigo-300 text-sm font-medium">AI生成中...</span>
+          </div>
+          <button onclick="cancelAIGeneration()"
+            class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition flex items-center justify-center gap-2">
+            <i class="fas fa-times-circle"></i>
+            キャンセル
+          </button>
+        </div>
+        ` : ''}
+        
         <!-- Quick Actions -->
-        <div class="space-y-2">
+        <div class="space-y-2 ${state.aiGenerating ? 'opacity-50 pointer-events-none' : ''}">
           <p class="text-xs text-gray-500">クイックアクション</p>
           <div class="grid grid-cols-2 gap-2">
             ${[
@@ -1847,14 +2139,15 @@ function renderModals() {
               class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">ジャンル</label>
-            <select id="new-project-genre" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-              <option value="fantasy">${t('genre.fantasy')}</option>
-              <option value="romance">${t('genre.romance')}</option>
-              <option value="mystery">${t('genre.mystery')}</option>
-              <option value="scifi">${t('genre.scifi')}</option>
-              <option value="literary">${t('genre.literary')}</option>
-            </select>
+            <label class="block text-sm font-medium mb-2">ジャンル（複数選択可）</label>
+            <div class="grid grid-cols-2 gap-1 max-h-48 overflow-y-auto p-2 border rounded-lg dark:border-gray-600 text-sm">
+              ${getGenreOptions().map(g => `
+                <label class="flex items-center gap-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">
+                  <input type="checkbox" name="new-project-genre" value="${g.value}" class="rounded">
+                  <span class="truncate">${g.label}</span>
+                </label>
+              `).join('')}
+            </div>
           </div>
           <div class="flex justify-end gap-2">
             <button type="button" onclick="closeModal('newProject')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
@@ -2071,7 +2364,10 @@ function attachEventListeners() {
     newProjectForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const title = $('#new-project-title').value;
-      const genre = $('#new-project-genre').value;
+      // Get selected genres (multiple)
+      const genreCheckboxes = document.querySelectorAll('input[name="new-project-genre"]:checked');
+      const genres = Array.from(genreCheckboxes).map(cb => cb.value);
+      const genre = genres.length > 0 ? genres.join(', ') : 'fantasy';
       createProject(title, genre);
       closeModal('newProject');
     });
@@ -2311,7 +2607,11 @@ window.deleteCalendarEvent = async () => {
 };
 
 window.handleGenerateIdeas = async () => {
-  const genre = $('#idea-genre')?.value || 'fantasy';
+  // Get selected genres (multiple)
+  const genreCheckboxes = document.querySelectorAll('input[name="idea-genre"]:checked');
+  const genres = Array.from(genreCheckboxes).map(cb => cb.value);
+  const genre = genres.length > 0 ? genres.join(', ') : 'fantasy';
+  
   const keywords = $('#idea-keywords')?.value || '';
   const count = parseInt($('#idea-count')?.value) || 5;
   
@@ -2361,6 +2661,11 @@ window.adoptIdea = async (ideaId) => {
           structure: state.plot.structure,
           template: state.plot.template
         });
+      }
+      
+      // Track idea adoption for achievements
+      if (typeof trackActivity === 'function') {
+        trackActivity('ideaAdopt', 1);
       }
       
       alert(`「${idea.title}」をプロットに反映しました！\nプロットタブの「起」セクションをご確認ください。`);
@@ -2518,6 +2823,11 @@ window.handleAnalyze = async () => {
     
     if (analysis) {
       renderAnalysisResults(analysis);
+      
+      // Track analysis for achievements
+      if (typeof trackActivity === 'function') {
+        trackActivity('analysis', 1);
+      }
     } else {
       alert('分析に失敗しました。もう一度お試しください。');
     }
@@ -2845,6 +3155,12 @@ window.changeCalendarMonth = async (delta) => {
 async function init() {
   setTheme(state.theme);
   await checkSession();
+  
+  // Track login for achievements
+  if (state.user && typeof trackActivity === 'function') {
+    trackActivity('login');
+  }
+  
   render();
 }
 
