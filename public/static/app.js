@@ -538,8 +538,32 @@ async function restoreProject(id) {
 // ============================================
 // Writing Functions
 // ============================================
-const autoSave = debounce(async (content) => {
+let saveStatus = 'saved'; // 'saved', 'saving', 'unsaved'
+
+function updateSaveIndicator(status) {
+  saveStatus = status;
+  const indicator = $('#save-indicator');
+  if (!indicator) return;
+  
+  switch(status) {
+    case 'saving':
+      indicator.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>保存中...';
+      indicator.className = 'text-sm text-yellow-600 dark:text-yellow-400 flex items-center';
+      break;
+    case 'saved':
+      indicator.innerHTML = '<i class="fas fa-check mr-1"></i>保存済み';
+      indicator.className = 'text-sm text-green-600 dark:text-green-400 flex items-center';
+      break;
+    case 'unsaved':
+      indicator.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>未保存';
+      indicator.className = 'text-sm text-red-600 dark:text-red-400 flex items-center';
+      break;
+  }
+}
+
+const autoSaveDebounced = debounce(async (content) => {
   if (!state.currentWriting) return;
+  updateSaveIndicator('saving');
   try {
     await api.put(`/writings/${state.currentWriting.id}`, {
       content,
@@ -550,8 +574,42 @@ const autoSave = debounce(async (content) => {
     state.currentWriting.content = content;
     state.currentWriting.word_count = countWords(content);
     updateWordCount();
-  } catch (e) { console.error('Auto-save error:', e); }
+    updateSaveIndicator('saved');
+  } catch (e) { 
+    console.error('Auto-save error:', e);
+    updateSaveIndicator('unsaved');
+  }
 }, 1000);
+
+// Global function for oninput
+window.autoSave = (content) => {
+  updateSaveIndicator('unsaved');
+  autoSaveDebounced(content);
+};
+
+// Manual save function
+window.manualSave = async () => {
+  const editor = $('#editor');
+  if (!editor || !state.currentWriting) return;
+  
+  updateSaveIndicator('saving');
+  try {
+    await api.put(`/writings/${state.currentWriting.id}`, {
+      content: editor.value,
+      chapter_title: state.currentWriting.chapter_title,
+      writing_direction: state.currentWriting.writing_direction,
+      font_family: state.currentWriting.font_family,
+    });
+    state.currentWriting.content = editor.value;
+    state.currentWriting.word_count = countWords(editor.value);
+    updateWordCount();
+    updateSaveIndicator('saved');
+  } catch (e) {
+    console.error('Manual save error:', e);
+    updateSaveIndicator('unsaved');
+    alert('保存に失敗しました: ' + e.message);
+  }
+};
 
 function updateWordCount() {
   const el = $('#word-count');
@@ -722,8 +780,16 @@ function downloadBlob(blob, filename) {
 let speechSynthesis = window.speechSynthesis;
 let currentUtterance = null;
 
-function readAloud() {
-  if (!state.currentWriting?.content) return;
+window.readAloud = function() {
+  if (!state.currentWriting?.content) {
+    alert('読み上げるテキストがありません');
+    return;
+  }
+  
+  if (!window.speechSynthesis) {
+    alert('お使いのブラウザは音声読み上げに対応していません');
+    return;
+  }
   
   if (currentUtterance) {
     speechSynthesis.cancel();
@@ -737,6 +803,10 @@ function readAloud() {
   
   currentUtterance = utterance;
   utterance.onend = () => { currentUtterance = null; };
+  utterance.onerror = (e) => { 
+    console.error('Speech error:', e);
+    currentUtterance = null;
+  };
   
   speechSynthesis.speak(utterance);
 }
@@ -1199,6 +1269,16 @@ function renderWritingTab() {
         </select>
         
         <div class="flex-1"></div>
+        
+        <!-- Save indicator and button -->
+        <span id="save-indicator" class="text-sm text-green-600 dark:text-green-400 flex items-center">
+          <i class="fas fa-check mr-1"></i>保存済み
+        </span>
+        
+        <button onclick="manualSave()" class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 flex items-center gap-1">
+          <i class="fas fa-save"></i>
+          <span class="hidden sm:inline">${t('common.save')}</span>
+        </button>
         
         <span id="word-count" class="text-sm text-gray-500">${writing?.word_count || 0} 文字</span>
         
@@ -2022,7 +2102,23 @@ window.toggleZenMode = () => {
   render();
 };
 
+// Save editor content before switching tabs or performing other actions
+function saveEditorContent() {
+  const editor = $('#editor');
+  if (editor && state.currentWriting) {
+    const currentContent = editor.value;
+    if (currentContent !== state.currentWriting.content) {
+      state.currentWriting.content = currentContent;
+      // Trigger auto-save
+      autoSaveDebounced(currentContent);
+    }
+  }
+}
+
 window.switchTab = (tab) => {
+  // Save current editor content before switching
+  saveEditorContent();
+  
   state.currentTab = tab;
   render();
   
@@ -2033,11 +2129,17 @@ window.switchTab = (tab) => {
 };
 
 window.selectProject = async (projectId) => {
+  // Save current editor content before switching projects
+  saveEditorContent();
+  
   await loadProjectData(projectId);
   render();
 };
 
 window.openModal = async (name) => {
+  // Save editor content before opening modal
+  saveEditorContent();
+  
   if (name === 'trash') await loadTrash();
   if (name === 'calendar') {
     const now = new Date();
