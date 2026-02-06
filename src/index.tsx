@@ -26,7 +26,7 @@ app.get('*', (c) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>myMuse - 執筆のすべてを把握し、寄り添う全知の相棒</title>
+  <title>myMuse - 創作の未来をともに描くパートナー</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

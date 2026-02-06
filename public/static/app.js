@@ -42,7 +42,7 @@ const state = {
 // ============================================
 const i18n = {
   ja: {
-    'app.title': 'myMuse', 'app.tagline': '執筆のすべてを把握し、寄り添う全知の相棒',
+    'app.title': 'myMuse', 'app.tagline': '創作の未来をともに描くパートナー',
     'nav.home': 'ホーム', 'nav.write': '執筆', 'nav.manage': '管理', 'nav.settings': '設定',
     'sidebar.projects': 'プロジェクト', 'sidebar.newProject': '新規プロジェクト', 'sidebar.newFolder': '新規フォルダ',
     'sidebar.trash': 'ゴミ箱', 'sidebar.search': '全文検索', 'sidebar.calendar': '創作カレンダー',
@@ -1004,12 +1004,6 @@ function renderLeftSidebar() {
           ${state.projects.filter(p => !p.folder_id).map(project => renderProjectItem(project)).join('')}
         </div>
         
-        <!-- Trash -->
-        <button onclick="openModal('trash')" class="w-full flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-          <i class="fas fa-trash"></i>
-          <span>${t('sidebar.trash')}</span>
-        </button>
-        
         <!-- Calendar -->
         <button onclick="openModal('calendar')" class="w-full flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
           <i class="fas fa-calendar-alt"></i>
@@ -1046,12 +1040,18 @@ function renderLeftSidebar() {
 function renderProjectItem(project) {
   const isActive = state.currentProject?.id === project.id;
   return `
-    <div onclick="selectProject('${project.id}')" 
-      class="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition
+    <div class="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition group
         ${isActive ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}">
-      <i class="fas fa-book-open text-sm"></i>
-      <span class="flex-1 truncate text-sm">${project.title}</span>
-      ${project.deadline ? '<i class="fas fa-clock text-xs text-orange-500"></i>' : ''}
+      <div onclick="selectProject('${project.id}')" class="flex items-center gap-2 flex-1 min-w-0">
+        <i class="fas fa-book-open text-sm"></i>
+        <span class="flex-1 truncate text-sm">${project.title}</span>
+        ${project.deadline ? '<i class="fas fa-clock text-xs text-orange-500"></i>' : ''}
+      </div>
+      <button onclick="event.stopPropagation(); deleteProject('${project.id}', '${project.title.replace(/'/g, "\\'")}')" 
+        class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition p-1"
+        title="プロジェクトを削除">
+        <i class="fas fa-times text-xs"></i>
+      </button>
     </div>
   `;
 }
@@ -1146,11 +1146,17 @@ function renderIdeasTab() {
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">${idea.content || ''}</p>
             <div class="flex items-center justify-between">
               <span class="text-xs text-gray-500">${idea.genre || ''}</span>
-              ${!idea.adopted ? `
-                <button onclick="adoptIdea('${idea.id}')" class="text-sm text-indigo-600 hover:underline">
-                  <i class="fas fa-arrow-right mr-1"></i>${t('common.adopt')}
-                </button>
-              ` : ''}
+              <div class="flex gap-2">
+                ${idea.adopted ? `
+                  <button onclick="unadoptIdea('${idea.id}')" class="text-sm text-red-600 hover:underline">
+                    <i class="fas fa-times mr-1"></i>採用取消
+                  </button>
+                ` : `
+                  <button onclick="adoptIdea('${idea.id}')" class="text-sm text-indigo-600 hover:underline">
+                    <i class="fas fa-arrow-right mr-1"></i>${t('common.adopt')}
+                  </button>
+                `}
+              </div>
             </div>
           </div>
         `).join('')}
@@ -1487,17 +1493,56 @@ function renderAchievementsTab() {
         </div>
       </div>
       
-      <!-- All-time Badges -->
+      <!-- Badge History Stats -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
         <h3 class="text-lg font-semibold flex items-center gap-2 mb-4">
-          <i class="fas fa-medal text-purple-500"></i>
-          ${t('achievement.all')}
+          <i class="fas fa-history text-purple-500"></i>
+          これまでの獲得バッジ数
         </h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          ${renderAllTimeBadges()}
-        </div>
+        ${renderBadgeHistory()}
       </div>
     </div>
+  `;
+}
+
+// Badge history stored in localStorage
+function getBadgeHistory() {
+  try {
+    const saved = localStorage.getItem('badgeHistory');
+    return saved ? JSON.parse(saved) : { platinum: 0, gold: 0, silver: 0, bronze: 0, encouragement: 0 };
+  } catch (e) {
+    return { platinum: 0, gold: 0, silver: 0, bronze: 0, encouragement: 0 };
+  }
+}
+
+function saveBadgeHistory(history) {
+  localStorage.setItem('badgeHistory', JSON.stringify(history));
+}
+
+function renderBadgeHistory() {
+  const history = getBadgeHistory();
+  
+  const badges = [
+    { key: 'platinum', name: 'プラチナ', icon: 'fa-gem', color: 'text-cyan-400', bg: 'bg-cyan-100 dark:bg-cyan-900/30', count: history.platinum },
+    { key: 'gold', name: 'ゴールド', icon: 'fa-crown', color: 'text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-900/30', count: history.gold },
+    { key: 'silver', name: 'シルバー', icon: 'fa-star', color: 'text-gray-400', bg: 'bg-gray-100 dark:bg-gray-700', count: history.silver },
+    { key: 'bronze', name: 'ブロンズ', icon: 'fa-medal', color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/30', count: history.bronze },
+    { key: 'encouragement', name: '頑張ってね', icon: 'fa-heart', color: 'text-pink-400', bg: 'bg-pink-100 dark:bg-pink-900/30', count: history.encouragement },
+  ];
+  
+  return `
+    <div class="grid grid-cols-5 gap-3">
+      ${badges.map(badge => `
+        <div class="text-center p-3 rounded-xl ${badge.bg}">
+          <i class="fas ${badge.icon} text-3xl ${badge.color} mb-2"></i>
+          <p class="text-xs font-medium text-gray-600 dark:text-gray-400">${badge.name}</p>
+          <p class="text-2xl font-bold ${badge.color}">${badge.count}</p>
+        </div>
+      `).join('')}
+    </div>
+    <p class="text-center text-sm text-gray-500 mt-4">
+      月末に実績を達成するとバッジが記録されます
+    </p>
   `;
 }
 
@@ -1681,7 +1726,8 @@ function renderChat() {
 }
 
 function renderRightSidebar() {
-  if (!state.sidebarOpen.right) return '';
+  // Only show AI Partner in writing tab
+  if (!state.sidebarOpen.right || state.currentTab !== 'writing') return '';
   
   return `
     <aside class="sidebar-right fixed right-0 top-14 bottom-0 w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-30">
@@ -1865,27 +1911,6 @@ function renderModals() {
         </button>
         <h3 class="text-lg font-semibold mb-4"><i class="fas fa-calendar-alt mr-2"></i>${t('sidebar.calendar')}</h3>
         <div id="calendar-container"></div>
-      </div>
-    </div>
-    
-    <!-- Trash Modal -->
-    <div id="modal-trash" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'trash')">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in relative" onclick="event.stopPropagation()">
-        <button type="button" onclick="closeModal('trash')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
-          <i class="fas fa-times"></i>
-        </button>
-        <h3 class="text-lg font-semibold mb-4"><i class="fas fa-trash mr-2"></i>${t('sidebar.trash')}</h3>
-        <div id="trash-container" class="space-y-2 max-h-64 overflow-y-auto">
-          ${state.trash.length === 0 ? '<p class="text-gray-500 text-sm">ゴミ箱は空です</p>' : state.trash.map(p => `
-            <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <span class="text-sm">${p.title}</span>
-              <div class="flex gap-2">
-                <button type="button" onclick="restoreProject('${p.id}')" class="text-sm text-indigo-600 hover:underline">${t('common.restore')}</button>
-                <button type="button" onclick="deleteProject('${p.id}', true)" class="text-sm text-red-600 hover:underline">${t('common.delete')}</button>
-              </div>
-            </div>
-          `).join('')}
-        </div>
       </div>
     </div>
     
@@ -2136,6 +2161,36 @@ window.selectProject = async (projectId) => {
   render();
 };
 
+window.deleteProject = async (projectId, projectTitle) => {
+  if (!confirm(`「${projectTitle}」を削除しますか？\n\nこの操作は取り消せません。プロジェクト内のすべてのデータ（執筆内容、プロット、アイデア等）が完全に削除されます。`)) {
+    return;
+  }
+  
+  try {
+    await api.delete(`/projects/${projectId}`);
+    
+    // Remove from local state
+    state.projects = state.projects.filter(p => p.id !== projectId);
+    
+    // If deleted project was current, clear selection
+    if (state.currentProject?.id === projectId) {
+      state.currentProject = null;
+      state.writings = [];
+      state.currentWriting = null;
+      state.plot = null;
+      state.ideas = [];
+      state.characters = [];
+      state.worldSettings = [];
+    }
+    
+    render();
+    alert('プロジェクトを削除しました');
+  } catch (e) {
+    console.error('Delete project error:', e);
+    alert('削除に失敗しました: ' + e.message);
+  }
+};
+
 window.openModal = async (name) => {
   // Save editor content before opening modal
   saveEditorContent();
@@ -2279,10 +2334,58 @@ window.handleGenerateIdeas = async () => {
 };
 
 window.adoptIdea = async (ideaId) => {
-  await api.put(`/ideas/${ideaId}/adopt`);
-  const idea = state.ideas.find(i => i.id === ideaId);
-  if (idea) idea.adopted = true;
-  render();
+  try {
+    await api.put(`/ideas/${ideaId}/adopt`);
+    const idea = state.ideas.find(i => i.id === ideaId);
+    if (idea) {
+      idea.adopted = true;
+      
+      // Reflect adopted idea to plot (add to ki/起 section)
+      if (state.plot) {
+        let structure = {};
+        try { structure = JSON.parse(state.plot.structure || '{}'); } catch (e) {}
+        
+        const ideaText = `【採用アイデア】${idea.title}: ${idea.content || ''}`;
+        
+        // Add to 起 (ki) section
+        if (structure.ki) {
+          structure.ki += '\n\n' + ideaText;
+        } else {
+          structure.ki = ideaText;
+        }
+        
+        state.plot.structure = JSON.stringify(structure);
+        
+        // Save plot to server
+        await api.put(`/plots/${state.plot.id}`, {
+          structure: state.plot.structure,
+          template: state.plot.template
+        });
+      }
+      
+      alert(`「${idea.title}」をプロットに反映しました！\nプロットタブの「起」セクションをご確認ください。`);
+    }
+    render();
+  } catch (e) {
+    console.error('Adopt idea error:', e);
+    alert('アイデアの採用に失敗しました');
+  }
+};
+
+window.unadoptIdea = async (ideaId) => {
+  if (!confirm('このアイデアの採用を取り消しますか？\n（プロットからは手動で削除してください）')) return;
+  
+  try {
+    await api.put(`/ideas/${ideaId}/unadopt`);
+    const idea = state.ideas.find(i => i.id === ideaId);
+    if (idea) {
+      idea.adopted = false;
+    }
+    render();
+  } catch (e) {
+    console.error('Unadopt idea error:', e);
+    alert('採用取り消しに失敗しました');
+  }
 };
 
 window.changePlotTemplate = (template) => {

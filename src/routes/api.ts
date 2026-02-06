@@ -370,6 +370,12 @@ api.put('/ideas/:id/adopt', async (c) => {
   return c.json({ success: true });
 });
 
+api.put('/ideas/:id/unadopt', async (c) => {
+  const id = c.req.param('id');
+  await c.env.DB.prepare('UPDATE ideas SET adopted = 0 WHERE id = ?').bind(id).run();
+  return c.json({ success: true });
+});
+
 // ============================================
 // Characters Routes
 // ============================================
