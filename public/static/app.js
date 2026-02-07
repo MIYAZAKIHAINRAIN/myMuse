@@ -1458,6 +1458,37 @@ function renderWritingTab() {
           <option value="BIZ UDMincho">BIZ UD明朝</option>
         </select>
         
+        <!-- Text Style Selector (Google Docs style) -->
+        <div class="relative">
+          <button onclick="toggleStyleMenu()" id="style-menu-btn" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2 min-w-28">
+            <i class="fas fa-paragraph text-indigo-500"></i>
+            <span id="current-style-label">標準テキスト</span>
+            <i class="fas fa-chevron-down text-xs ml-auto"></i>
+          </button>
+          <div id="style-menu" class="hidden absolute left-0 top-full mt-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg py-1 z-20 w-48 border border-gray-200 dark:border-gray-700">
+            <button onclick="applyTextStyle('normal')" class="block w-full px-4 py-2 text-sm text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
+              <span class="w-6 text-gray-400"><i class="fas fa-font"></i></span>
+              <span>標準テキスト</span>
+            </button>
+            <button onclick="applyTextStyle('title')" class="block w-full px-4 py-3 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
+              <span class="w-6 text-indigo-500"><i class="fas fa-heading"></i></span>
+              <span class="text-xl font-bold">タイトル</span>
+            </button>
+            <button onclick="applyTextStyle('h1')" class="block w-full px-4 py-2.5 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
+              <span class="w-6 text-indigo-400">H1</span>
+              <span class="text-lg font-semibold">見出し 1</span>
+            </button>
+            <button onclick="applyTextStyle('h2')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
+              <span class="w-6 text-indigo-400">H2</span>
+              <span class="text-base font-medium">見出し 2</span>
+            </button>
+            <button onclick="applyTextStyle('h3')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
+              <span class="w-6 text-indigo-400">H3</span>
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">見出し 3</span>
+            </button>
+          </div>
+        </div>
+        
         <!-- Outline Toggle Button -->
         <button onclick="toggleOutline()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="アウトライン表示">
           <i class="fas fa-list-ul mr-1"></i>
@@ -1524,7 +1555,9 @@ function renderWritingTab() {
 ### 見出し2
 
 見出しを入力すると、左のアウトラインに自動で表示されます。"
-            oninput="autoSave(this.value); updateOutline();">${writing?.content || ''}</textarea>
+            oninput="autoSave(this.value); updateOutline();"
+            onclick="detectAndUpdateStyleLabel()"
+            onkeyup="detectAndUpdateStyleLabel()">${writing?.content || ''}</textarea>
         </div>
       </div>
     </div>
@@ -3245,6 +3278,131 @@ window.changeFont = (font) => {
 
 window.toggleExportMenu = () => {
   $('#export-menu')?.classList.toggle('hidden');
+};
+
+// Text Style Functions (Google Docs style)
+window.toggleStyleMenu = () => {
+  const menu = $('#style-menu');
+  if (menu) {
+    menu.classList.toggle('hidden');
+    // Close when clicking outside
+    if (!menu.classList.contains('hidden')) {
+      setTimeout(() => {
+        document.addEventListener('click', closeStyleMenuOnClickOutside, { once: true });
+      }, 0);
+    }
+  }
+};
+
+function closeStyleMenuOnClickOutside(e) {
+  const menu = $('#style-menu');
+  const btn = $('#style-menu-btn');
+  if (menu && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.add('hidden');
+  }
+}
+
+window.applyTextStyle = (style) => {
+  const editor = $('#editor');
+  if (!editor) return;
+  
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const content = editor.value;
+  
+  // Find the start and end of the current line(s)
+  let lineStart = content.lastIndexOf('\n', start - 1) + 1;
+  let lineEnd = content.indexOf('\n', end);
+  if (lineEnd === -1) lineEnd = content.length;
+  
+  // Get the selected lines
+  const selectedLines = content.substring(lineStart, lineEnd);
+  const lines = selectedLines.split('\n');
+  
+  // Apply style prefix to each line
+  const styledLines = lines.map(line => {
+    // Remove existing style prefix
+    const cleanLine = line.replace(/^(#{1,3}\s*|【|】)/, '').replace(/】$/, '');
+    
+    switch (style) {
+      case 'title':
+        return '# ' + cleanLine;
+      case 'h1':
+        return '## ' + cleanLine;
+      case 'h2':
+        return '### ' + cleanLine;
+      case 'h3':
+        return '【' + cleanLine + '】';
+      case 'normal':
+      default:
+        return cleanLine;
+    }
+  });
+  
+  const newContent = content.substring(0, lineStart) + styledLines.join('\n') + content.substring(lineEnd);
+  
+  // Update editor
+  editor.value = newContent;
+  
+  // Update state and trigger autosave
+  if (state.currentWriting) {
+    state.currentWriting.content = newContent;
+  }
+  autoSave(newContent);
+  
+  // Update outline
+  updateOutline();
+  
+  // Update style label
+  updateStyleLabel(style);
+  
+  // Close menu
+  $('#style-menu')?.classList.add('hidden');
+  
+  // Restore focus and selection
+  editor.focus();
+  const newEnd = lineStart + styledLines.join('\n').length;
+  editor.setSelectionRange(lineStart, newEnd);
+};
+
+function updateStyleLabel(style) {
+  const label = $('#current-style-label');
+  if (!label) return;
+  
+  const labels = {
+    normal: '標準テキスト',
+    title: 'タイトル',
+    h1: '見出し 1',
+    h2: '見出し 2',
+    h3: '見出し 3'
+  };
+  
+  label.textContent = labels[style] || '標準テキスト';
+}
+
+// Detect current line style and update label
+window.detectAndUpdateStyleLabel = () => {
+  const editor = $('#editor');
+  if (!editor) return;
+  
+  const content = editor.value;
+  const cursorPos = editor.selectionStart;
+  
+  // Find current line
+  let lineStart = content.lastIndexOf('\n', cursorPos - 1) + 1;
+  let lineEnd = content.indexOf('\n', cursorPos);
+  if (lineEnd === -1) lineEnd = content.length;
+  
+  const currentLine = content.substring(lineStart, lineEnd);
+  
+  // Detect style
+  let style = 'normal';
+  if (currentLine.match(/^#\s+/)) style = 'title';
+  else if (currentLine.match(/^##\s+/)) style = 'h1';
+  else if (currentLine.match(/^###\s+/)) style = 'h2';
+  else if (currentLine.match(/^【.*】$/)) style = 'h3';
+  
+  updateStyleLabel(style);
 };
 
 // Outline Functions
