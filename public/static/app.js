@@ -1467,23 +1467,23 @@ function renderWritingTab() {
           </button>
           <div id="style-menu" class="hidden absolute left-0 top-full mt-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg py-1 z-20 w-48 border border-gray-200 dark:border-gray-700">
             <button onclick="applyTextStyle('normal')" class="block w-full px-4 py-2 text-sm text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
-              <span class="w-6 text-gray-400"><i class="fas fa-font"></i></span>
+              <span class="w-6 text-center text-gray-400"><i class="fas fa-font"></i></span>
               <span>標準テキスト</span>
             </button>
             <button onclick="applyTextStyle('title')" class="block w-full px-4 py-3 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
-              <span class="w-6 text-indigo-500"><i class="fas fa-heading"></i></span>
+              <span class="w-6 text-center text-xs font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50 rounded">H1</span>
               <span class="text-xl font-bold">タイトル</span>
             </button>
             <button onclick="applyTextStyle('h1')" class="block w-full px-4 py-2.5 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
-              <span class="w-6 text-indigo-400">H1</span>
+              <span class="w-6 text-center text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 rounded">H2</span>
               <span class="text-lg font-semibold">見出し 1</span>
             </button>
             <button onclick="applyTextStyle('h2')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
-              <span class="w-6 text-indigo-400">H2</span>
+              <span class="w-6 text-center text-xs font-bold text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">H3</span>
               <span class="text-base font-medium">見出し 2</span>
             </button>
             <button onclick="applyTextStyle('h3')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
-              <span class="w-6 text-indigo-400">H3</span>
+              <span class="w-6 text-center text-xs text-gray-400">【】</span>
               <span class="text-sm font-medium text-gray-700 dark:text-gray-300">見出し 3</span>
             </button>
           </div>
@@ -1587,11 +1587,27 @@ function renderOutlineItems() {
       class="w-full text-left px-2 py-1.5 rounded hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-sm transition-colors"
       style="padding-left: ${(h.level - 1) * 12 + 8}px;">
       <span class="flex items-center gap-2">
-        <i class="fas ${h.level === 1 ? 'fa-heading text-indigo-500' : h.level === 2 ? 'fa-h text-indigo-400' : 'fa-minus text-gray-400'} text-xs"></i>
+        ${getOutlineIcon(h.level)}
         <span class="truncate ${h.level === 1 ? 'font-medium' : ''}">${h.text}</span>
       </span>
     </button>
   `).join('');
+}
+
+function getOutlineIcon(level) {
+  // level 1 = # (タイトル) → H1
+  // level 2 = ## (見出し1) → H2  
+  // level 3 = ### (見出し2) → H3
+  switch (level) {
+    case 1:
+      return '<span class="w-5 h-5 flex items-center justify-center text-xs font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 rounded">H1</span>';
+    case 2:
+      return '<span class="w-5 h-5 flex items-center justify-center text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 rounded">H2</span>';
+    case 3:
+      return '<span class="w-5 h-5 flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded">H3</span>';
+    default:
+      return '<span class="w-5 h-5 flex items-center justify-center text-xs text-gray-400"><i class="fas fa-minus"></i></span>';
+  }
 }
 
 function parseHeadings(content) {
