@@ -47,7 +47,7 @@ const i18n = {
     'sidebar.projects': 'プロジェクト', 'sidebar.newProject': '新規プロジェクト', 'sidebar.newFolder': '新規フォルダ',
     'sidebar.trash': 'ゴミ箱', 'sidebar.search': '全文検索', 'sidebar.calendar': '創作カレンダー',
     'sidebar.language': '言語', 'sidebar.aiCredits': 'AI利用量',
-    'tab.ideas': 'ネタ考案', 'tab.plot': 'プロット', 'tab.writing': 'ライティング', 'tab.chapters': '章',
+    'tab.ideas': 'ネタ考案', 'tab.plot': 'プロット', 'tab.writing': 'ライティング',
     'tab.analysis': '分析・批評', 'tab.consultation': '相談AI', 'tab.achievements': '実績',
     'achievement.title': '実績トロフィー', 'achievement.monthly': '今月の実績', 'achievement.all': '獲得バッジ',
     'achievement.progress': '進捗', 'achievement.unlocked': '解除済み', 'achievement.locked': '未解除',
@@ -91,7 +91,7 @@ const i18n = {
     'sidebar.projects': 'Projects', 'sidebar.newProject': 'New Project', 'sidebar.newFolder': 'New Folder',
     'sidebar.trash': 'Trash', 'sidebar.search': 'Search', 'sidebar.calendar': 'Calendar',
     'sidebar.language': 'Language', 'sidebar.aiCredits': 'AI Credits',
-    'tab.ideas': 'Ideas', 'tab.plot': 'Plot', 'tab.writing': 'Writing', 'tab.chapters': 'Chapters',
+    'tab.ideas': 'Ideas', 'tab.plot': 'Plot', 'tab.writing': 'Writing',
     'tab.analysis': 'Analysis', 'tab.consultation': 'AI Chat', 'tab.achievements': 'Achievements',
     'achievement.title': 'Achievements', 'achievement.monthly': 'Monthly Goals', 'achievement.all': 'Badges',
     'achievement.progress': 'Progress', 'achievement.unlocked': 'Unlocked', 'achievement.locked': 'Locked',
@@ -1176,7 +1176,7 @@ function renderMainContent() {
     <div class="h-full flex flex-col">
       <!-- Tabs -->
       <div class="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4">
-        ${['ideas', 'plot', 'writing', 'chapters', 'analysis', 'consultation', 'achievements'].map(tab => `
+        ${['ideas', 'plot', 'writing', 'analysis', 'consultation', 'achievements'].map(tab => `
           <button onclick="switchTab('${tab}')" 
             class="px-4 py-3 text-sm font-medium transition ${state.currentTab === tab ? 'tab-active' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'} ${tab === 'achievements' ? 'ml-auto bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent' : ''}">
             <i class="fas ${getTabIcon(tab)} mr-1 ${tab === 'achievements' ? 'text-yellow-500' : ''}"></i>
@@ -1194,7 +1194,7 @@ function renderMainContent() {
 }
 
 function getTabIcon(tab) {
-  const icons = { ideas: 'fa-lightbulb', plot: 'fa-sitemap', writing: 'fa-pen-fancy', chapters: 'fa-list-alt', analysis: 'fa-chart-pie', consultation: 'fa-comments', achievements: 'fa-trophy' };
+  const icons = { ideas: 'fa-lightbulb', plot: 'fa-sitemap', writing: 'fa-pen-fancy', analysis: 'fa-chart-pie', consultation: 'fa-comments', achievements: 'fa-trophy' };
   return icons[tab] || 'fa-circle';
 }
 
@@ -1203,7 +1203,6 @@ function renderTabContent() {
     case 'ideas': return renderIdeasTab();
     case 'plot': return renderPlotTab();
     case 'writing': return renderWritingTab();
-    case 'chapters': return renderChaptersTab();
     case 'analysis': return renderAnalysisTab();
     case 'consultation': return renderConsultationTab();
     case 'achievements': return renderAchievementsTab();
@@ -1369,10 +1368,10 @@ function renderPlotTab() {
           <button onclick="savePlot()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
             <i class="fas fa-save mr-1"></i>${t('common.save')}
           </button>
-          <button onclick="handleAICompletePlot()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          <button onclick="generatePlotFromIdeas()" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700"
             ${state.aiGenerating ? 'disabled' : ''}>
             ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-magic mr-1"></i>'}
-            AI補完
+            構成を生成
           </button>
         </div>
       </div>
@@ -1487,89 +1486,6 @@ function renderWritingTab() {
           style="font-family: '${writing?.font_family || 'Noto Sans JP'}', sans-serif; font-size: 16px; line-height: 2;"
           placeholder="ここに物語を紡いでください..."
           oninput="autoSave(this.value)">${writing?.content || ''}</textarea>
-      </div>
-    </div>
-  `;
-}
-
-function renderChaptersTab() {
-  const writings = state.writings || [];
-  
-  return `
-    <div class="max-w-4xl mx-auto space-y-6">
-      <!-- Chapter Overview -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold">
-            <i class="fas fa-list-alt mr-2 text-indigo-500"></i>章の一覧
-          </h3>
-          <button onclick="createNewChapter()" 
-            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
-            <i class="fas fa-plus mr-1"></i>新しい章を追加
-          </button>
-        </div>
-        
-        ${writings.length > 0 ? `
-          <div class="space-y-3">
-            ${writings.map((w, index) => `
-              <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                <div class="flex items-center gap-4">
-                  <span class="w-10 h-10 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full font-bold">
-                    ${index + 1}
-                  </span>
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                      <input type="text" value="${w.chapter_title || `第${index + 1}章`}" 
-                        onchange="updateChapterTitle('${w.id}', this.value)"
-                        class="font-medium bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-1 -ml-1 flex-1">
-                      <button onclick="selectWriting('${w.id}')" 
-                        class="text-indigo-600 hover:text-indigo-700 text-sm">
-                        <i class="fas fa-edit mr-1"></i>編集
-                      </button>
-                    </div>
-                    <div class="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                      <span><i class="fas fa-font mr-1"></i>${w.word_count || 0}文字</span>
-                      <span><i class="fas fa-clock mr-1"></i>${formatDate(w.updated_at)}</span>
-                    </div>
-                  </div>
-                  <button onclick="analyzeChapter('${w.id}')"
-                    class="px-3 py-1 text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50">
-                    <i class="fas fa-magic mr-1"></i>AI分析
-                  </button>
-                </div>
-                ${w.ai_suggestions ? `
-                  <div class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                    <p class="text-sm text-yellow-800 dark:text-yellow-200">
-                      <i class="fas fa-lightbulb mr-1"></i>改善提案: ${w.ai_suggestions}
-                    </p>
-                  </div>
-                ` : ''}
-              </div>
-            `).join('')}
-          </div>
-        ` : `
-          <div class="text-center py-12 text-gray-500">
-            <i class="fas fa-book-open text-4xl mb-4 opacity-50"></i>
-            <p>まだ章がありません</p>
-            <p class="text-sm">「新しい章を追加」ボタンで執筆を始めましょう</p>
-          </div>
-        `}
-      </div>
-      
-      <!-- Chapter Statistics -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 text-center">
-          <p class="text-3xl font-bold text-indigo-600">${writings.length}</p>
-          <p class="text-sm text-gray-500">総章数</p>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 text-center">
-          <p class="text-3xl font-bold text-green-600">${writings.reduce((sum, w) => sum + (w.word_count || 0), 0).toLocaleString()}</p>
-          <p class="text-sm text-gray-500">総文字数</p>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 text-center">
-          <p class="text-3xl font-bold text-purple-600">${writings.length > 0 ? Math.round(writings.reduce((sum, w) => sum + (w.word_count || 0), 0) / writings.length).toLocaleString() : 0}</p>
-          <p class="text-sm text-gray-500">平均文字数/章</p>
-        </div>
       </div>
     </div>
   `;
@@ -3033,18 +2949,113 @@ window.savePlot = async () => {
   alert('プロットを保存しました');
 };
 
-window.handleAICompletePlot = async () => {
+// Generate plot structure from adopted ideas
+window.generatePlotFromIdeas = async () => {
+  const adoptedIdeas = (state.ideas || []).filter(i => i.adopted);
   const template = state.plot?.template || 'kishotenketsu';
-  let currentPlot = '';
+  const projectGenre = state.currentProject?.genre || 'ファンタジー';
   
+  if (adoptedIdeas.length === 0) {
+    alert('採用したアイディアがありません。\nアイディアタブでアイディアを生成し、採用してからご利用ください。');
+    return;
+  }
+  
+  // Build prompt with template and ideas
+  const ideasText = adoptedIdeas.map((idea, i) => `${i + 1}. ${idea.title}: ${idea.content || ''}`).join('\n');
+  
+  let templatePrompt = '';
   if (template === 'kishotenketsu') {
-    currentPlot = `起: ${$('#plot-ki')?.value || '(空欄)'}\n承: ${$('#plot-sho')?.value || '(空欄)'}\n転: ${$('#plot-ten')?.value || '(空欄)'}\n結: ${$('#plot-ketsu')?.value || '(空欄)'}`;
+    templatePrompt = `以下のアイディアを元に、「起承転結」形式のプロット構成を生成してください。
+
+【起】物語の始まり、登場人物や世界観の紹介
+【承】物語の展開、問題や課題の発生
+【転】クライマックス、予想外の展開
+【結】結末、問題の解決
+
+JSON形式で出力してください:
+{"ki": "起の内容", "sho": "承の内容", "ten": "転の内容", "ketsu": "結の内容"}`;
+  } else if (template === 'three_act') {
+    templatePrompt = `以下のアイディアを元に、「三幕構成」形式のプロット構成を生成してください。
+
+【第一幕】設定とセットアップ、主人公の紹介、事件の発生
+【第二幕】対立と発展、主人公の試練、ミッドポイント
+【第三幕】クライマックスと解決
+
+JSON形式で出力してください:
+{"act1": "第一幕の内容", "act2": "第二幕の内容", "act3": "第三幕の内容"}`;
+  } else if (template === 'blake_snyder') {
+    templatePrompt = `以下のアイディアを元に、「ブレイク・スナイダー」（Save the Cat）形式のプロット構成を生成してください。
+
+【オープニングイメージ】物語の最初のシーン
+【テーマの提示】物語のテーマが示される
+【セットアップ】主人公と世界の紹介
+【きっかけ】物語を動かす出来事
+【悩みのとき】主人公が決断を迷う
+【第一ターニングポイント】新しい世界への突入
+【サブプロット】B ストーリーの開始
+【お楽しみ】約束された面白さ
+【ミッドポイント】偽りの勝利または敗北
+【迫り来る悪い奴ら】問題が深刻化
+【すべてを失って】最悪の瞬間
+【心の暗闇】最低点
+【第二ターニングポイント】解決策の発見
+【フィナーレ】最終対決と解決
+【ファイナルイメージ】変化した主人公
+
+JSON形式で出力してください:
+{"opening": "内容", "theme": "内容", "setup": "内容", "catalyst": "内容", "debate": "内容", "break_into_two": "内容", "b_story": "内容", "fun_and_games": "内容", "midpoint": "内容", "bad_guys": "内容", "all_is_lost": "内容", "dark_night": "内容", "break_into_three": "内容", "finale": "内容", "final_image": "内容"}`;
+  }
+
+  const fullPrompt = `ジャンル: ${projectGenre}
+
+採用したアイディア:
+${ideasText}
+
+${templatePrompt}
+
+各セクションは具体的で、物語として一貫性のある内容にしてください。`;
+
+  state.aiGenerating = true;
+  render();
+  
+  try {
+    const result = await callAI('custom', fullPrompt, { customPrompt: 'プロット構成を生成してください。' });
+    
+    if (result) {
+      // Try to parse JSON from result
+      const jsonMatch = result.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const plotData = JSON.parse(jsonMatch[0]);
+          
+          // Fill in the form fields
+          if (template === 'kishotenketsu') {
+            if ($('#plot-ki')) $('#plot-ki').value = plotData.ki || '';
+            if ($('#plot-sho')) $('#plot-sho').value = plotData.sho || '';
+            if ($('#plot-ten')) $('#plot-ten').value = plotData.ten || '';
+            if ($('#plot-ketsu')) $('#plot-ketsu').value = plotData.ketsu || '';
+          } else if (template === 'three_act') {
+            if ($('#plot-act1')) $('#plot-act1').value = plotData.act1 || '';
+            if ($('#plot-act2')) $('#plot-act2').value = plotData.act2 || '';
+            if ($('#plot-act3')) $('#plot-act3').value = plotData.act3 || '';
+          }
+          
+          alert('構成を生成しました！\n内容を確認し、必要に応じて編集してから保存してください。');
+        } catch (e) {
+          // If JSON parsing fails, show result as text
+          showAIResult(result);
+        }
+      } else {
+        showAIResult(result);
+      }
+    }
+  } catch (e) {
+    console.error('Generate plot error:', e);
+    alert('構成の生成に失敗しました');
   }
   
-  const result = await callAI('plot_complete', currentPlot);
-  if (result) {
-    showAIResult(result);
-  }
+  state.aiGenerating = false;
+  renderAISidebar();
 };
 
 window.toggleWritingDirection = async () => {
@@ -3108,85 +3119,6 @@ window.handleCustomAction = async () => {
     showAIResult(result);
     addToAIHistory('custom', result);
   }
-};
-
-// Chapter management functions
-window.createNewChapter = async () => {
-  if (!state.currentProject) {
-    alert('プロジェクトを選択してください');
-    return;
-  }
-  
-  const chapterNumber = (state.writings?.length || 0) + 1;
-  const title = prompt('章のタイトルを入力してください:', `第${chapterNumber}章`);
-  if (!title) return;
-  
-  try {
-    const res = await api.post('/writings', {
-      project_id: state.currentProject.id,
-      chapter_title: title,
-      content: '',
-      word_count: 0
-    });
-    
-    state.writings = [...(state.writings || []), res.data];
-    state.currentWriting = res.data;
-    state.currentTab = 'writing';
-    render();
-  } catch (e) {
-    console.error('Create chapter error:', e);
-    alert('章の作成に失敗しました');
-  }
-};
-
-window.selectWriting = async (writingId) => {
-  const writing = state.writings?.find(w => w.id === writingId);
-  if (writing) {
-    state.currentWriting = writing;
-    state.currentTab = 'writing';
-    render();
-  }
-};
-
-window.updateChapterTitle = async (writingId, newTitle) => {
-  try {
-    await api.put(`/writings/${writingId}`, { chapter_title: newTitle });
-    const writing = state.writings?.find(w => w.id === writingId);
-    if (writing) {
-      writing.chapter_title = newTitle;
-    }
-    if (state.currentWriting?.id === writingId) {
-      state.currentWriting.chapter_title = newTitle;
-    }
-  } catch (e) {
-    console.error('Update chapter title error:', e);
-  }
-};
-
-window.analyzeChapter = async (writingId) => {
-  const writing = state.writings?.find(w => w.id === writingId);
-  if (!writing?.content) {
-    alert('この章にはまだ内容がありません');
-    return;
-  }
-  
-  state.aiGenerating = true;
-  render();
-  
-  try {
-    const result = await callAI('proofread', writing.content);
-    if (result) {
-      writing.ai_suggestions = result.substring(0, 200) + (result.length > 200 ? '...' : '');
-      render();
-      alert('分析が完了しました。改善提案を確認してください。');
-    }
-  } catch (e) {
-    console.error('Analyze chapter error:', e);
-    alert('分析に失敗しました');
-  }
-  
-  state.aiGenerating = false;
-  render();
 };
 
 window.handleAnalyze = async () => {
