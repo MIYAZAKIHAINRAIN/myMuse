@@ -15,6 +15,7 @@ const state = {
   theme: localStorage.getItem('theme') || 'light',
   zenMode: false,
   sidebarOpen: { left: true, right: true },
+  showOutline: false,
   calendarDate: new Date(),
   calendarEvents: [],
   chatThreads: [],
@@ -1432,32 +1433,6 @@ function renderWritingTab() {
   
   return `
     <div class="h-full flex flex-col">
-      <!-- Document Tabs (Google Docs style) -->
-      <div class="flex items-center gap-1 mb-3 bg-gray-100 dark:bg-gray-900 rounded-lg p-1 overflow-x-auto">
-        ${(state.writings || []).map((w, index) => `
-          <button onclick="switchDocument('${w.id}')"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-all ${
-              state.currentWriting?.id === w.id 
-                ? 'bg-white dark:bg-gray-800 shadow-sm text-indigo-600 dark:text-indigo-400 font-medium' 
-                : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-800/50'
-            }">
-            <i class="fas fa-file-alt text-xs"></i>
-            <span class="max-w-24 truncate">${w.chapter_title || `文書${index + 1}`}</span>
-            ${state.writings.length > 1 ? `
-              <span onclick="event.stopPropagation(); closeDocument('${w.id}', '${(w.chapter_title || '').replace(/'/g, "\\'")}')" 
-                class="ml-1 text-gray-400 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full w-4 h-4 flex items-center justify-center text-xs">
-                <i class="fas fa-times"></i>
-              </span>
-            ` : ''}
-          </button>
-        `).join('')}
-        <button onclick="createNewDocument()" 
-          class="flex items-center gap-1 px-3 py-1.5 rounded-md text-sm text-gray-500 hover:text-indigo-600 hover:bg-white/50 dark:hover:bg-gray-800/50 transition-all">
-          <i class="fas fa-plus"></i>
-          <span>新規文書</span>
-        </button>
-      </div>
-      
       <!-- Pinned Plot (if exists) -->
       ${state.currentProject?.pinned_plot ? `
         <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 mb-4">
@@ -1482,6 +1457,12 @@ function renderWritingTab() {
           <option value="Shippori Mincho">しっぽり明朝</option>
           <option value="BIZ UDMincho">BIZ UD明朝</option>
         </select>
+        
+        <!-- Outline Toggle Button -->
+        <button onclick="toggleOutline()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="アウトライン表示">
+          <i class="fas fa-list-ul mr-1"></i>
+          アウトライン
+        </button>
         
         <div class="flex-1"></div>
         
@@ -1512,16 +1493,155 @@ function renderWritingTab() {
         </div>
       </div>
       
-      <!-- Editor -->
-      <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-        <textarea id="editor" 
-          class="w-full h-full p-6 resize-none focus:outline-none dark:bg-gray-800 ${isVertical ? 'writing-vertical' : ''}"
-          style="font-family: '${writing?.font_family || 'Noto Sans JP'}', sans-serif; font-size: 16px; line-height: 2;"
-          placeholder="ここに物語を紡いでください..."
-          oninput="autoSave(this.value)">${writing?.content || ''}</textarea>
+      <!-- Editor with Outline Panel -->
+      <div class="flex-1 flex gap-4 overflow-hidden">
+        <!-- Outline Panel -->
+        <div id="outline-panel" class="${state.showOutline ? '' : 'hidden'} w-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden flex-shrink-0">
+          <div class="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <h4 class="font-medium text-sm flex items-center gap-2">
+              <i class="fas fa-list-ul text-indigo-500"></i>
+              アウトライン
+            </h4>
+            <button onclick="toggleOutline()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div id="outline-content" class="p-2 overflow-y-auto" style="max-height: calc(100% - 48px);">
+            ${renderOutlineItems()}
+          </div>
+        </div>
+        
+        <!-- Editor -->
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+          <textarea id="editor" 
+            class="w-full h-full p-6 resize-none focus:outline-none dark:bg-gray-800 ${isVertical ? 'writing-vertical' : ''}"
+            style="font-family: '${writing?.font_family || 'Noto Sans JP'}', sans-serif; font-size: 16px; line-height: 2;"
+            placeholder="ここに物語を紡いでください...
+
+【見出しの書き方】
+# タイトル
+## 見出し1
+### 見出し2
+
+見出しを入力すると、左のアウトラインに自動で表示されます。"
+            oninput="autoSave(this.value); updateOutline();">${writing?.content || ''}</textarea>
+        </div>
       </div>
     </div>
   `;
+}
+
+// Outline Functions
+function renderOutlineItems() {
+  const content = state.currentWriting?.content || '';
+  const headings = parseHeadings(content);
+  
+  if (headings.length === 0) {
+    return `
+      <p class="text-sm text-gray-500 p-2">
+        見出しがありません<br>
+        <span class="text-xs text-gray-400 mt-1 block">
+          # タイトル<br>
+          ## 見出し1<br>
+          ### 見出し2
+        </span>
+      </p>
+    `;
+  }
+  
+  return headings.map((h, index) => `
+    <button onclick="jumpToHeading(${h.lineIndex})"
+      class="w-full text-left px-2 py-1.5 rounded hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-sm transition-colors"
+      style="padding-left: ${(h.level - 1) * 12 + 8}px;">
+      <span class="flex items-center gap-2">
+        <i class="fas ${h.level === 1 ? 'fa-heading text-indigo-500' : h.level === 2 ? 'fa-h text-indigo-400' : 'fa-minus text-gray-400'} text-xs"></i>
+        <span class="truncate ${h.level === 1 ? 'font-medium' : ''}">${h.text}</span>
+      </span>
+    </button>
+  `).join('');
+}
+
+function parseHeadings(content) {
+  const lines = content.split('\n');
+  const headings = [];
+  
+  lines.forEach((line, index) => {
+    // Markdown style headings: #, ##, ###
+    const mdMatch = line.match(/^(#{1,3})\s+(.+)$/);
+    if (mdMatch) {
+      headings.push({
+        level: mdMatch[1].length,
+        text: mdMatch[2].trim(),
+        lineIndex: index
+      });
+      return;
+    }
+    
+    // Japanese style headings: 第X章、第X節 etc.
+    const jpChapterMatch = line.match(/^(第[一二三四五六七八九十百千万〇０-９0-9]+[章部編])\s*(.*)$/);
+    if (jpChapterMatch) {
+      headings.push({
+        level: 1,
+        text: jpChapterMatch[1] + (jpChapterMatch[2] ? ' ' + jpChapterMatch[2] : ''),
+        lineIndex: index
+      });
+      return;
+    }
+    
+    const jpSectionMatch = line.match(/^(第[一二三四五六七八九十百千万〇０-９0-9]+[節項])\s*(.*)$/);
+    if (jpSectionMatch) {
+      headings.push({
+        level: 2,
+        text: jpSectionMatch[1] + (jpSectionMatch[2] ? ' ' + jpSectionMatch[2] : ''),
+        lineIndex: index
+      });
+      return;
+    }
+    
+    // Numbered headings: 1., 1.1, etc.
+    const numMatch = line.match(/^(\d+\.)\s+(.+)$/);
+    if (numMatch) {
+      headings.push({
+        level: 1,
+        text: numMatch[2].trim(),
+        lineIndex: index
+      });
+      return;
+    }
+    
+    const subNumMatch = line.match(/^(\d+\.\d+\.?)\s+(.+)$/);
+    if (subNumMatch) {
+      headings.push({
+        level: 2,
+        text: subNumMatch[2].trim(),
+        lineIndex: index
+      });
+      return;
+    }
+    
+    // 【】brackets style headings
+    const bracketMatch = line.match(/^【(.+)】$/);
+    if (bracketMatch) {
+      headings.push({
+        level: 1,
+        text: bracketMatch[1].trim(),
+        lineIndex: index
+      });
+      return;
+    }
+    
+    // ■□●○ marker style headings
+    const markerMatch = line.match(/^[■□●○▼▽◆◇★☆]\s*(.+)$/);
+    if (markerMatch) {
+      headings.push({
+        level: 2,
+        text: markerMatch[1].trim(),
+        lineIndex: index
+      });
+    }
+  });
+  
+  return headings;
 }
 
 function renderAnalysisTab() {
@@ -3127,66 +3247,43 @@ window.toggleExportMenu = () => {
   $('#export-menu')?.classList.toggle('hidden');
 };
 
-// Document Tabs Functions
-window.switchDocument = (writingId) => {
-  const writing = state.writings.find(w => w.id === writingId);
-  if (writing) {
-    // Save current document before switching
-    saveEditorContent();
-    state.currentWriting = writing;
-    render();
+// Outline Functions
+window.toggleOutline = () => {
+  state.showOutline = !state.showOutline;
+  const panel = $('#outline-panel');
+  if (panel) {
+    panel.classList.toggle('hidden', !state.showOutline);
   }
 };
 
-window.createNewDocument = async () => {
-  if (!state.currentProject) {
-    alert('プロジェクトを選択してください');
-    return;
-  }
-  
-  const title = prompt('新しい文書のタイトルを入力してください:', `文書${(state.writings?.length || 0) + 1}`);
-  if (!title) return;
-  
-  try {
-    const res = await axios.post('/writings', {
-      project_id: state.currentProject.id,
-      chapter_title: title,
-      content: '',
-      word_count: 0
-    });
-    
-    const newWriting = res.data;
-    state.writings = [...(state.writings || []), newWriting];
-    state.currentWriting = newWriting;
-    render();
-  } catch (error) {
-    console.error('Create document error:', error);
-    alert('文書の作成に失敗しました');
+window.updateOutline = () => {
+  const outlineContent = $('#outline-content');
+  if (outlineContent && state.showOutline) {
+    outlineContent.innerHTML = renderOutlineItems();
   }
 };
 
-window.closeDocument = async (writingId, writingTitle) => {
-  if (state.writings.length <= 1) {
-    alert('最後の文書は閉じることができません');
-    return;
+window.jumpToHeading = (lineIndex) => {
+  const editor = $('#editor');
+  if (!editor) return;
+  
+  const content = editor.value;
+  const lines = content.split('\n');
+  
+  // Calculate character position of the target line
+  let charPosition = 0;
+  for (let i = 0; i < lineIndex; i++) {
+    charPosition += lines[i].length + 1; // +1 for newline
   }
   
-  const confirmed = confirm(`「${writingTitle || '無題の文書'}」を削除しますか？\nこの操作は元に戻せません。`);
-  if (!confirmed) return;
+  // Set cursor position and scroll
+  editor.focus();
+  editor.setSelectionRange(charPosition, charPosition + lines[lineIndex].length);
   
-  try {
-    await axios.delete(`/writings/${writingId}`);
-    state.writings = state.writings.filter(w => w.id !== writingId);
-    
-    // If deleted document was current, switch to first available
-    if (state.currentWriting?.id === writingId) {
-      state.currentWriting = state.writings[0] || null;
-    }
-    render();
-  } catch (error) {
-    console.error('Delete document error:', error);
-    alert('文書の削除に失敗しました');
-  }
+  // Scroll to make the cursor visible
+  const lineHeight = parseInt(getComputedStyle(editor).lineHeight) || 32;
+  const scrollTop = lineIndex * lineHeight - editor.clientHeight / 3;
+  editor.scrollTop = Math.max(0, scrollTop);
 };
 
 window.handleQuickAction = async (action) => {
