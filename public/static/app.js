@@ -47,9 +47,9 @@ const i18n = {
     'sidebar.projects': 'プロジェクト', 'sidebar.newProject': '新規プロジェクト', 'sidebar.newFolder': '新規フォルダ',
     'sidebar.trash': 'ゴミ箱', 'sidebar.search': '全文検索', 'sidebar.calendar': '創作カレンダー',
     'sidebar.language': '言語', 'sidebar.aiCredits': 'AI利用量',
-    'tab.ideas': 'ネタ考案', 'tab.plot': 'プロット', 'tab.writing': 'ライティング',
+    'tab.ideas': 'ネタ考案', 'tab.plot': 'プロット', 'tab.writing': 'ライティング', 'tab.chapters': '章',
     'tab.analysis': '分析・批評', 'tab.consultation': '相談AI', 'tab.achievements': '実績',
-    'achievement.title': '実績・バッジ', 'achievement.monthly': '今月の実績', 'achievement.all': '獲得バッジ',
+    'achievement.title': '実績トロフィー', 'achievement.monthly': '今月の実績', 'achievement.all': '獲得バッジ',
     'achievement.progress': '進捗', 'achievement.unlocked': '解除済み', 'achievement.locked': '未解除',
     'achievement.generateNew': 'AIで実績を更新', 'achievement.lastUpdate': '最終更新',
     'achievement.platinum': 'プラチナ', 'achievement.gold': 'ゴールド', 'achievement.silver': 'シルバー',
@@ -91,7 +91,7 @@ const i18n = {
     'sidebar.projects': 'Projects', 'sidebar.newProject': 'New Project', 'sidebar.newFolder': 'New Folder',
     'sidebar.trash': 'Trash', 'sidebar.search': 'Search', 'sidebar.calendar': 'Calendar',
     'sidebar.language': 'Language', 'sidebar.aiCredits': 'AI Credits',
-    'tab.ideas': 'Ideas', 'tab.plot': 'Plot', 'tab.writing': 'Writing',
+    'tab.ideas': 'Ideas', 'tab.plot': 'Plot', 'tab.writing': 'Writing', 'tab.chapters': 'Chapters',
     'tab.analysis': 'Analysis', 'tab.consultation': 'AI Chat', 'tab.achievements': 'Achievements',
     'achievement.title': 'Achievements', 'achievement.monthly': 'Monthly Goals', 'achievement.all': 'Badges',
     'achievement.progress': 'Progress', 'achievement.unlocked': 'Unlocked', 'achievement.locked': 'Locked',
@@ -676,7 +676,7 @@ async function callAI(action, content, options = {}) {
   // Create new abort controller for this request
   aiAbortController = new AbortController();
   state.aiGenerating = true;
-  renderAISidebar();
+  renderAISidebar(); // Update sidebar to show loading state
   
   try {
     const res = await api.post('/ai/generate', {
@@ -689,10 +689,12 @@ async function callAI(action, content, options = {}) {
     });
     state.aiGenerating = false;
     aiAbortController = null;
+    renderAISidebar(); // Update sidebar to hide loading state
     return res.data.result;
   } catch (e) {
     state.aiGenerating = false;
     aiAbortController = null;
+    renderAISidebar(); // Update sidebar to hide loading state
     if (e.name === 'AbortError') {
       console.log('AI generation cancelled');
       return null;
@@ -858,23 +860,42 @@ let speechSynthesis = window.speechSynthesis;
 let currentUtterance = null;
 
 window.readAloud = function() {
-  if (!state.currentWriting?.content) {
-    alert('読み上げるテキストがありません');
-    return;
-  }
-  
   if (!window.speechSynthesis) {
     alert('お使いのブラウザは音声読み上げに対応していません');
     return;
   }
   
+  // If currently speaking, stop
   if (currentUtterance) {
     speechSynthesis.cancel();
     currentUtterance = null;
     return;
   }
   
-  const utterance = new SpeechSynthesisUtterance(state.currentWriting.content);
+  // Get selected text first, fall back to full content
+  const editor = document.getElementById('editor');
+  let textToRead = '';
+  
+  if (editor) {
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    if (start !== end) {
+      // There is selected text
+      textToRead = editor.value.substring(start, end);
+    }
+  }
+  
+  // If no selection, use full content
+  if (!textToRead) {
+    textToRead = state.currentWriting?.content || '';
+  }
+  
+  if (!textToRead) {
+    alert('読み上げるテキストがありません。\nテキストを選択するか、執筆欄に内容を入力してください。');
+    return;
+  }
+  
+  const utterance = new SpeechSynthesisUtterance(textToRead);
   utterance.lang = state.language === 'ja' ? 'ja-JP' : 'en-US';
   utterance.rate = 0.9;
   
@@ -929,10 +950,13 @@ function renderLoginPage() {
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4">
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in">
         <div class="text-center mb-8">
-          <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent mb-2">
-            <i class="fas fa-feather-alt mr-2"></i>myMuse
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400">${t('app.tagline')}</p>
+          <div class="flex items-center justify-center gap-3 mb-2">
+            <i class="fas fa-feather-alt text-4xl text-indigo-600"></i>
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent">
+              myMuse
+            </h1>
+          </div>
+          <p class="text-gray-600 dark:text-gray-400 text-sm">${t('app.tagline')}</p>
         </div>
         
         <!-- Tab Switcher -->
@@ -1117,18 +1141,32 @@ function renderLeftSidebar() {
 function renderProjectItem(project) {
   const isActive = state.currentProject?.id === project.id;
   return `
-    <div class="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition group
+    <div class="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition group relative
         ${isActive ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}">
       <div onclick="selectProject('${project.id}')" class="flex items-center gap-2 flex-1 min-w-0">
         <i class="fas fa-book-open text-sm"></i>
         <span class="flex-1 truncate text-sm">${project.title}</span>
         ${project.deadline ? '<i class="fas fa-clock text-xs text-orange-500"></i>' : ''}
       </div>
-      <button onclick="event.stopPropagation(); deleteProject('${project.id}', '${project.title.replace(/'/g, "\\'")}')" 
-        class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition p-1"
-        title="プロジェクトを削除">
-        <i class="fas fa-times text-xs"></i>
-      </button>
+      <div class="relative">
+        <button onclick="event.stopPropagation(); toggleProjectMenu('${project.id}')" 
+          class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition p-1"
+          title="メニュー">
+          <i class="fas fa-ellipsis-v text-xs"></i>
+        </button>
+        <div id="project-menu-${project.id}" class="hidden absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+          <button onclick="event.stopPropagation(); renameProject('${project.id}', '${project.title.replace(/'/g, "\\'")}')" 
+            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg">
+            <i class="fas fa-edit text-blue-500"></i>
+            名前を編集
+          </button>
+          <button onclick="event.stopPropagation(); deleteProject('${project.id}', '${project.title.replace(/'/g, "\\'")}')" 
+            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-b-lg">
+            <i class="fas fa-trash"></i>
+            削除
+          </button>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -1138,7 +1176,7 @@ function renderMainContent() {
     <div class="h-full flex flex-col">
       <!-- Tabs -->
       <div class="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4">
-        ${['ideas', 'plot', 'writing', 'analysis', 'consultation', 'achievements'].map(tab => `
+        ${['ideas', 'plot', 'writing', 'chapters', 'analysis', 'consultation', 'achievements'].map(tab => `
           <button onclick="switchTab('${tab}')" 
             class="px-4 py-3 text-sm font-medium transition ${state.currentTab === tab ? 'tab-active' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'} ${tab === 'achievements' ? 'ml-auto bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent' : ''}">
             <i class="fas ${getTabIcon(tab)} mr-1 ${tab === 'achievements' ? 'text-yellow-500' : ''}"></i>
@@ -1156,7 +1194,7 @@ function renderMainContent() {
 }
 
 function getTabIcon(tab) {
-  const icons = { ideas: 'fa-lightbulb', plot: 'fa-sitemap', writing: 'fa-pen-fancy', analysis: 'fa-chart-pie', consultation: 'fa-comments', achievements: 'fa-trophy' };
+  const icons = { ideas: 'fa-lightbulb', plot: 'fa-sitemap', writing: 'fa-pen-fancy', chapters: 'fa-list-alt', analysis: 'fa-chart-pie', consultation: 'fa-comments', achievements: 'fa-trophy' };
   return icons[tab] || 'fa-circle';
 }
 
@@ -1165,6 +1203,7 @@ function renderTabContent() {
     case 'ideas': return renderIdeasTab();
     case 'plot': return renderPlotTab();
     case 'writing': return renderWritingTab();
+    case 'chapters': return renderChaptersTab();
     case 'analysis': return renderAnalysisTab();
     case 'consultation': return renderConsultationTab();
     case 'achievements': return renderAchievementsTab();
@@ -1276,8 +1315,40 @@ function renderPlotTab() {
   try { structure = JSON.parse(state.plot?.structure || '{}'); } catch (e) {}
   const template = state.plot?.template || 'kishotenketsu';
   
+  // Get adopted ideas
+  const adoptedIdeas = (state.ideas || []).filter(idea => idea.adopted);
+  
   return `
     <div class="max-w-4xl mx-auto space-y-6">
+      <!-- Adopted Ideas Section -->
+      <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl shadow-sm p-4 border border-green-200 dark:border-green-800">
+        <h3 class="font-semibold text-green-700 dark:text-green-400 mb-3 flex items-center gap-2">
+          <i class="fas fa-lightbulb"></i>採用したアイディア
+        </h3>
+        ${adoptedIdeas.length > 0 ? `
+          <div class="space-y-2">
+            ${adoptedIdeas.map(idea => `
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-green-300 dark:border-green-700 flex items-start gap-3">
+                <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                <div class="flex-1">
+                  <p class="font-medium text-gray-800 dark:text-gray-200">${idea.title}</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${idea.content || ''}</p>
+                </div>
+                <button onclick="unadoptIdea('${idea.id}')" 
+                  class="text-gray-400 hover:text-red-500 p-1" title="採用を取り消す">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <p class="text-gray-500 dark:text-gray-400 text-sm italic">
+            <i class="fas fa-info-circle mr-1"></i>
+            アイディアタブで生成したアイディアを採用すると、ここに表示されます
+          </p>
+        `}
+      </div>
+      
       <!-- Template Selector -->
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
         <div class="flex flex-wrap gap-2">
@@ -1421,6 +1492,89 @@ function renderWritingTab() {
   `;
 }
 
+function renderChaptersTab() {
+  const writings = state.writings || [];
+  
+  return `
+    <div class="max-w-4xl mx-auto space-y-6">
+      <!-- Chapter Overview -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold">
+            <i class="fas fa-list-alt mr-2 text-indigo-500"></i>章の一覧
+          </h3>
+          <button onclick="createNewChapter()" 
+            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
+            <i class="fas fa-plus mr-1"></i>新しい章を追加
+          </button>
+        </div>
+        
+        ${writings.length > 0 ? `
+          <div class="space-y-3">
+            ${writings.map((w, index) => `
+              <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                <div class="flex items-center gap-4">
+                  <span class="w-10 h-10 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full font-bold">
+                    ${index + 1}
+                  </span>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                      <input type="text" value="${w.chapter_title || `第${index + 1}章`}" 
+                        onchange="updateChapterTitle('${w.id}', this.value)"
+                        class="font-medium bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-1 -ml-1 flex-1">
+                      <button onclick="selectWriting('${w.id}')" 
+                        class="text-indigo-600 hover:text-indigo-700 text-sm">
+                        <i class="fas fa-edit mr-1"></i>編集
+                      </button>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                      <span><i class="fas fa-font mr-1"></i>${w.word_count || 0}文字</span>
+                      <span><i class="fas fa-clock mr-1"></i>${formatDate(w.updated_at)}</span>
+                    </div>
+                  </div>
+                  <button onclick="analyzeChapter('${w.id}')"
+                    class="px-3 py-1 text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50">
+                    <i class="fas fa-magic mr-1"></i>AI分析
+                  </button>
+                </div>
+                ${w.ai_suggestions ? `
+                  <div class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                    <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                      <i class="fas fa-lightbulb mr-1"></i>改善提案: ${w.ai_suggestions}
+                    </p>
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="text-center py-12 text-gray-500">
+            <i class="fas fa-book-open text-4xl mb-4 opacity-50"></i>
+            <p>まだ章がありません</p>
+            <p class="text-sm">「新しい章を追加」ボタンで執筆を始めましょう</p>
+          </div>
+        `}
+      </div>
+      
+      <!-- Chapter Statistics -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 text-center">
+          <p class="text-3xl font-bold text-indigo-600">${writings.length}</p>
+          <p class="text-sm text-gray-500">総章数</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 text-center">
+          <p class="text-3xl font-bold text-green-600">${writings.reduce((sum, w) => sum + (w.word_count || 0), 0).toLocaleString()}</p>
+          <p class="text-sm text-gray-500">総文字数</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 text-center">
+          <p class="text-3xl font-bold text-purple-600">${writings.length > 0 ? Math.round(writings.reduce((sum, w) => sum + (w.word_count || 0), 0) / writings.length).toLocaleString() : 0}</p>
+          <p class="text-sm text-gray-500">平均文字数/章</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderAnalysisTab() {
   return `
     <div class="max-w-4xl mx-auto space-y-6">
@@ -1524,15 +1678,20 @@ function renderChatMessages() {
 // ============================================
 function renderAchievementsTab() {
   const currentMonth = new Date().toLocaleString(state.language === 'ja' ? 'ja-JP' : 'en-US', { month: 'long', year: 'numeric' });
+  const currentDay = new Date().getDate();
   
-  // Calculate monthly progress
-  const monthlyGoals = state.monthlyAchievements || getDefaultMonthlyGoals();
+  // Get activity-based achievements (auto-tracked)
+  const activityLog = getActivityLog();
+  const monthlyGoals = generateAutoAchievements(activityLog);
   const completedCount = monthlyGoals.filter(g => g.completed).length;
   const totalCount = monthlyGoals.length;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   
   // Determine badge tier
   const badgeTier = getBadgeTier(progressPercent);
+  
+  // Check if it's time to update achievements (25th of month)
+  const shouldAutoReset = currentDay >= 25 && shouldResetMonthlyAchievements();
   
   return `
     <div class="max-w-4xl mx-auto space-y-6">
@@ -1545,6 +1704,11 @@ function renderAchievementsTab() {
           ${t('achievement.title')}
         </h2>
         <p class="text-gray-600 dark:text-gray-400 mt-2">${currentMonth}</p>
+        ${shouldAutoReset ? `
+          <p class="text-sm text-orange-500 mt-1">
+            <i class="fas fa-info-circle mr-1"></i>月末（25日）に実績がリセットされます
+          </p>
+        ` : ''}
       </div>
       
       <!-- Monthly Progress Card -->
@@ -1554,12 +1718,9 @@ function renderAchievementsTab() {
             <i class="fas fa-calendar-check text-yellow-500"></i>
             ${t('achievement.monthly')}
           </h3>
-          <button onclick="generateMonthlyAchievements()" 
-            class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition text-sm"
-            ${state.aiGenerating ? 'disabled' : ''}>
-            <i class="fas ${state.aiGenerating ? 'fa-spinner fa-spin' : 'fa-magic'}"></i>
-            ${t('achievement.generateNew')}
-          </button>
+          <span class="text-sm text-gray-500">
+            <i class="fas fa-sync-alt mr-1"></i>自動更新
+          </span>
         </div>
         
         <!-- Progress Bar -->
@@ -1579,21 +1740,27 @@ function renderAchievementsTab() {
           ${renderBadgeTiers(progressPercent)}
         </div>
         
-        <!-- Monthly Goals List -->
+        <!-- Monthly Goals List (Auto-tracked, read-only) -->
         <div class="space-y-3">
-          ${monthlyGoals.map((goal, index) => `
+          ${monthlyGoals.map(goal => `
             <div class="flex items-center gap-3 p-3 rounded-lg ${goal.completed ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-700'}">
-              <button onclick="toggleAchievement(${index})" class="w-8 h-8 flex items-center justify-center rounded-full ${goal.completed ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-400'}">
+              <div class="w-8 h-8 flex items-center justify-center rounded-full ${goal.completed ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-400'}">
                 <i class="fas ${goal.completed ? 'fa-check' : 'fa-circle'}"></i>
-              </button>
+              </div>
               <div class="flex-1">
-                <p class="font-medium ${goal.completed ? 'text-green-700 dark:text-green-300 line-through' : ''}">${goal.title}</p>
+                <p class="font-medium ${goal.completed ? 'text-green-700 dark:text-green-300' : ''}">${goal.title}</p>
                 <p class="text-sm text-gray-500">${goal.description}</p>
+                <p class="text-xs text-gray-400 mt-1">進捗: ${goal.progress}</p>
               </div>
               <span class="text-2xl">${goal.emoji}</span>
             </div>
           `).join('')}
         </div>
+        
+        <p class="text-xs text-gray-500 text-center mt-4">
+          <i class="fas fa-info-circle mr-1"></i>
+          実績は執筆活動に基づいて自動的に更新されます
+        </p>
       </div>
       
       <!-- Badge History Stats -->
@@ -1606,6 +1773,71 @@ function renderAchievementsTab() {
       </div>
     </div>
   `;
+}
+
+// Generate achievements based on actual user activity
+function generateAutoAchievements(activityLog) {
+  const writings = state.writings || [];
+  const totalWords = writings.reduce((sum, w) => sum + (w.word_count || 0), 0);
+  const projectCount = state.projects?.length || 0;
+  const adoptedIdeas = (state.ideas || []).filter(i => i.adopted).length;
+  
+  return [
+    {
+      id: 1,
+      title: '今月の執筆目標',
+      description: '5,000文字以上執筆する',
+      emoji: '✍️',
+      completed: totalWords >= 5000,
+      progress: `${totalWords.toLocaleString()} / 5,000 文字`
+    },
+    {
+      id: 2,
+      title: 'ログイン習慣',
+      description: '週5日以上ログインする',
+      emoji: '📅',
+      completed: (activityLog.loginDaysThisWeek?.length || 0) >= 5,
+      progress: `${activityLog.loginDaysThisWeek?.length || 0} / 5 日`
+    },
+    {
+      id: 3,
+      title: 'AIパートナー活用',
+      description: 'AIと10回以上相談する',
+      emoji: '🤖',
+      completed: (activityLog.aiConsultations || 0) >= 10,
+      progress: `${activityLog.aiConsultations || 0} / 10 回`
+    },
+    {
+      id: 4,
+      title: 'アイデアコレクター',
+      description: '3つ以上のアイデアを採用する',
+      emoji: '💡',
+      completed: adoptedIdeas >= 3,
+      progress: `${adoptedIdeas} / 3 個`
+    },
+    {
+      id: 5,
+      title: '章の完成',
+      description: '3章以上を執筆する',
+      emoji: '📝',
+      completed: writings.length >= 3,
+      progress: `${writings.length} / 3 章`
+    },
+    {
+      id: 6,
+      title: '作品分析',
+      description: '作品を1回以上分析する',
+      emoji: '📊',
+      completed: (activityLog.analysisPerformed || 0) >= 1,
+      progress: `${activityLog.analysisPerformed || 0} / 1 回`
+    }
+  ];
+}
+
+function shouldResetMonthlyAchievements() {
+  const lastReset = localStorage.getItem('lastAchievementReset');
+  const currentMonth = new Date().getMonth() + '-' + new Date().getFullYear();
+  return lastReset !== currentMonth;
 }
 
 // Badge history stored in localStorage
@@ -1861,17 +2093,22 @@ function checkAchievementsFromLog(log) {
   return unlockedAchievements.length > 0 ? unlockedAchievements : '更新なし';
 }
 
-// Check completion and update badge history
+// Check completion and update badge history (auto-tracked version)
 function checkAndUpdateBadgeHistory() {
-  const monthlyGoals = state.monthlyAchievements || getDefaultMonthlyGoals();
+  const activityLog = getActivityLog();
+  const monthlyGoals = generateAutoAchievements(activityLog);
   const completedCount = monthlyGoals.filter(g => g.completed).length;
   const totalCount = monthlyGoals.length;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   
   const history = getBadgeHistory();
   const currentMonth = new Date().getMonth().toString() + '-' + new Date().getFullYear().toString();
+  const currentDay = new Date().getDate();
   const lastBadgeMonth = localStorage.getItem('lastBadgeMonth');
   const lastBadgeTier = localStorage.getItem('lastBadgeTier') || '';
+  
+  // Check if it's the 25th or later and we should finalize this month
+  const shouldFinalize = currentDay >= 25;
   
   // Determine current tier
   let currentTier = '';
@@ -1881,13 +2118,11 @@ function checkAndUpdateBadgeHistory() {
   else if (progressPercent >= 40) currentTier = 'bronze';
   else if (progressPercent > 0) currentTier = 'encouragement';
   
-  // Only award badge when:
-  // 1. It's a new month, OR
-  // 2. User just reached a higher tier in the same month
+  // Award badge on the 25th if not already awarded this month
   const isNewMonth = lastBadgeMonth !== currentMonth;
   const isHigherTier = currentTier && getTierRank(currentTier) > getTierRank(lastBadgeTier);
   
-  if (currentTier && (isNewMonth || isHigherTier)) {
+  if (shouldFinalize && currentTier && (isNewMonth || isHigherTier)) {
     // If same month but higher tier, remove old tier badge first
     if (!isNewMonth && isHigherTier && lastBadgeTier) {
       history[lastBadgeTier] = Math.max(0, (history[lastBadgeTier] || 0) - 1);
@@ -1897,12 +2132,29 @@ function checkAndUpdateBadgeHistory() {
     history[currentTier]++;
     localStorage.setItem('lastBadgeMonth', currentMonth);
     localStorage.setItem('lastBadgeTier', currentTier);
+    localStorage.setItem('lastAchievementReset', currentMonth);
     saveBadgeHistory(history);
     
     // Show congratulation message
     const tierNames = { platinum: 'プラチナ', gold: 'ゴールド', silver: 'シルバー', bronze: 'ブロンズ', encouragement: '頑張ってね' };
-    alert(`🎉 おめでとうございます！「${tierNames[currentTier]}」バッジを獲得しました！`);
+    alert(`🎉 今月の実績確定！「${tierNames[currentTier]}」バッジを獲得しました！`);
+    
+    // Reset activity log for next month
+    resetActivityLogForNewMonth();
   }
+}
+
+function resetActivityLogForNewMonth() {
+  const newLog = {
+    wordsWrittenToday: 0,
+    loginDaysThisWeek: [],
+    aiConsultations: 0,
+    plotCompleted: false,
+    ideasAdopted: 0,
+    analysisPerformed: 0,
+    lastUpdated: new Date().toDateString()
+  };
+  localStorage.setItem('activityLog', JSON.stringify(newLog));
 }
 
 function getTierRank(tier) {
@@ -2423,6 +2675,26 @@ window.toggleZenMode = () => {
   render();
 };
 
+// Exit ZEN mode with ESC key or clicking outside editor
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && state.zenMode) {
+    state.zenMode = false;
+    render();
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (state.zenMode) {
+    const editor = document.getElementById('editor');
+    const toolbar = e.target.closest('.flex.items-center.gap-2.p-2');
+    // If clicked outside editor and toolbar, exit ZEN mode
+    if (!editor?.contains(e.target) && !toolbar && !e.target.closest('button')) {
+      state.zenMode = false;
+      render();
+    }
+  }
+});
+
 // Save editor content before switching tabs or performing other actions
 function saveEditorContent() {
   const editor = $('#editor');
@@ -2456,6 +2728,60 @@ window.selectProject = async (projectId) => {
   await loadProjectData(projectId);
   render();
 };
+
+// Project Menu Functions
+window.toggleProjectMenu = (projectId) => {
+  // Close all other menus first
+  document.querySelectorAll('[id^="project-menu-"]').forEach(menu => {
+    if (menu.id !== `project-menu-${projectId}`) {
+      menu.classList.add('hidden');
+    }
+  });
+  
+  const menu = $(`#project-menu-${projectId}`);
+  if (menu) {
+    menu.classList.toggle('hidden');
+  }
+};
+
+window.renameProject = async (projectId, currentTitle) => {
+  // Close menu
+  const menu = $(`#project-menu-${projectId}`);
+  if (menu) menu.classList.add('hidden');
+  
+  const newTitle = prompt('新しいプロジェクト名を入力してください:', currentTitle);
+  if (!newTitle || newTitle.trim() === '' || newTitle === currentTitle) {
+    return;
+  }
+  
+  try {
+    await api.put(`/projects/${projectId}`, { title: newTitle.trim() });
+    
+    // Update local state
+    const project = state.projects.find(p => p.id === projectId);
+    if (project) {
+      project.title = newTitle.trim();
+    }
+    if (state.currentProject?.id === projectId) {
+      state.currentProject.title = newTitle.trim();
+    }
+    
+    render();
+    alert('プロジェクト名を変更しました');
+  } catch (e) {
+    console.error('Rename project error:', e);
+    alert('名前の変更に失敗しました: ' + e.message);
+  }
+};
+
+// Close project menus when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('[id^="project-menu-"]') && !e.target.closest('button[onclick*="toggleProjectMenu"]')) {
+    document.querySelectorAll('[id^="project-menu-"]').forEach(menu => {
+      menu.classList.add('hidden');
+    });
+  }
+});
 
 window.deleteProject = async (projectId, projectTitle) => {
   if (!confirm(`「${projectTitle}」を削除しますか？\n\nこの操作は取り消せません。プロジェクト内のすべてのデータ（執筆内容、プロット、アイデア等）が完全に削除されます。`)) {
@@ -2640,35 +2966,12 @@ window.adoptIdea = async (ideaId) => {
     if (idea) {
       idea.adopted = true;
       
-      // Reflect adopted idea to plot (add to ki/起 section)
-      if (state.plot) {
-        let structure = {};
-        try { structure = JSON.parse(state.plot.structure || '{}'); } catch (e) {}
-        
-        const ideaText = `【採用アイデア】${idea.title}: ${idea.content || ''}`;
-        
-        // Add to 起 (ki) section
-        if (structure.ki) {
-          structure.ki += '\n\n' + ideaText;
-        } else {
-          structure.ki = ideaText;
-        }
-        
-        state.plot.structure = JSON.stringify(structure);
-        
-        // Save plot to server
-        await api.put(`/plots/${state.plot.id}`, {
-          structure: state.plot.structure,
-          template: state.plot.template
-        });
-      }
-      
       // Track idea adoption for achievements
       if (typeof trackActivity === 'function') {
         trackActivity('ideaAdopt', 1);
       }
       
-      alert(`「${idea.title}」をプロットに反映しました！\nプロットタブの「起」セクションをご確認ください。`);
+      alert(`「${idea.title}」を採用しました！\nプロットタブの「採用したアイディア」セクションで確認できます。`);
     }
     render();
   } catch (e) {
@@ -2805,6 +3108,85 @@ window.handleCustomAction = async () => {
     showAIResult(result);
     addToAIHistory('custom', result);
   }
+};
+
+// Chapter management functions
+window.createNewChapter = async () => {
+  if (!state.currentProject) {
+    alert('プロジェクトを選択してください');
+    return;
+  }
+  
+  const chapterNumber = (state.writings?.length || 0) + 1;
+  const title = prompt('章のタイトルを入力してください:', `第${chapterNumber}章`);
+  if (!title) return;
+  
+  try {
+    const res = await api.post('/writings', {
+      project_id: state.currentProject.id,
+      chapter_title: title,
+      content: '',
+      word_count: 0
+    });
+    
+    state.writings = [...(state.writings || []), res.data];
+    state.currentWriting = res.data;
+    state.currentTab = 'writing';
+    render();
+  } catch (e) {
+    console.error('Create chapter error:', e);
+    alert('章の作成に失敗しました');
+  }
+};
+
+window.selectWriting = async (writingId) => {
+  const writing = state.writings?.find(w => w.id === writingId);
+  if (writing) {
+    state.currentWriting = writing;
+    state.currentTab = 'writing';
+    render();
+  }
+};
+
+window.updateChapterTitle = async (writingId, newTitle) => {
+  try {
+    await api.put(`/writings/${writingId}`, { chapter_title: newTitle });
+    const writing = state.writings?.find(w => w.id === writingId);
+    if (writing) {
+      writing.chapter_title = newTitle;
+    }
+    if (state.currentWriting?.id === writingId) {
+      state.currentWriting.chapter_title = newTitle;
+    }
+  } catch (e) {
+    console.error('Update chapter title error:', e);
+  }
+};
+
+window.analyzeChapter = async (writingId) => {
+  const writing = state.writings?.find(w => w.id === writingId);
+  if (!writing?.content) {
+    alert('この章にはまだ内容がありません');
+    return;
+  }
+  
+  state.aiGenerating = true;
+  render();
+  
+  try {
+    const result = await callAI('proofread', writing.content);
+    if (result) {
+      writing.ai_suggestions = result.substring(0, 200) + (result.length > 200 ? '...' : '');
+      render();
+      alert('分析が完了しました。改善提案を確認してください。');
+    }
+  } catch (e) {
+    console.error('Analyze chapter error:', e);
+    alert('分析に失敗しました');
+  }
+  
+  state.aiGenerating = false;
+  render();
 };
 
 window.handleAnalyze = async () => {

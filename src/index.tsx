@@ -92,6 +92,21 @@ app.get('*', (c) => {
     .zen-mode .sidebar-right,
     .zen-mode .header { display: none !important; }
     .zen-mode .main-content { margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+    .zen-mode { position: relative; }
+    .zen-mode::before {
+      content: 'ESCキーまたは空白部分をクリックで解除';
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      z-index: 1000;
+      opacity: 0.7;
+      pointer-events: none;
+    }
     
     /* RTL Support */
     [dir="rtl"] { direction: rtl; text-align: right; }

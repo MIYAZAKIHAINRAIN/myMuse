@@ -4,12 +4,52 @@ import { callGemini, calculateDailyTarget } from '../utils/gemini';
 type Bindings = {
   DB: D1Database;
   GEMINI_API_KEY: string;
+  GROK_API_KEY?: string;      // For future Grok integration
+  OPENAI_API_KEY?: string;    // For future OpenAI integration
+  AI_PROVIDER?: string;       // 'gemini' | 'grok' | 'openai' - defaults to 'gemini'
 };
 
 const api = new Hono<{ Bindings: Bindings }>();
 
 // Helper to generate UUID
 const generateId = () => crypto.randomUUID();
+
+// AI Provider helper - call appropriate AI based on environment config
+async function callAI(env: Bindings, params: {
+  action: string;
+  content: string;
+  context?: any;
+  options?: any;
+}): Promise<string> {
+  const provider = env.AI_PROVIDER || 'gemini';
+  
+  switch (provider) {
+    case 'grok':
+      // Placeholder for Grok integration
+      if (!env.GROK_API_KEY) {
+        throw new Error('GROK_API_KEY is not configured');
+      }
+      // TODO: Implement Grok API call when ready
+      // return await callGrok(env.GROK_API_KEY, params);
+      throw new Error('Grok integration is not yet implemented');
+      
+    case 'openai':
+      // Placeholder for OpenAI integration
+      if (!env.OPENAI_API_KEY) {
+        throw new Error('OPENAI_API_KEY is not configured');
+      }
+      // TODO: Implement OpenAI API call when ready
+      // return await callOpenAI(env.OPENAI_API_KEY, params);
+      throw new Error('OpenAI integration is not yet implemented');
+      
+    case 'gemini':
+    default:
+      if (!env.GEMINI_API_KEY) {
+        throw new Error('GEMINI_API_KEY is not configured');
+      }
+      return await callGemini(env.GEMINI_API_KEY, params);
+  }
+}
 
 // ============================================
 // User & Auth Routes
@@ -650,7 +690,7 @@ api.post('/ai/generate', async (c) => {
       };
     }
     
-    const result = await callGemini(c.env.GEMINI_API_KEY, {
+    const result = await callAI(c.env, {
       action: data.action,
       content: data.content,
       context,
@@ -675,7 +715,7 @@ api.post('/ai/analyze', async (c) => {
   const data = await c.req.json();
   
   try {
-    const result = await callGemini(c.env.GEMINI_API_KEY, {
+    const result = await callAI(c.env, {
       action: 'analyze',
       content: data.content,
     });
@@ -698,7 +738,7 @@ api.post('/ai/generate-ideas', async (c) => {
   const data = await c.req.json();
   
   try {
-    const result = await callGemini(c.env.GEMINI_API_KEY, {
+    const result = await callAI(c.env, {
       action: 'generate_ideas',
       content: data.keywords || '',
       options: {
@@ -748,7 +788,7 @@ api.post('/ai/generate-achievements', async (c) => {
   const data = await c.req.json();
   
   try {
-    const result = await callGemini(c.env.GEMINI_API_KEY, {
+    const result = await callAI(c.env, {
       action: 'achievement',
       content: JSON.stringify(data.writingStats),
     });
