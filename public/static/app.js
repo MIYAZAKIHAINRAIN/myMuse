@@ -3523,6 +3523,10 @@ window.toggleWritingDirection = async () => {
   if (!state.currentWriting) return;
   const newDirection = state.currentWriting.writing_direction === 'vertical' ? 'horizontal' : 'vertical';
   state.currentWriting.writing_direction = newDirection;
+  
+  // autoSaveを呼び出して設定を保存（1秒後にサーバーに保存される）
+  autoSave(state.currentWriting.content || '');
+  
   render();
 };
 
@@ -3531,6 +3535,9 @@ window.changeFont = (font) => {
   state.currentWriting.font_family = font;
   const editor = $('#editor');
   if (editor) editor.style.fontFamily = `'${font}', sans-serif`;
+  
+  // autoSaveを呼び出して設定を保存（1秒後にサーバーに保存される）
+  autoSave(state.currentWriting.content || '');
 };
 
 window.toggleExportMenu = () => {
