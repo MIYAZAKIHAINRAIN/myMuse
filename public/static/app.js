@@ -1282,8 +1282,15 @@ function renderIdeasTab() {
       <!-- Ideas List -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         ${state.ideas.map(idea => `
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 ${idea.adopted ? 'ring-2 ring-green-500' : ''}">
-            <div class="flex items-start justify-between mb-2">
+          <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 ${idea.adopted ? 'ring-2 ring-green-500' : ''} group">
+            <!-- Delete button (top-right corner) -->
+            <button onclick="deleteIdea('${idea.id}', '${(idea.title || '').replace(/'/g, "\\'")}')"
+              class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              title="アイデアを削除">
+              <i class="fas fa-times text-sm"></i>
+            </button>
+            
+            <div class="flex items-start justify-between mb-2 pr-6">
               <h4 class="font-medium">${idea.title}</h4>
               ${idea.adopted ? '<span class="text-green-500 text-xs"><i class="fas fa-check-circle"></i> 採用済</span>' : ''}
             </div>
@@ -1425,6 +1432,32 @@ function renderWritingTab() {
   
   return `
     <div class="h-full flex flex-col">
+      <!-- Document Tabs (Google Docs style) -->
+      <div class="flex items-center gap-1 mb-3 bg-gray-100 dark:bg-gray-900 rounded-lg p-1 overflow-x-auto">
+        ${(state.writings || []).map((w, index) => `
+          <button onclick="switchDocument('${w.id}')"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-all ${
+              state.currentWriting?.id === w.id 
+                ? 'bg-white dark:bg-gray-800 shadow-sm text-indigo-600 dark:text-indigo-400 font-medium' 
+                : 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-gray-800/50'
+            }">
+            <i class="fas fa-file-alt text-xs"></i>
+            <span class="max-w-24 truncate">${w.chapter_title || `文書${index + 1}`}</span>
+            ${state.writings.length > 1 ? `
+              <span onclick="event.stopPropagation(); closeDocument('${w.id}', '${(w.chapter_title || '').replace(/'/g, "\\'")}')" 
+                class="ml-1 text-gray-400 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                <i class="fas fa-times"></i>
+              </span>
+            ` : ''}
+          </button>
+        `).join('')}
+        <button onclick="createNewDocument()" 
+          class="flex items-center gap-1 px-3 py-1.5 rounded-md text-sm text-gray-500 hover:text-indigo-600 hover:bg-white/50 dark:hover:bg-gray-800/50 transition-all">
+          <i class="fas fa-plus"></i>
+          <span>新規文書</span>
+        </button>
+      </div>
+      
       <!-- Pinned Plot (if exists) -->
       ${state.currentProject?.pinned_plot ? `
         <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 mb-4">
@@ -2912,6 +2945,24 @@ window.unadoptIdea = async (ideaId) => {
   }
 };
 
+window.deleteIdea = async (ideaId, ideaTitle) => {
+  // First confirmation
+  if (!confirm(`「${ideaTitle || 'このアイデア'}」を削除しますか？`)) return;
+  
+  // Second confirmation
+  if (!confirm('本当に削除しますか？\nこの操作は元に戻せません。\n\n「OK」で削除、「キャンセル」で中止')) return;
+  
+  try {
+    await axios.delete(`/ideas/${ideaId}`);
+    state.ideas = state.ideas.filter(i => i.id !== ideaId);
+    alert('アイデアを削除しました');
+    render();
+  } catch (e) {
+    console.error('Delete idea error:', e);
+    alert('アイデアの削除に失敗しました');
+  }
+};
+
 window.changePlotTemplate = (template) => {
   if (state.plot) {
     state.plot.template = template;
@@ -3074,6 +3125,68 @@ window.changeFont = (font) => {
 
 window.toggleExportMenu = () => {
   $('#export-menu')?.classList.toggle('hidden');
+};
+
+// Document Tabs Functions
+window.switchDocument = (writingId) => {
+  const writing = state.writings.find(w => w.id === writingId);
+  if (writing) {
+    // Save current document before switching
+    saveEditorContent();
+    state.currentWriting = writing;
+    render();
+  }
+};
+
+window.createNewDocument = async () => {
+  if (!state.currentProject) {
+    alert('プロジェクトを選択してください');
+    return;
+  }
+  
+  const title = prompt('新しい文書のタイトルを入力してください:', `文書${(state.writings?.length || 0) + 1}`);
+  if (!title) return;
+  
+  try {
+    const res = await axios.post('/writings', {
+      project_id: state.currentProject.id,
+      chapter_title: title,
+      content: '',
+      word_count: 0
+    });
+    
+    const newWriting = res.data;
+    state.writings = [...(state.writings || []), newWriting];
+    state.currentWriting = newWriting;
+    render();
+  } catch (error) {
+    console.error('Create document error:', error);
+    alert('文書の作成に失敗しました');
+  }
+};
+
+window.closeDocument = async (writingId, writingTitle) => {
+  if (state.writings.length <= 1) {
+    alert('最後の文書は閉じることができません');
+    return;
+  }
+  
+  const confirmed = confirm(`「${writingTitle || '無題の文書'}」を削除しますか？\nこの操作は元に戻せません。`);
+  if (!confirmed) return;
+  
+  try {
+    await axios.delete(`/writings/${writingId}`);
+    state.writings = state.writings.filter(w => w.id !== writingId);
+    
+    // If deleted document was current, switch to first available
+    if (state.currentWriting?.id === writingId) {
+      state.currentWriting = state.writings[0] || null;
+    }
+    render();
+  } catch (error) {
+    console.error('Delete document error:', error);
+    alert('文書の削除に失敗しました');
+  }
 };
 
 window.handleQuickAction = async (action) => {
