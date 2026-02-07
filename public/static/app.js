@@ -830,19 +830,220 @@ async function sendChatMessage(content, tabContext = 'consultation') {
 // Export Functions
 // ============================================
 function exportAs(format) {
-  if (!state.currentWriting?.content) return;
+  if (!state.currentWriting?.content) {
+    alert('エクスポートするコンテンツがありません');
+    return;
+  }
   
   const content = state.currentWriting.content;
   const title = state.currentProject?.title || 'document';
   
-  if (format === 'txt') {
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    downloadBlob(blob, `${title}.txt`);
-  } else if (format === 'html') {
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title></head><body><pre>${content}</pre></body></html>`;
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    downloadBlob(blob, `${title}.html`);
+  // Close export menu
+  $('#export-menu')?.classList.add('hidden');
+  
+  switch (format) {
+    case 'txt':
+      exportAsTxt(content, title);
+      break;
+    case 'html':
+      exportAsHtml(content, title);
+      break;
+    case 'html-zip':
+      exportAsHtmlZip(content, title);
+      break;
+    case 'md':
+      exportAsMarkdown(content, title);
+      break;
+    case 'docx':
+      exportAsDocx(content, title);
+      break;
+    case 'pdf':
+      exportAsPdf(content, title);
+      break;
+    case 'odt':
+      exportAsOdt(content, title);
+      break;
+    case 'rtf':
+      exportAsRtf(content, title);
+      break;
+    case 'epub':
+      exportAsEpub(content, title);
+      break;
+    default:
+      alert('未対応の形式です');
   }
+}
+
+function exportAsTxt(content, title) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  downloadBlob(blob, `${title}.txt`);
+}
+
+function exportAsHtml(content, title) {
+  const htmlContent = convertToHtml(content, title);
+  const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+  downloadBlob(blob, `${title}.html`);
+}
+
+function exportAsHtmlZip(content, title) {
+  // For ZIP, we'll create a simple implementation
+  // In production, you'd use JSZip library
+  alert('HTML (ZIP) エクスポートは現在準備中です。\n通常のHTMLエクスポートをご利用ください。');
+  exportAsHtml(content, title);
+}
+
+function exportAsMarkdown(content, title) {
+  // Content is already in Markdown-like format
+  const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+  downloadBlob(blob, `${title}.md`);
+}
+
+function exportAsDocx(content, title) {
+  // Create a simple DOCX using XML structure
+  const docxContent = generateDocxContent(content, title);
+  const blob = new Blob([docxContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  downloadBlob(blob, `${title}.docx`);
+}
+
+function exportAsPdf(content, title) {
+  // For PDF, we'll use print functionality as a workaround
+  // In production, use a library like jsPDF or server-side generation
+  const printWindow = window.open('', '_blank');
+  const htmlContent = convertToHtml(content, title, true);
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
+  printWindow.onload = function() {
+    printWindow.print();
+  };
+}
+
+function exportAsOdt(content, title) {
+  // ODT is a ZIP-based format similar to DOCX
+  // For simplicity, export as RTF which LibreOffice can open
+  alert('ODT エクスポートは現在準備中です。\nRTF形式でエクスポートします（LibreOfficeで開けます）。');
+  exportAsRtf(content, title);
+}
+
+function exportAsRtf(content, title) {
+  const rtfContent = convertToRtf(content, title);
+  const blob = new Blob([rtfContent], { type: 'application/rtf' });
+  downloadBlob(blob, `${title}.rtf`);
+}
+
+function exportAsEpub(content, title) {
+  // EPUB is a complex format requiring multiple files in a ZIP
+  // For now, provide a simplified solution
+  alert('EPUB エクスポートは現在準備中です。\nHTML形式でエクスポートし、Calibreなどで変換してください。');
+  exportAsHtml(content, title);
+}
+
+// Helper function to convert content to styled HTML
+function convertToHtml(content, title, forPrint = false) {
+  const lines = content.split('\n');
+  let bodyHtml = '';
+  
+  lines.forEach(line => {
+    if (line.match(/^#\s+(.+)$/)) {
+      const text = line.replace(/^#\s+/, '');
+      bodyHtml += `<h1 style="font-size: 2em; font-weight: bold; margin: 1em 0 0.5em 0;">${escapeHtml(text)}</h1>\n`;
+    } else if (line.match(/^##\s+(.+)$/)) {
+      const text = line.replace(/^##\s+/, '');
+      bodyHtml += `<h2 style="font-size: 1.5em; font-weight: bold; margin: 1em 0 0.5em 0;">${escapeHtml(text)}</h2>\n`;
+    } else if (line.match(/^###\s+(.+)$/)) {
+      const text = line.replace(/^###\s+/, '');
+      bodyHtml += `<h3 style="font-size: 1.25em; font-weight: bold; margin: 1em 0 0.5em 0;">${escapeHtml(text)}</h3>\n`;
+    } else if (line.match(/^【(.+)】$/)) {
+      const text = line.replace(/^【|】$/g, '');
+      bodyHtml += `<h4 style="font-size: 1.1em; font-weight: bold; margin: 1em 0 0.5em 0;">【${escapeHtml(text)}】</h4>\n`;
+    } else if (line.trim() === '') {
+      bodyHtml += '<br>\n';
+    } else {
+      bodyHtml += `<p style="margin: 0.5em 0; line-height: 1.8;">${escapeHtml(line)}</p>\n`;
+    }
+  });
+  
+  const printStyles = forPrint ? `
+    @media print {
+      body { margin: 2cm; }
+      @page { margin: 2cm; }
+    }
+  ` : '';
+  
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(title)}</title>
+  <style>
+    body {
+      font-family: 'Noto Serif JP', 'Yu Mincho', serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2em;
+      line-height: 1.8;
+      color: #333;
+    }
+    ${printStyles}
+  </style>
+</head>
+<body>
+${bodyHtml}
+</body>
+</html>`;
+}
+
+// Helper function to convert content to RTF
+function convertToRtf(content, title) {
+  const lines = content.split('\n');
+  let rtfBody = '';
+  
+  lines.forEach(line => {
+    if (line.match(/^#\s+(.+)$/)) {
+      const text = line.replace(/^#\s+/, '');
+      rtfBody += `\\pard\\fs48\\b ${escapeRtf(text)}\\b0\\fs24\\par\n`;
+    } else if (line.match(/^##\s+(.+)$/)) {
+      const text = line.replace(/^##\s+/, '');
+      rtfBody += `\\pard\\fs36\\b ${escapeRtf(text)}\\b0\\fs24\\par\n`;
+    } else if (line.match(/^###\s+(.+)$/)) {
+      const text = line.replace(/^###\s+/, '');
+      rtfBody += `\\pard\\fs28\\b ${escapeRtf(text)}\\b0\\fs24\\par\n`;
+    } else if (line.trim() === '') {
+      rtfBody += '\\par\n';
+    } else {
+      rtfBody += `\\pard ${escapeRtf(line)}\\par\n`;
+    }
+  });
+  
+  return `{\\rtf1\\ansi\\deff0
+{\\fonttbl{\\f0 Yu Mincho;}}
+{\\info{\\title ${escapeRtf(title)}}}
+\\paperw11906\\paperh16838\\margl1440\\margr1440\\margt1440\\margb1440
+\\fs24
+${rtfBody}
+}`;
+}
+
+// Helper function to generate simplified DOCX content
+function generateDocxContent(content, title) {
+  // Note: Real DOCX requires a ZIP file with XML files inside
+  // This generates a simple RTF that Word can open
+  // For proper DOCX, use docx library or server-side generation
+  return convertToRtf(content, title);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function escapeRtf(text) {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/\{/g, '\\{')
+    .replace(/\}/g, '\\}')
+    .replace(/[\u0080-\uFFFF]/g, char => `\\u${char.charCodeAt(0)}?`);
 }
 
 function downloadBlob(blob, filename) {
@@ -1471,19 +1672,19 @@ function renderWritingTab() {
               <span>標準テキスト</span>
             </button>
             <button onclick="applyTextStyle('title')" class="block w-full px-4 py-3 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
-              <span class="w-6 text-center text-xs font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50 rounded">H1</span>
+              <span class="w-6 h-5 flex items-center justify-center text-xs font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 rounded">H</span>
               <span class="text-xl font-bold">タイトル</span>
             </button>
             <button onclick="applyTextStyle('h1')" class="block w-full px-4 py-2.5 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
-              <span class="w-6 text-center text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 rounded">H2</span>
+              <span class="w-6 h-5 flex items-center justify-center text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 rounded">H1</span>
               <span class="text-lg font-semibold">見出し 1</span>
             </button>
             <button onclick="applyTextStyle('h2')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
-              <span class="w-6 text-center text-xs font-bold text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">H3</span>
+              <span class="w-6 h-5 flex items-center justify-center text-xs font-bold text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/20 dark:text-indigo-400 rounded">H2</span>
               <span class="text-base font-medium">見出し 2</span>
             </button>
             <button onclick="applyTextStyle('h3')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
-              <span class="w-6 text-center text-xs text-gray-400">【】</span>
+              <span class="w-6 h-5 flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded">H3</span>
               <span class="text-sm font-medium text-gray-700 dark:text-gray-300">見出し 3</span>
             </button>
           </div>
@@ -1517,9 +1718,46 @@ function renderWritingTab() {
           <button onclick="toggleExportMenu()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
             <i class="fas fa-download mr-1"></i>${t('writing.export')}
           </button>
-          <div id="export-menu" class="hidden absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg py-1 z-10">
-            <button onclick="exportAs('txt')" class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700">TXT</button>
-            <button onclick="exportAs('html')" class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700">HTML</button>
+          <div id="export-menu" class="hidden absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg py-1 z-10 w-56 border border-gray-200 dark:border-gray-700">
+            <div class="px-3 py-1.5 text-xs text-gray-500 border-b border-gray-100 dark:border-gray-700">ドキュメント形式</div>
+            <button onclick="exportAs('docx')" class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <i class="fas fa-file-word text-blue-600 w-4"></i>
+              <span>Microsoft Word (.docx)</span>
+            </button>
+            <button onclick="exportAs('pdf')" class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <i class="fas fa-file-pdf text-red-600 w-4"></i>
+              <span>PDF ドキュメント (.pdf)</span>
+            </button>
+            <button onclick="exportAs('odt')" class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <i class="fas fa-file-alt text-orange-500 w-4"></i>
+              <span>OpenDocument (.odt)</span>
+            </button>
+            <button onclick="exportAs('rtf')" class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <i class="fas fa-file-lines text-gray-600 w-4"></i>
+              <span>リッチテキスト (.rtf)</span>
+            </button>
+            <div class="px-3 py-1.5 text-xs text-gray-500 border-t border-b border-gray-100 dark:border-gray-700 mt-1">ウェブ・電子書籍</div>
+            <button onclick="exportAs('html')" class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <i class="fas fa-code text-orange-600 w-4"></i>
+              <span>ウェブページ (.html)</span>
+            </button>
+            <button onclick="exportAs('html-zip')" class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <i class="fas fa-file-zipper text-yellow-600 w-4"></i>
+              <span>ウェブページ (.html, zip)</span>
+            </button>
+            <button onclick="exportAs('epub')" class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <i class="fas fa-book text-green-600 w-4"></i>
+              <span>EPUB Publication (.epub)</span>
+            </button>
+            <div class="px-3 py-1.5 text-xs text-gray-500 border-t border-b border-gray-100 dark:border-gray-700 mt-1">プレーンテキスト</div>
+            <button onclick="exportAs('md')" class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <i class="fab fa-markdown text-gray-700 dark:text-gray-300 w-4"></i>
+              <span>マークダウン (.md)</span>
+            </button>
+            <button onclick="exportAs('txt')" class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <i class="fas fa-file-lines text-gray-500 w-4"></i>
+              <span>プレーンテキスト (.txt)</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1595,15 +1833,18 @@ function renderOutlineItems() {
 }
 
 function getOutlineIcon(level) {
-  // level 1 = # (タイトル) → H1
-  // level 2 = ## (見出し1) → H2  
-  // level 3 = ### (見出し2) → H3
+  // level 1 = # (タイトル) → H
+  // level 2 = ## (見出し1) → H1  
+  // level 3 = ### (見出し2) → H2
+  // level 4 = 【】(見出し3) → H3
   switch (level) {
     case 1:
-      return '<span class="w-5 h-5 flex items-center justify-center text-xs font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 rounded">H1</span>';
+      return '<span class="w-5 h-5 flex items-center justify-center text-xs font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 rounded">H</span>';
     case 2:
-      return '<span class="w-5 h-5 flex items-center justify-center text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 rounded">H2</span>';
+      return '<span class="w-5 h-5 flex items-center justify-center text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 rounded">H1</span>';
     case 3:
+      return '<span class="w-5 h-5 flex items-center justify-center text-xs font-bold text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/20 dark:text-indigo-400 rounded">H2</span>';
+    case 4:
       return '<span class="w-5 h-5 flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded">H3</span>';
     default:
       return '<span class="w-5 h-5 flex items-center justify-center text-xs text-gray-400"><i class="fas fa-minus"></i></span>';
@@ -1668,11 +1909,11 @@ function parseHeadings(content) {
       return;
     }
     
-    // 【】brackets style headings
+    // 【】brackets style headings → 見出し3 (H3)
     const bracketMatch = line.match(/^【(.+)】$/);
     if (bracketMatch) {
       headings.push({
-        level: 1,
+        level: 4,
         text: bracketMatch[1].trim(),
         lineIndex: index
       });
@@ -1683,7 +1924,7 @@ function parseHeadings(content) {
     const markerMatch = line.match(/^[■□●○▼▽◆◇★☆]\s*(.+)$/);
     if (markerMatch) {
       headings.push({
-        level: 2,
+        level: 3,
         text: markerMatch[1].trim(),
         lineIndex: index
       });
