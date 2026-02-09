@@ -28,11 +28,15 @@ const state = {
   characters: [],
   worldSettings: [],
   generatedImages: [], // For illustration tab
+  illustrationFiles: [], // Reference files for illustration
+  selectedReferenceIdx: null, // Selected reference file index
   storyOutline: null, // Story outline for ideas tab
   ideasDocument: '', // Document content for ideas tab
   ideasChatMessages: [], // Chat messages for ideas AI
   showStoryOutline: true, // Show/hide story outline panel
   showQuickIdeas: false, // Show/hide quick ideas panel
+  adoptedIdeasText: '', // Word processor text for adopted ideas
+  showAdoptedIdeasPreview: false, // Show/hide adopted ideas preview
   searchResults: [],
   trash: [],
   isLoading: false,
@@ -1714,45 +1718,89 @@ function renderPlotTab() {
   try { structure = JSON.parse(state.plot?.structure || '{}'); } catch (e) {}
   const template = state.plot?.template || 'kishotenketsu';
   
-  // Get adopted ideas
+  // Get adopted ideas and convert to text if not already done
   const adoptedIdeas = (state.ideas || []).filter(idea => idea.adopted);
+  
+  // Initialize adoptedIdeasText if empty and there are adopted ideas
+  if (!state.adoptedIdeasText && adoptedIdeas.length > 0) {
+    state.adoptedIdeasText = adoptedIdeas.map(idea => 
+      `【${idea.title}】\n${idea.content || ''}`
+    ).join('\n\n');
+  }
   
   return `
     <div class="max-w-4xl mx-auto space-y-6">
-      <!-- Adopted Ideas Section -->
-      <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl shadow-sm p-4 border border-green-200 dark:border-green-800">
-        <h3 class="font-semibold text-green-700 dark:text-green-400 mb-3 flex items-center gap-2">
-          <i class="fas fa-lightbulb"></i>採用したアイディア
-        </h3>
-        ${adoptedIdeas.length > 0 ? `
-          <div class="space-y-2">
-            ${adoptedIdeas.map(idea => `
-              <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-green-300 dark:border-green-700 flex items-start gap-3 group">
-                <i class="fas fa-check-circle text-green-500 mt-1"></i>
-                <div class="flex-1">
-                  <p class="font-medium text-gray-800 dark:text-gray-200">${idea.title}</p>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${idea.content || ''}</p>
-                </div>
-                <div class="flex gap-1">
-                  <button onclick="copyAdoptedIdea('${idea.id}', '${(idea.title || '').replace(/'/g, "\\'")}', '${(idea.content || '').replace(/'/g, "\\'").replace(/\n/g, '\\n')}')" 
-                    class="text-gray-400 hover:text-indigo-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="コピー">
-                    <i class="fas fa-copy"></i>
-                  </button>
-                  <button onclick="unadoptIdea('${idea.id}')" 
-                    class="text-gray-400 hover:text-red-500 p-1" title="採用を取り消す">
+      <!-- Adopted Ideas Section - Word Processor Style -->
+      <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl shadow-sm border border-green-200 dark:border-green-800 overflow-hidden">
+        <div class="flex items-center justify-between p-3 border-b border-green-200 dark:border-green-700 bg-white/50 dark:bg-gray-800/50">
+          <h3 class="font-semibold text-green-700 dark:text-green-400 flex items-center gap-2">
+            <i class="fas fa-lightbulb"></i>採用したアイディア
+          </h3>
+          <div class="flex items-center gap-2">
+            ${adoptedIdeas.length > 0 ? `
+              <button onclick="importAdoptedIdeasToText()" 
+                class="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700" 
+                title="採用済みアイディアをテキストに追加">
+                <i class="fas fa-plus mr-1"></i>採用を追加
+              </button>
+            ` : ''}
+            <button onclick="saveAdoptedIdeasText()" 
+              class="px-2 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700">
+              <i class="fas fa-save mr-1"></i>保存
+            </button>
+            <span class="text-xs text-gray-500" id="adopted-ideas-chars">
+              ${(state.adoptedIdeasText || '').length} 文字
+            </span>
+          </div>
+        </div>
+        
+        <textarea id="adopted-ideas-editor" 
+          class="w-full p-4 min-h-[200px] text-sm resize-none focus:outline-none bg-transparent dark:text-gray-100"
+          placeholder="ここにアイディアを自由に記述できます...
+
+【使い方】
+・直接アイディアを書き込めます
+・「採用を追加」ボタンで、ネタ考案タブで採用したアイディアを追加できます
+・この内容はAIに反映され、プロット生成や相談で活用されます
+
+【例】
+【主人公の目的】
+世界を救うために魔王を倒す旅に出る
+
+【物語のテーマ】
+友情と成長、自己犠牲の意味"
+          oninput="updateAdoptedIdeasCount(this.value)">${state.adoptedIdeasText || ''}</textarea>
+      </div>
+      
+      <!-- Quick adopted ideas preview (collapsible) -->
+      ${adoptedIdeas.length > 0 ? `
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3">
+          <button onclick="toggleAdoptedIdeasPreview()" class="w-full flex items-center justify-between text-sm">
+            <span class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+              <i class="fas fa-list-check"></i>
+              ネタ考案から採用中のアイディア（${adoptedIdeas.length}件）
+            </span>
+            <i class="fas fa-chevron-${state.showAdoptedIdeasPreview ? 'up' : 'down'} text-gray-400"></i>
+          </button>
+          
+          ${state.showAdoptedIdeasPreview ? `
+            <div class="mt-3 space-y-2">
+              ${adoptedIdeas.map(idea => `
+                <div class="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-900 rounded text-sm">
+                  <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+                  <div class="flex-1">
+                    <span class="font-medium">${idea.title}</span>
+                    <span class="text-gray-500 ml-2">${(idea.content || '').slice(0, 50)}...</span>
+                  </div>
+                  <button onclick="unadoptIdea('${idea.id}')" class="text-gray-400 hover:text-red-500 text-xs">
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
-              </div>
-            `).join('')}
-          </div>
-        ` : `
-          <p class="text-gray-500 dark:text-gray-400 text-sm italic">
-            <i class="fas fa-info-circle mr-1"></i>
-            アイディアタブで生成したアイディアを採用すると、ここに表示されます
-          </p>
-        `}
-      </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      ` : ''}
       
       <!-- Template Selector -->
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
@@ -1829,65 +1877,101 @@ function getPlotPlaceholder(part) {
 // Illustration Tab - AI Image Generation
 // ============================================
 function renderIllustrationTab() {
-  const characters = state.characters || [];
+  // Auto-detect characters from project writings and outline
+  const detectedCharacters = detectCharactersFromProject();
   const generatedImages = state.generatedImages || [];
+  const referenceFiles = state.illustrationFiles || [];
   
   return `
     <div class="h-full flex gap-4">
       <!-- Left Panel: Generation Controls -->
       <div class="w-1/3 flex flex-col gap-4 overflow-y-auto">
-        <!-- NovelAI API Key Setup -->
+        <!-- Project Context -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
           <h3 class="font-semibold mb-3 flex items-center gap-2">
-            <i class="fas fa-key text-yellow-500"></i>
-            NovelAI API設定
+            <i class="fas fa-book-open text-blue-500"></i>
+            プロジェクト参照
           </h3>
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium mb-1">APIキー</label>
-              <input type="password" id="novelai-api-key" 
-                value="${localStorage.getItem('novelai_api_key') || ''}"
-                placeholder="NovelAI APIキーを入力"
-                class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+              <i class="fas fa-check-circle text-green-500"></i>
+              <span>執筆内容からキャラクターを自動認識</span>
             </div>
-            <button onclick="saveNovelAIKey()" 
-              class="w-full px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
-              <i class="fas fa-save mr-1"></i>保存
-            </button>
+            <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+              <i class="fas fa-check-circle text-green-500"></i>
+              <span>世界観・設定を自動反映</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+              ネタ考案タブのアウトラインと執筆内容を基に、一貫性のある挿絵を生成します
+            </p>
           </div>
         </div>
         
-        <!-- Character Selection for Consistency -->
+        <!-- Character Selection (Auto-detected) -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
           <h3 class="font-semibold mb-3 flex items-center gap-2">
-            <i class="fas fa-user text-purple-500"></i>
-            キャラクター一貫性
+            <i class="fas fa-users text-purple-500"></i>
+            登場キャラクター
+            <span class="text-xs text-gray-500">(自動認識)</span>
+          </h3>
+          <div class="space-y-3">
+            <select id="illustration-character" 
+              class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm"
+              onchange="updateCharacterPrompt()">
+              <option value="">キャラクターを選択（任意）</option>
+              ${detectedCharacters.map(c => `
+                <option value="${c.name}" data-description="${(c.description || '').replace(/"/g, '&quot;')}">${c.name}</option>
+              `).join('')}
+            </select>
+            ${detectedCharacters.length === 0 ? `
+              <p class="text-xs text-yellow-600 dark:text-yellow-400">
+                <i class="fas fa-info-circle mr-1"></i>
+                ネタ考案タブでキャラクターを設定すると、ここに表示されます
+              </p>
+            ` : `
+              <p class="text-xs text-gray-500">
+                ${detectedCharacters.length}人のキャラクターを認識しました
+              </p>
+            `}
+          </div>
+        </div>
+        
+        <!-- Reference Files -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <i class="fas fa-folder-open text-yellow-500"></i>
+            参照ファイル
           </h3>
           <div class="space-y-3">
             <div>
-              <label class="block text-sm font-medium mb-1">登場キャラクター</label>
-              <select id="illustration-character" 
-                class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm"
-                onchange="updateCharacterPrompt()">
-                <option value="">キャラクターを選択（任意）</option>
-                ${characters.map(c => `
-                  <option value="${c.id}" data-description="${(c.description || '').replace(/"/g, '&quot;')}">${c.name}</option>
-                `).join('')}
-              </select>
-              <p class="text-xs text-gray-500 mt-1">選択するとキャラ設定がプロンプトに反映されます</p>
+              <label class="block text-sm font-medium mb-1">参照画像をアップロード</label>
+              <input type="file" id="reference-files" accept="image/*" multiple
+                onchange="handleReferenceFiles(event)"
+                class="w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+              <p class="text-xs text-gray-500 mt-1">キャラや背景の参照画像（複数可）</p>
             </div>
             
-            <!-- Reference Image for Consistency -->
-            <div>
-              <label class="block text-sm font-medium mb-1">参照画像（キャラ一貫性用）</label>
-              <input type="file" id="reference-image" accept="image/*" 
-                onchange="handleReferenceImage(event)"
-                class="w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-              <div id="reference-preview" class="mt-2 hidden">
-                <img src="" alt="Reference" class="w-20 h-20 object-cover rounded-lg border">
-                <button onclick="clearReferenceImage()" class="text-xs text-red-500 hover:underline mt-1">クリア</button>
+            ${referenceFiles.length > 0 ? `
+              <div class="flex flex-wrap gap-2">
+                ${referenceFiles.map((file, idx) => `
+                  <div class="relative">
+                    <img src="${file.data}" alt="${file.name}" 
+                      class="w-16 h-16 object-cover rounded-lg border cursor-pointer hover:ring-2 ring-indigo-500"
+                      onclick="selectReferenceFile(${idx})"
+                      title="${file.name}${state.selectedReferenceIdx === idx ? ' (選択中)' : ''}">
+                    ${state.selectedReferenceIdx === idx ? `
+                      <div class="absolute -top-1 -right-1 w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-white text-xs"></i>
+                      </div>
+                    ` : ''}
+                    <button onclick="removeReferenceFile(${idx})" 
+                      class="absolute -top-1 -left-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs hover:bg-red-600">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                `).join('')}
               </div>
-            </div>
+            ` : ''}
           </div>
         </div>
         
@@ -3768,6 +3852,69 @@ window.copyAdoptedIdea = async (ideaId, title, content) => {
   }
 };
 
+// Adopted Ideas Word Processor Functions
+window.updateAdoptedIdeasCount = (value) => {
+  state.adoptedIdeasText = value;
+  const counter = $('#adopted-ideas-chars');
+  if (counter) {
+    counter.textContent = `${value.length} 文字`;
+  }
+};
+
+window.saveAdoptedIdeasText = async () => {
+  if (!state.currentProject) {
+    alert('プロジェクトを選択してください');
+    return;
+  }
+  
+  try {
+    await fetch(`/api/projects/${state.currentProject.id}/world-settings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        category: 'adopted_ideas_text',
+        title: '採用アイディア',
+        content: state.adoptedIdeasText
+      })
+    });
+    
+    alert('採用アイディアを保存しました');
+  } catch (e) {
+    console.error('Save adopted ideas error:', e);
+    alert('保存に失敗しました');
+  }
+};
+
+window.importAdoptedIdeasToText = () => {
+  const adoptedIdeas = (state.ideas || []).filter(idea => idea.adopted);
+  if (adoptedIdeas.length === 0) {
+    alert('採用済みのアイディアがありません');
+    return;
+  }
+  
+  const newText = adoptedIdeas.map(idea => 
+    `【${idea.title}】\n${idea.content || ''}`
+  ).join('\n\n');
+  
+  const currentText = state.adoptedIdeasText || '';
+  const separator = currentText ? '\n\n---\n\n' : '';
+  
+  state.adoptedIdeasText = currentText + separator + newText;
+  
+  const editor = $('#adopted-ideas-editor');
+  if (editor) {
+    editor.value = state.adoptedIdeasText;
+  }
+  
+  updateAdoptedIdeasCount(state.adoptedIdeasText);
+  render();
+};
+
+window.toggleAdoptedIdeasPreview = () => {
+  state.showAdoptedIdeasPreview = !state.showAdoptedIdeasPreview;
+  render();
+};
+
 window.unadoptIdea = async (ideaId) => {
   if (!confirm('このアイデアの採用を取り消しますか？\n（プロットからは手動で削除してください）')) return;
   
@@ -3974,41 +4121,91 @@ window.toggleExportMenu = () => {
 };
 
 // ============================================
-// Illustration Functions (NovelAI Integration)
+// Illustration Functions (Project-based)
 // ============================================
 
-window.saveNovelAIKey = () => {
-  const key = $('#novelai-api-key')?.value;
-  if (key) {
-    localStorage.setItem('novelai_api_key', key);
-    alert('NovelAI APIキーを保存しました');
+// Detect characters from project outline and writings
+function detectCharactersFromProject() {
+  const characters = [];
+  
+  // 1. From story outline (キャラクター設定)
+  if (state.storyOutline?.characters) {
+    const charText = state.storyOutline.characters;
+    // Parse character entries (line by line or comma separated)
+    const lines = charText.split(/[\n,、]/);
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed && trimmed.length > 0) {
+        // Try to extract name and description
+        const match = trimmed.match(/^([^:：（(]+)[:：（(]?(.*)$/);
+        if (match) {
+          characters.push({
+            name: match[1].trim(),
+            description: match[2] ? match[2].replace(/[）)]$/, '').trim() : ''
+          });
+        } else if (trimmed.length < 20) {
+          characters.push({ name: trimmed, description: '' });
+        }
+      }
+    });
   }
-};
+  
+  // 2. From registered characters in state
+  if (state.characters && state.characters.length > 0) {
+    state.characters.forEach(c => {
+      if (!characters.find(ch => ch.name === c.name)) {
+        characters.push({ name: c.name, description: c.description || '' });
+      }
+    });
+  }
+  
+  // 3. From ideas document (look for 「」 quoted names)
+  if (state.ideasDocument) {
+    const nameMatches = state.ideasDocument.match(/「([^」]{1,10})」/g) || [];
+    nameMatches.forEach(match => {
+      const name = match.replace(/[「」]/g, '');
+      if (name.length > 1 && name.length < 10 && !characters.find(c => c.name === name)) {
+        characters.push({ name, description: '' });
+      }
+    });
+  }
+  
+  return characters.slice(0, 20); // Limit to 20 characters
+}
 
-window.handleReferenceImage = (event) => {
-  const file = event.target.files[0];
-  if (file) {
+window.handleReferenceFiles = (event) => {
+  const files = event.target.files;
+  if (!files || files.length === 0) return;
+  
+  if (!state.illustrationFiles) state.illustrationFiles = [];
+  
+  Array.from(files).forEach(file => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      state.referenceImage = e.target.result;
-      const preview = $('#reference-preview');
-      if (preview) {
-        preview.classList.remove('hidden');
-        preview.querySelector('img').src = e.target.result;
-      }
+      state.illustrationFiles.push({
+        name: file.name,
+        data: e.target.result,
+        type: file.type
+      });
+      render();
     };
     reader.readAsDataURL(file);
-  }
+  });
 };
 
-window.clearReferenceImage = () => {
-  state.referenceImage = null;
-  const preview = $('#reference-preview');
-  if (preview) {
-    preview.classList.add('hidden');
+window.selectReferenceFile = (idx) => {
+  state.selectedReferenceIdx = state.selectedReferenceIdx === idx ? null : idx;
+  render();
+};
+
+window.removeReferenceFile = (idx) => {
+  state.illustrationFiles.splice(idx, 1);
+  if (state.selectedReferenceIdx === idx) {
+    state.selectedReferenceIdx = null;
+  } else if (state.selectedReferenceIdx > idx) {
+    state.selectedReferenceIdx--;
   }
-  const input = $('#reference-image');
-  if (input) input.value = '';
+  render();
 };
 
 window.updateCharacterPrompt = () => {
@@ -4020,18 +4217,11 @@ window.updateCharacterPrompt = () => {
   const description = selectedOption?.getAttribute('data-description');
   
   if (description && promptArea.value.trim() === '') {
-    // Auto-fill with character description if prompt is empty
     promptArea.value = description;
   }
 };
 
 window.generateIllustration = async () => {
-  const apiKey = localStorage.getItem('novelai_api_key');
-  if (!apiKey) {
-    alert('NovelAI APIキーを設定してください');
-    return;
-  }
-  
   const prompt = $('#illustration-prompt')?.value;
   if (!prompt) {
     alert('プロンプトを入力してください');
@@ -4044,6 +4234,15 @@ window.generateIllustration = async () => {
   const steps = parseInt($('#illustration-steps')?.value || '28');
   
   const [width, height] = size.split('x').map(Number);
+  
+  // Build context from project
+  const projectContext = {
+    storyOutline: state.storyOutline,
+    ideasDocument: state.ideasDocument,
+    worldSettings: state.worldSettings,
+    plot: state.plot,
+    currentWriting: state.currentWriting?.content?.slice(0, 2000)
+  };
   
   // Build style prefix based on selection
   const stylePrompts = {
@@ -4061,21 +4260,27 @@ window.generateIllustration = async () => {
   const characterName = characterSelect?.options[characterSelect.selectedIndex]?.text;
   const hasCharacter = characterSelect?.value !== '';
   
+  // Get selected reference image
+  const referenceImage = state.selectedReferenceIdx !== null 
+    ? state.illustrationFiles[state.selectedReferenceIdx]?.data 
+    : null;
+  
   state.aiGenerating = true;
   render();
   
   try {
-    const response = await fetch('/api/novelai/generate', {
+    const response = await fetch('/api/illustration/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        apiKey,
         prompt: fullPrompt,
         negative_prompt: negative,
         width,
         height,
         steps,
-        reference_image: state.referenceImage || null
+        reference_image: referenceImage,
+        projectContext,
+        sessionId: state.sessionId
       })
     });
     

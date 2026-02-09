@@ -856,17 +856,31 @@ api.post('/ai/chat', async (c) => {
 });
 
 // ============================================
-// NovelAI Image Generation
+// Illustration Image Generation (Server-managed API key)
 // ============================================
 
-api.post('/novelai/generate', async (c) => {
-  const { apiKey, prompt, negative_prompt, width, height, steps, reference_image } = await c.req.json();
+api.post('/illustration/generate', async (c) => {
+  const { prompt, negative_prompt, width, height, steps, reference_image, projectContext, sessionId } = await c.req.json();
+  
+  // Get NovelAI API key from environment (server-side management)
+  const apiKey = (c.env as any).NOVELAI_API_KEY;
   
   if (!apiKey) {
-    return c.json({ error: 'NovelAI API key is required' }, 400);
+    return c.json({ error: 'NovelAI API key is not configured on the server. Please contact administrator.' }, 500);
   }
   
   try {
+    // Build enhanced prompt with project context
+    let enhancedPrompt = prompt;
+    
+    if (projectContext) {
+      // Add world setting context if available
+      if (projectContext.storyOutline?.worldSetting) {
+        const worldContext = projectContext.storyOutline.worldSetting.slice(0, 200);
+        enhancedPrompt = `${worldContext}, ${prompt}`;
+      }
+    }
+    
     // NovelAI API endpoint for image generation
     const response = await fetch('https://image.novelai.net/ai/generate-image', {
       method: 'POST',
@@ -876,7 +890,7 @@ api.post('/novelai/generate', async (c) => {
         'Accept': 'application/json'
       },
       body: JSON.stringify({
-        input: prompt,
+        input: enhancedPrompt,
         model: 'nai-diffusion-3', // NAI Diffusion Anime V3
         action: reference_image ? 'img2img' : 'generate',
         parameters: {
@@ -908,9 +922,7 @@ api.post('/novelai/generate', async (c) => {
     // NovelAI returns a zip file containing the image
     const buffer = await response.arrayBuffer();
     
-    // For simplicity, we'll extract the PNG from the zip
-    // The response is actually a zip file with the image inside
-    // We'll use a simple approach to find the PNG data
+    // Extract PNG from the response
     const bytes = new Uint8Array(buffer);
     
     // Find PNG signature (89 50 4E 47 0D 0A 1A 0A)
@@ -928,7 +940,92 @@ api.post('/novelai/generate', async (c) => {
       return c.json({ imageUrl: `data:image/png;base64,${base64}` });
     }
     
-    // Find PNG end (IEND chunk: 49 45 4E 44 AE 42 60 82)
+    // Find PNG end (IEND chunk)
+    let pngEnd = bytes.length;
+    for (let i = pngStart; i < bytes.length - 8; i++) {
+      if (bytes[i] === 0x49 && bytes[i+1] === 0x45 && bytes[i+2] === 0x4E && bytes[i+3] === 0x44 &&
+          bytes[i+4] === 0xAE && bytes[i+5] === 0x42 && bytes[i+6] === 0x60 && bytes[i+7] === 0x82) {
+        pngEnd = i + 8;
+        break;
+      }
+    }
+    
+    const pngBytes = bytes.slice(pngStart, pngEnd);
+    const base64 = btoa(String.fromCharCode(...pngBytes));
+    
+    return c.json({ imageUrl: `data:image/png;base64,${base64}` });
+  } catch (error: any) {
+    console.error('Illustration Generation Error:', error);
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+// Keep old NovelAI endpoint for backward compatibility (but remove apiKey requirement)
+api.post('/novelai/generate', async (c) => {
+  const { apiKey, prompt, negative_prompt, width, height, steps, reference_image } = await c.req.json();
+  
+  // Use server API key if client doesn't provide one
+  const finalApiKey = apiKey || (c.env as any).NOVELAI_API_KEY;
+  
+  if (!finalApiKey) {
+    return c.json({ error: 'NovelAI API key is not configured' }, 500);
+  }
+  
+  try {
+    // NovelAI API endpoint for image generation
+    const response = await fetch('https://image.novelai.net/ai/generate-image', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${finalApiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        input: prompt,
+        model: 'nai-diffusion-3',
+        action: reference_image ? 'img2img' : 'generate',
+        parameters: {
+          width: width || 512,
+          height: height || 768,
+          scale: 7,
+          sampler: 'k_euler_ancestral',
+          steps: steps || 28,
+          seed: Math.floor(Math.random() * 4294967295),
+          n_samples: 1,
+          ucPreset: 0,
+          qualityToggle: true,
+          negative_prompt: negative_prompt || 'low quality, bad anatomy, worst quality',
+          ...(reference_image && {
+            image: reference_image.replace(/^data:image\/\w+;base64,/, ''),
+            strength: 0.6,
+            noise: 0.1
+          })
+        }
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('NovelAI API error:', errorText);
+      return c.json({ error: `NovelAI API error: ${response.status}` }, response.status);
+    }
+    
+    const buffer = await response.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    
+    let pngStart = -1;
+    for (let i = 0; i < bytes.length - 8; i++) {
+      if (bytes[i] === 0x89 && bytes[i+1] === 0x50 && bytes[i+2] === 0x4E && bytes[i+3] === 0x47) {
+        pngStart = i;
+        break;
+      }
+    }
+    
+    if (pngStart === -1) {
+      const base64 = btoa(String.fromCharCode(...bytes));
+      return c.json({ imageUrl: `data:image/png;base64,${base64}` });
+    }
+    
     let pngEnd = bytes.length;
     for (let i = pngStart; i < bytes.length - 8; i++) {
       if (bytes[i] === 0x49 && bytes[i+1] === 0x45 && bytes[i+2] === 0x4E && bytes[i+3] === 0x44 &&

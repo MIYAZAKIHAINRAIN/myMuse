@@ -10,6 +10,16 @@ export interface GeminiContext {
   currentWriting?: string;
   adoptedIdeas?: { title: string; content: string }[];
   projectGenres?: string;
+  // New: Story outline and ideas document
+  storyOutline?: {
+    characters?: string;
+    terminology?: string;
+    worldSetting?: string;
+    storyGoal?: string;
+    episodes?: string;
+  };
+  ideasDocument?: string;
+  adoptedIdeasText?: string; // Direct text from word processor
 }
 
 export interface GeminiRequest {
@@ -58,6 +68,36 @@ function buildSystemPrompt(context: GeminiContext): string {
 
   if (context.projectGenres) {
     prompt += `【作品ジャンル】\n${context.projectGenres}\nこのジャンルの特性を活かした提案をしてください。\n\n`;
+  }
+
+  // New: Story outline from Ideas tab
+  if (context.storyOutline) {
+    const outline = context.storyOutline;
+    if (outline.characters) {
+      prompt += `【キャラクター設定】\n${outline.characters}\n\n`;
+    }
+    if (outline.terminology) {
+      prompt += `【専門用語】\n${outline.terminology}\n\n`;
+    }
+    if (outline.worldSetting) {
+      prompt += `【世界観設定（詳細）】\n${outline.worldSetting}\n\n`;
+    }
+    if (outline.storyGoal) {
+      prompt += `【描きたい物語・テーマ】\n${outline.storyGoal}\n\n`;
+    }
+    if (outline.episodes) {
+      prompt += `【各話アウトライン】\n${outline.episodes}\n\n`;
+    }
+  }
+
+  // New: Ideas document (notes/memo)
+  if (context.ideasDocument) {
+    prompt += `【ネタ・プロットメモ】\n${context.ideasDocument.slice(0, 3000)}\n\n`;
+  }
+
+  // New: Direct adopted ideas text (word processor format)
+  if (context.adoptedIdeasText) {
+    prompt += `【採用アイディア（詳細）】\n${context.adoptedIdeasText}\n\n`;
   }
 
   if (context.adoptedIdeas && context.adoptedIdeas.length > 0) {
