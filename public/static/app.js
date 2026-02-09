@@ -27,6 +27,12 @@ const state = {
   ideas: [],
   characters: [],
   worldSettings: [],
+  generatedImages: [], // For illustration tab
+  storyOutline: null, // Story outline for ideas tab
+  ideasDocument: '', // Document content for ideas tab
+  ideasChatMessages: [], // Chat messages for ideas AI
+  showStoryOutline: true, // Show/hide story outline panel
+  showQuickIdeas: false, // Show/hide quick ideas panel
   searchResults: [],
   trash: [],
   isLoading: false,
@@ -49,7 +55,7 @@ const i18n = {
     'sidebar.trash': 'ゴミ箱', 'sidebar.search': '全文検索', 'sidebar.calendar': '創作カレンダー',
     'sidebar.language': '言語', 'sidebar.aiCredits': 'AI利用量',
     'tab.ideas': 'ネタ考案', 'tab.plot': 'プロット', 'tab.writing': 'ライティング',
-    'tab.analysis': '分析・批評', 'tab.consultation': '相談AI', 'tab.achievements': '実績',
+    'tab.illustration': '挿絵', 'tab.analysis': '分析・批評', 'tab.consultation': '相談AI', 'tab.achievements': '実績',
     'achievement.title': '実績トロフィー', 'achievement.monthly': '今月の実績', 'achievement.all': '獲得バッジ',
     'achievement.progress': '進捗', 'achievement.unlocked': '解除済み', 'achievement.locked': '未解除',
     'achievement.generateNew': 'AIで実績を更新', 'achievement.lastUpdate': '最終更新',
@@ -93,7 +99,7 @@ const i18n = {
     'sidebar.trash': 'Trash', 'sidebar.search': 'Search', 'sidebar.calendar': 'Calendar',
     'sidebar.language': 'Language', 'sidebar.aiCredits': 'AI Credits',
     'tab.ideas': 'Ideas', 'tab.plot': 'Plot', 'tab.writing': 'Writing',
-    'tab.analysis': 'Analysis', 'tab.consultation': 'AI Chat', 'tab.achievements': 'Achievements',
+    'tab.illustration': 'Illustration', 'tab.analysis': 'Analysis', 'tab.consultation': 'AI Chat', 'tab.achievements': 'Achievements',
     'achievement.title': 'Achievements', 'achievement.monthly': 'Monthly Goals', 'achievement.all': 'Badges',
     'achievement.progress': 'Progress', 'achievement.unlocked': 'Unlocked', 'achievement.locked': 'Locked',
     'achievement.generateNew': 'Update with AI', 'achievement.lastUpdate': 'Last Update',
@@ -136,7 +142,7 @@ const i18n = {
     'sidebar.projects': '项目', 'sidebar.newProject': '新建项目', 'sidebar.newFolder': '新建文件夹',
     'sidebar.trash': '回收站', 'sidebar.search': '搜索', 'sidebar.calendar': '日历',
     'sidebar.language': '语言', 'sidebar.aiCredits': 'AI额度',
-    'tab.ideas': '创意', 'tab.plot': '情节', 'tab.writing': '写作', 'tab.analysis': '分析', 'tab.consultation': 'AI咨询',
+    'tab.ideas': '创意', 'tab.plot': '情节', 'tab.writing': '写作', 'tab.illustration': '插图', 'tab.analysis': '分析', 'tab.consultation': 'AI咨询',
     'ai.continue': '续写', 'ai.rewrite': '重写', 'ai.expand': '扩展', 'ai.proofread': '校对',
     'ai.summarize': '总结', 'ai.translate': '翻译', 'ai.titleSuggestion': '标题建议',
     'ai.formal': '正式', 'ai.casual': '随意', 'ai.literary': '文学',
@@ -158,7 +164,7 @@ const i18n = {
     'sidebar.projects': '프로젝트', 'sidebar.newProject': '새 프로젝트', 'sidebar.newFolder': '새 폴더',
     'sidebar.trash': '휴지통', 'sidebar.search': '검색', 'sidebar.calendar': '캘린더',
     'sidebar.language': '언어', 'sidebar.aiCredits': 'AI 크레딧',
-    'tab.ideas': '아이디어', 'tab.plot': '플롯', 'tab.writing': '집필', 'tab.analysis': '분석', 'tab.consultation': 'AI 상담',
+    'tab.ideas': '아이디어', 'tab.plot': '플롯', 'tab.writing': '집필', 'tab.illustration': '삽화', 'tab.analysis': '분석', 'tab.consultation': 'AI 상담',
     'ai.continue': '계속 쓰기', 'ai.rewrite': '다시 쓰기', 'ai.expand': '확장', 'ai.proofread': '교정',
     'ai.summarize': '요약', 'ai.translate': '번역', 'ai.titleSuggestion': '제목 제안',
     'ai.formal': '격식체', 'ai.casual': '비격식체', 'ai.literary': '문학적',
@@ -175,7 +181,7 @@ const i18n = {
     'nav.home': 'Inicio', 'nav.write': 'Escribir', 'nav.manage': 'Gestionar', 'nav.settings': 'Ajustes',
     'sidebar.projects': 'Proyectos', 'sidebar.newProject': 'Nuevo proyecto', 'sidebar.trash': 'Papelera',
     'sidebar.search': 'Buscar', 'sidebar.calendar': 'Calendario', 'sidebar.language': 'Idioma',
-    'tab.ideas': 'Ideas', 'tab.plot': 'Trama', 'tab.writing': 'Escritura', 'tab.analysis': 'Análisis', 'tab.consultation': 'Chat AI',
+    'tab.ideas': 'Ideas', 'tab.plot': 'Trama', 'tab.writing': 'Escritura', 'tab.illustration': 'Ilustración', 'tab.analysis': 'Análisis', 'tab.consultation': 'Chat AI',
     'ai.continue': 'Continuar', 'ai.rewrite': 'Reescribir', 'ai.expand': 'Expandir', 'ai.proofread': 'Corregir',
     'ai.summarize': 'Resumir', 'ai.translate': 'Traducir', 'ai.titleSuggestion': 'Ideas de título', 'ai.generate': 'Generar',
     'writing.zenMode': 'Modo ZEN', 'writing.export': 'Exportar', 'writing.characters': 'Caracteres',
@@ -190,7 +196,7 @@ const i18n = {
     'nav.home': 'Accueil', 'nav.write': 'Écrire', 'nav.manage': 'Gérer', 'nav.settings': 'Paramètres',
     'sidebar.projects': 'Projets', 'sidebar.newProject': 'Nouveau projet', 'sidebar.trash': 'Corbeille',
     'sidebar.search': 'Rechercher', 'sidebar.calendar': 'Calendrier', 'sidebar.language': 'Langue',
-    'tab.ideas': 'Idées', 'tab.plot': 'Intrigue', 'tab.writing': 'Écriture', 'tab.analysis': 'Analyse', 'tab.consultation': 'Chat AI',
+    'tab.ideas': 'Idées', 'tab.plot': 'Intrigue', 'tab.writing': 'Écriture', 'tab.illustration': 'Illustration', 'tab.analysis': 'Analyse', 'tab.consultation': 'Chat AI',
     'ai.continue': 'Continuer', 'ai.rewrite': 'Réécrire', 'ai.expand': 'Développer', 'ai.proofread': 'Corriger',
     'ai.summarize': 'Résumer', 'ai.translate': 'Traduire', 'ai.titleSuggestion': 'Idées de titre', 'ai.generate': 'Générer',
     'writing.zenMode': 'Mode ZEN', 'writing.export': 'Exporter', 'writing.characters': 'Caractères',
@@ -205,7 +211,7 @@ const i18n = {
     'nav.home': 'Startseite', 'nav.write': 'Schreiben', 'nav.manage': 'Verwalten', 'nav.settings': 'Einstellungen',
     'sidebar.projects': 'Projekte', 'sidebar.newProject': 'Neues Projekt', 'sidebar.trash': 'Papierkorb',
     'sidebar.search': 'Suchen', 'sidebar.calendar': 'Kalender', 'sidebar.language': 'Sprache',
-    'tab.ideas': 'Ideen', 'tab.plot': 'Handlung', 'tab.writing': 'Schreiben', 'tab.analysis': 'Analyse', 'tab.consultation': 'AI-Chat',
+    'tab.ideas': 'Ideen', 'tab.plot': 'Handlung', 'tab.writing': 'Schreiben', 'tab.illustration': 'Illustration', 'tab.analysis': 'Analyse', 'tab.consultation': 'AI-Chat',
     'ai.continue': 'Fortsetzen', 'ai.rewrite': 'Umschreiben', 'ai.expand': 'Erweitern', 'ai.proofread': 'Korrektur',
     'ai.summarize': 'Zusammenfassen', 'ai.translate': 'Übersetzen', 'ai.titleSuggestion': 'Titelvorschläge', 'ai.generate': 'Generieren',
     'writing.zenMode': 'ZEN-Modus', 'writing.export': 'Exportieren', 'writing.characters': 'Zeichen',
@@ -220,7 +226,7 @@ const i18n = {
     'nav.home': 'Início', 'nav.write': 'Escrever', 'nav.manage': 'Gerenciar', 'nav.settings': 'Configurações',
     'sidebar.projects': 'Projetos', 'sidebar.newProject': 'Novo projeto', 'sidebar.trash': 'Lixeira',
     'sidebar.search': 'Pesquisar', 'sidebar.calendar': 'Calendário', 'sidebar.language': 'Idioma',
-    'tab.ideas': 'Ideias', 'tab.plot': 'Enredo', 'tab.writing': 'Escrita', 'tab.analysis': 'Análise', 'tab.consultation': 'Chat AI',
+    'tab.ideas': 'Ideias', 'tab.plot': 'Enredo', 'tab.writing': 'Escrita', 'tab.illustration': 'Ilustração', 'tab.analysis': 'Análise', 'tab.consultation': 'Chat AI',
     'ai.continue': 'Continuar', 'ai.rewrite': 'Reescrever', 'ai.expand': 'Expandir', 'ai.proofread': 'Revisar',
     'ai.summarize': 'Resumir', 'ai.translate': 'Traduzir', 'ai.titleSuggestion': 'Sugestões de título', 'ai.generate': 'Gerar',
     'writing.zenMode': 'Modo ZEN', 'writing.export': 'Exportar', 'writing.characters': 'Caracteres',
@@ -235,7 +241,7 @@ const i18n = {
     'nav.home': 'Главная', 'nav.write': 'Писать', 'nav.manage': 'Управление', 'nav.settings': 'Настройки',
     'sidebar.projects': 'Проекты', 'sidebar.newProject': 'Новый проект', 'sidebar.trash': 'Корзина',
     'sidebar.search': 'Поиск', 'sidebar.calendar': 'Календарь', 'sidebar.language': 'Язык',
-    'tab.ideas': 'Идеи', 'tab.plot': 'Сюжет', 'tab.writing': 'Написание', 'tab.analysis': 'Анализ', 'tab.consultation': 'Чат AI',
+    'tab.ideas': 'Идеи', 'tab.plot': 'Сюжет', 'tab.writing': 'Написание', 'tab.illustration': 'Иллюстрация', 'tab.analysis': 'Анализ', 'tab.consultation': 'Чат AI',
     'ai.continue': 'Продолжить', 'ai.rewrite': 'Переписать', 'ai.expand': 'Расширить', 'ai.proofread': 'Корректура',
     'ai.summarize': 'Резюме', 'ai.translate': 'Перевести', 'ai.titleSuggestion': 'Идеи названия', 'ai.generate': 'Создать',
     'writing.zenMode': 'Режим ZEN', 'writing.export': 'Экспорт', 'writing.characters': 'Символы',
@@ -250,7 +256,7 @@ const i18n = {
     'nav.home': 'الرئيسية', 'nav.write': 'كتابة', 'nav.manage': 'إدارة', 'nav.settings': 'الإعدادات',
     'sidebar.projects': 'المشاريع', 'sidebar.newProject': 'مشروع جديد', 'sidebar.trash': 'سلة المهملات',
     'sidebar.search': 'بحث', 'sidebar.calendar': 'التقويم', 'sidebar.language': 'اللغة',
-    'tab.ideas': 'أفكار', 'tab.plot': 'الحبكة', 'tab.writing': 'الكتابة', 'tab.analysis': 'تحليل', 'tab.consultation': 'دردشة AI',
+    'tab.ideas': 'أفكار', 'tab.plot': 'الحبكة', 'tab.writing': 'الكتابة', 'tab.illustration': 'رسم توضيحي', 'tab.analysis': 'تحليل', 'tab.consultation': 'دردشة AI',
     'ai.continue': 'متابعة', 'ai.rewrite': 'إعادة كتابة', 'ai.expand': 'توسيع', 'ai.proofread': 'تدقيق',
     'ai.summarize': 'تلخيص', 'ai.translate': 'ترجمة', 'ai.titleSuggestion': 'اقتراحات العنوان', 'ai.generate': 'توليد',
     'writing.zenMode': 'وضع ZEN', 'writing.export': 'تصدير', 'writing.characters': 'الأحرف',
@@ -265,7 +271,7 @@ const i18n = {
     'nav.home': 'होम', 'nav.write': 'लिखें', 'nav.manage': 'प्रबंधन', 'nav.settings': 'सेटिंग्स',
     'sidebar.projects': 'प्रोजेक्ट्स', 'sidebar.newProject': 'नया प्रोजेक्ट', 'sidebar.trash': 'ट्रैश',
     'sidebar.search': 'खोजें', 'sidebar.calendar': 'कैलेंडर', 'sidebar.language': 'भाषा',
-    'tab.ideas': 'विचार', 'tab.plot': 'कथानक', 'tab.writing': 'लेखन', 'tab.analysis': 'विश्लेषण', 'tab.consultation': 'AI चैट',
+    'tab.ideas': 'विचार', 'tab.plot': 'कथानक', 'tab.writing': 'लेखन', 'tab.illustration': 'चित्रण', 'tab.analysis': 'विश्लेषण', 'tab.consultation': 'AI चैट',
     'ai.continue': 'जारी रखें', 'ai.rewrite': 'पुनः लिखें', 'ai.expand': 'विस्तार', 'ai.proofread': 'प्रूफ़रीड',
     'ai.summarize': 'सारांश', 'ai.translate': 'अनुवाद', 'ai.titleSuggestion': 'शीर्षक सुझाव', 'ai.generate': 'उत्पन्न करें',
     'writing.zenMode': 'ZEN मोड', 'writing.export': 'निर्यात', 'writing.characters': 'अक्षर',
@@ -280,7 +286,7 @@ const i18n = {
     'nav.home': 'หน้าแรก', 'nav.write': 'เขียน', 'nav.manage': 'จัดการ', 'nav.settings': 'ตั้งค่า',
     'sidebar.projects': 'โปรเจกต์', 'sidebar.newProject': 'โปรเจกต์ใหม่', 'sidebar.trash': 'ถังขยะ',
     'sidebar.search': 'ค้นหา', 'sidebar.calendar': 'ปฏิทิน', 'sidebar.language': 'ภาษา',
-    'tab.ideas': 'ไอเดีย', 'tab.plot': 'พล็อต', 'tab.writing': 'การเขียน', 'tab.analysis': 'วิเคราะห์', 'tab.consultation': 'แชท AI',
+    'tab.ideas': 'ไอเดีย', 'tab.plot': 'พล็อต', 'tab.writing': 'การเขียน', 'tab.illustration': 'ภาพประกอบ', 'tab.analysis': 'วิเคราะห์', 'tab.consultation': 'แชท AI',
     'ai.continue': 'เขียนต่อ', 'ai.rewrite': 'เขียนใหม่', 'ai.expand': 'ขยาย', 'ai.proofread': 'ตรวจทาน',
     'ai.summarize': 'สรุป', 'ai.translate': 'แปล', 'ai.titleSuggestion': 'แนะนำชื่อเรื่อง', 'ai.generate': 'สร้าง',
     'writing.zenMode': 'โหมด ZEN', 'writing.export': 'ส่งออก', 'writing.characters': 'ตัวอักษร',
@@ -1378,7 +1384,7 @@ function renderMainContent() {
     <div class="h-full flex flex-col">
       <!-- Tabs -->
       <div class="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4">
-        ${['ideas', 'plot', 'writing', 'analysis', 'consultation', 'achievements'].map(tab => `
+        ${['ideas', 'plot', 'writing', 'illustration', 'analysis', 'consultation', 'achievements'].map(tab => `
           <button onclick="switchTab('${tab}')" 
             class="px-4 py-3 text-sm font-medium transition ${state.currentTab === tab ? 'tab-active' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'} ${tab === 'achievements' ? 'ml-auto bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent' : ''}">
             <i class="fas ${getTabIcon(tab)} mr-1 ${tab === 'achievements' ? 'text-yellow-500' : ''}"></i>
@@ -1396,7 +1402,7 @@ function renderMainContent() {
 }
 
 function getTabIcon(tab) {
-  const icons = { ideas: 'fa-lightbulb', plot: 'fa-sitemap', writing: 'fa-pen-fancy', analysis: 'fa-chart-pie', consultation: 'fa-comments', achievements: 'fa-trophy' };
+  const icons = { ideas: 'fa-lightbulb', plot: 'fa-sitemap', writing: 'fa-pen-fancy', illustration: 'fa-image', analysis: 'fa-chart-pie', consultation: 'fa-comments', achievements: 'fa-trophy' };
   return icons[tab] || 'fa-circle';
 }
 
@@ -1405,6 +1411,7 @@ function renderTabContent() {
     case 'ideas': return renderIdeasTab();
     case 'plot': return renderPlotTab();
     case 'writing': return renderWritingTab();
+    case 'illustration': return renderIllustrationTab();
     case 'analysis': return renderAnalysisTab();
     case 'consultation': return renderConsultationTab();
     case 'achievements': return renderAchievementsTab();
@@ -1438,81 +1445,265 @@ function renderIdeasTab() {
     { value: 'biography', label: t('genre.biography') },
   ];
   
+  const storyOutline = state.storyOutline || {
+    characters: '',
+    terminology: '',
+    worldSetting: '',
+    storyGoal: '',
+    episodes: ''
+  };
+  
+  const projectGenres = state.currentProject?.genre?.split(',') || [];
+  const showStoryOutline = state.showStoryOutline !== false;
+  
   return `
-    <div class="max-w-4xl mx-auto space-y-6">
-      <!-- Idea Generator -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold mb-4"><i class="fas fa-magic mr-2 text-indigo-500"></i>${t('idea.generate')}</h3>
-        
-        <!-- Genre Multi-Select -->
-        <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">ジャンル（複数選択可）</label>
-          <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 max-h-40 overflow-y-auto p-2 border rounded-lg dark:border-gray-600">
-            ${allGenres.map(g => `
-              <label class="flex items-center gap-1 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">
-                <input type="checkbox" name="idea-genre" value="${g.value}" class="genre-checkbox rounded">
-                <span class="truncate">${g.label}</span>
-              </label>
-            `).join('')}
-          </div>
-          <p class="text-xs text-gray-500 mt-1">選択したジャンルを組み合わせたアイデアを生成します</p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label class="block text-sm font-medium mb-1">キーワード</label>
-            <input type="text" id="idea-keywords" placeholder="例: 魔法、冒険、友情"
-              class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">${t('idea.count')}</label>
-            <select id="idea-count" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-              <option value="3">3</option>
-              <option value="5" selected>5</option>
-              <option value="10">10</option>
-            </select>
-          </div>
-        </div>
-        <button onclick="handleGenerateIdeas()" 
-          class="w-full md:w-auto px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2"
-          ${state.aiGenerating ? 'disabled' : ''}>
-          ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-wand-magic-sparkles"></i>'}
-          <span>${t('ai.generate')}</span>
-        </button>
-      </div>
-      
-      <!-- Ideas List -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        ${state.ideas.map(idea => `
-          <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 ${idea.adopted ? 'ring-2 ring-green-500' : ''} group">
-            <!-- Delete button (top-right corner) -->
-            <button onclick="deleteIdea('${idea.id}', '${(idea.title || '').replace(/'/g, "\\'")}')"
-              class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-              title="アイデアを削除">
-              <i class="fas fa-times text-sm"></i>
-            </button>
-            
-            <div class="flex items-start justify-between mb-2 pr-6">
-              <h4 class="font-medium">${idea.title}</h4>
-              ${idea.adopted ? '<span class="text-green-500 text-xs"><i class="fas fa-check-circle"></i> 採用済</span>' : ''}
+    <div class="h-full flex gap-4">
+      <!-- Left: Story Outline Panel (collapsible) -->
+      ${showStoryOutline ? `
+        <div class="w-80 flex flex-col gap-3 overflow-y-auto">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold flex items-center gap-2">
+                <i class="fas fa-list-alt text-purple-500"></i>
+                物語構成アウトライン
+              </h3>
+              <button onclick="toggleStoryOutline()" class="text-gray-400 hover:text-gray-600" title="アウトラインを非表示">
+                <i class="fas fa-chevron-left"></i>
+              </button>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">${idea.content || ''}</p>
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-gray-500">${idea.genre || ''}</span>
-              <div class="flex gap-2">
-                ${idea.adopted ? `
-                  <button onclick="unadoptIdea('${idea.id}')" class="text-sm text-red-600 hover:underline">
-                    <i class="fas fa-times mr-1"></i>採用取消
-                  </button>
-                ` : `
-                  <button onclick="adoptIdea('${idea.id}')" class="text-sm text-indigo-600 hover:underline">
-                    <i class="fas fa-arrow-right mr-1"></i>${t('common.adopt')}
-                  </button>
-                `}
+            
+            <!-- Genre Settings -->
+            <div class="mb-4 pb-4 border-b dark:border-gray-700">
+              <label class="block text-sm font-medium mb-2">
+                <i class="fas fa-tags mr-1 text-indigo-500"></i>ジャンル設定
+              </label>
+              <div class="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto p-2 border rounded-lg dark:border-gray-600 text-xs">
+                ${allGenres.map(g => `
+                  <label class="flex items-center gap-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">
+                    <input type="checkbox" name="project-genre" value="${g.value}" 
+                      ${projectGenres.includes(g.value) ? 'checked' : ''}
+                      onchange="updateProjectGenre()" class="rounded">
+                    <span class="truncate">${g.label}</span>
+                  </label>
+                `).join('')}
               </div>
             </div>
+            
+            <!-- Story Elements -->
+            <div class="space-y-3">
+              <div>
+                <label class="flex items-center gap-1 text-sm font-medium mb-1">
+                  <i class="fas fa-users text-blue-500"></i>キャラクター
+                </label>
+                <textarea id="outline-characters" rows="3" placeholder="主人公、ヒロイン、敵役など..."
+                  class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters}</textarea>
+              </div>
+              
+              <div>
+                <label class="flex items-center gap-1 text-sm font-medium mb-1">
+                  <i class="fas fa-book text-green-500"></i>専門用語
+                </label>
+                <textarea id="outline-terminology" rows="2" placeholder="魔法、技術、組織名など..."
+                  class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology}</textarea>
+              </div>
+              
+              <div>
+                <label class="flex items-center gap-1 text-sm font-medium mb-1">
+                  <i class="fas fa-globe text-yellow-500"></i>世界観
+                </label>
+                <textarea id="outline-worldSetting" rows="3" placeholder="舞台設定、時代、ルールなど..."
+                  class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting}</textarea>
+              </div>
+              
+              <div>
+                <label class="flex items-center gap-1 text-sm font-medium mb-1">
+                  <i class="fas fa-bullseye text-red-500"></i>描きたい物語
+                </label>
+                <textarea id="outline-storyGoal" rows="3" placeholder="テーマ、メッセージ、結末のイメージ..."
+                  class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal}</textarea>
+              </div>
+              
+              <div>
+                <label class="flex items-center gap-1 text-sm font-medium mb-1">
+                  <i class="fas fa-list-ol text-purple-500"></i>各話アウトライン
+                </label>
+                <textarea id="outline-episodes" rows="4" placeholder="第1話: xxx&#10;第2話: xxx&#10;..."
+                  class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes}</textarea>
+              </div>
+            </div>
+            
+            <button onclick="saveStoryOutline()" 
+              class="w-full mt-4 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
+              <i class="fas fa-save mr-1"></i>アウトラインを保存
+            </button>
           </div>
-        `).join('')}
+        </div>
+      ` : `
+        <button onclick="toggleStoryOutline()" 
+          class="px-2 py-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+          title="アウトラインを表示">
+          <i class="fas fa-chevron-right text-gray-400"></i>
+        </button>
+      `}
+      
+      <!-- Center: Main Document Area -->
+      <div class="flex-1 flex flex-col">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm flex-1 flex flex-col overflow-hidden">
+          <!-- Document Header/Toolbar -->
+          <div class="flex items-center gap-4 p-3 border-b dark:border-gray-700">
+            <h3 class="font-semibold flex items-center gap-2">
+              <i class="fas fa-file-alt text-indigo-500"></i>
+              ネタ・プロットメモ
+            </h3>
+            <div class="flex-1"></div>
+            <span class="text-xs text-gray-500" id="ideas-doc-chars">
+              ${(state.ideasDocument || '').length} 文字
+            </span>
+            <button onclick="saveIdeasDocument()" class="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700">
+              <i class="fas fa-save mr-1"></i>保存
+            </button>
+          </div>
+          
+          <!-- Document Editor -->
+          <textarea id="ideas-document" 
+            class="flex-1 w-full p-4 text-sm resize-none focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+            placeholder="ここにネタやプロットのアイデアを自由に書き込んでください...
+
+【使い方のヒント】
+・右側のAIチャットで相談しながらアイデアを膨らませましょう
+・左のアウトラインに設定を書くと、AIがより良い提案をします
+・プロット・ライティング・分析タブでもこの設定が反映されます"
+            oninput="updateIdeasDocumentCount(this.value)">${state.ideasDocument || ''}</textarea>
+        </div>
+        
+        <!-- Quick Ideas Section (collapsed by default) -->
+        <div class="mt-3">
+          <button onclick="toggleQuickIdeas()" class="w-full px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700">
+            <span class="flex items-center gap-2">
+              <i class="fas fa-lightbulb text-yellow-500"></i>
+              <span class="font-medium">クイックアイデア生成</span>
+              <span class="text-xs text-gray-500">(${state.ideas?.length || 0}件)</span>
+            </span>
+            <i class="fas fa-chevron-${state.showQuickIdeas ? 'up' : 'down'} text-gray-400"></i>
+          </button>
+          
+          ${state.showQuickIdeas ? `
+            <div class="mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+              <div class="flex gap-2 mb-3">
+                <input type="text" id="quick-idea-keywords" placeholder="キーワード（任意）"
+                  class="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
+                <select id="quick-idea-count" class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
+                  <option value="3">3件</option>
+                  <option value="5" selected>5件</option>
+                  <option value="10">10件</option>
+                </select>
+                <button onclick="handleGenerateIdeas()" 
+                  class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 text-sm"
+                  ${state.aiGenerating ? 'disabled' : ''}>
+                  ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-magic mr-1"></i>生成'}
+                </button>
+              </div>
+              
+              ${state.ideas?.length > 0 ? `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                  ${state.ideas.map(idea => `
+                    <div class="relative bg-gray-50 dark:bg-gray-900 rounded-lg p-3 text-sm ${idea.adopted ? 'ring-2 ring-green-500' : ''} group">
+                      <button onclick="deleteIdea('${idea.id}', '${(idea.title || '').replace(/'/g, "\\'")}')"
+                        class="absolute top-1 right-1 w-5 h-5 flex items-center justify-center text-gray-400 hover:text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-xs">
+                        <i class="fas fa-times"></i>
+                      </button>
+                      <div class="font-medium mb-1 pr-5">${idea.title}</div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">${idea.content || ''}</p>
+                      <div class="flex justify-between items-center mt-2">
+                        <span class="text-xs text-gray-500">${idea.genre || ''}</span>
+                        ${idea.adopted ? 
+                          `<button onclick="unadoptIdea('${idea.id}')" class="text-xs text-red-500 hover:underline">取消</button>` :
+                          `<button onclick="adoptIdea('${idea.id}')" class="text-xs text-indigo-600 hover:underline">採用</button>`
+                        }
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : `
+                <p class="text-center text-gray-500 text-sm py-4">アイデアを生成してください</p>
+              `}
+            </div>
+          ` : ''}
+        </div>
+      </div>
+      
+      <!-- Right: AI Chat Panel (Monica-like) -->
+      <div class="w-80 flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div class="p-3 border-b dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+          <h3 class="font-semibold flex items-center gap-2">
+            <i class="fas fa-robot"></i>
+            ネタ考案AIアシスタント
+          </h3>
+          <p class="text-xs text-indigo-100 mt-1">設定やアイデアについて相談できます</p>
+        </div>
+        
+        <!-- Chat Messages -->
+        <div id="ideas-chat-messages" class="flex-1 overflow-y-auto p-3 space-y-3">
+          ${(state.ideasChatMessages || []).length > 0 ? 
+            state.ideasChatMessages.map(msg => `
+              <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+                <div class="max-w-[85%] rounded-lg p-3 text-sm ${
+                  msg.role === 'user' 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                }">
+                  ${msg.content.replace(/\n/g, '<br>')}
+                </div>
+              </div>
+            `).join('') : `
+              <div class="text-center text-gray-500 text-sm py-8">
+                <i class="fas fa-comments text-3xl mb-3"></i>
+                <p>AIに質問してみましょう！</p>
+                <p class="text-xs mt-2">例: 「ファンタジー世界で使える魔法のアイデアをください」</p>
+              </div>
+            `
+          }
+        </div>
+        
+        <!-- Chat Input -->
+        <div class="p-3 border-t dark:border-gray-700">
+          <div class="flex gap-2">
+            <input type="text" id="ideas-chat-input" 
+              placeholder="アイデアについて相談..."
+              class="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm"
+              onkeypress="if(event.key === 'Enter') sendIdeasChat()">
+            <button onclick="sendIdeasChat()" 
+              class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              ${state.aiGenerating ? 'disabled' : ''}>
+              ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-paper-plane"></i>'}
+            </button>
+          </div>
+          
+          <!-- Quick prompts -->
+          <div class="flex flex-wrap gap-1 mt-2">
+            <button onclick="sendIdeasChatQuick('キャラクターのアイデアをください')" 
+              class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              キャラ案
+            </button>
+            <button onclick="sendIdeasChatQuick('世界観の設定を提案してください')" 
+              class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              世界観
+            </button>
+            <button onclick="sendIdeasChatQuick('プロットの展開を考えてください')" 
+              class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              展開
+            </button>
+            <button onclick="sendIdeasChatQuick('この物語の山場を提案してください')" 
+              class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              山場
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -1536,16 +1727,22 @@ function renderPlotTab() {
         ${adoptedIdeas.length > 0 ? `
           <div class="space-y-2">
             ${adoptedIdeas.map(idea => `
-              <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-green-300 dark:border-green-700 flex items-start gap-3">
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-green-300 dark:border-green-700 flex items-start gap-3 group">
                 <i class="fas fa-check-circle text-green-500 mt-1"></i>
                 <div class="flex-1">
                   <p class="font-medium text-gray-800 dark:text-gray-200">${idea.title}</p>
                   <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${idea.content || ''}</p>
                 </div>
-                <button onclick="unadoptIdea('${idea.id}')" 
-                  class="text-gray-400 hover:text-red-500 p-1" title="採用を取り消す">
-                  <i class="fas fa-times"></i>
-                </button>
+                <div class="flex gap-1">
+                  <button onclick="copyAdoptedIdea('${idea.id}', '${(idea.title || '').replace(/'/g, "\\'")}', '${(idea.content || '').replace(/'/g, "\\'").replace(/\n/g, '\\n')}')" 
+                    class="text-gray-400 hover:text-indigo-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity" title="コピー">
+                    <i class="fas fa-copy"></i>
+                  </button>
+                  <button onclick="unadoptIdea('${idea.id}')" 
+                    class="text-gray-400 hover:text-red-500 p-1" title="採用を取り消す">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
               </div>
             `).join('')}
           </div>
@@ -1626,6 +1823,220 @@ function getPlotPlaceholder(part) {
     ketsu: '結末、物語の収束...'
   };
   return placeholders[part] || '';
+}
+
+// ============================================
+// Illustration Tab - AI Image Generation
+// ============================================
+function renderIllustrationTab() {
+  const characters = state.characters || [];
+  const generatedImages = state.generatedImages || [];
+  
+  return `
+    <div class="h-full flex gap-4">
+      <!-- Left Panel: Generation Controls -->
+      <div class="w-1/3 flex flex-col gap-4 overflow-y-auto">
+        <!-- NovelAI API Key Setup -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <i class="fas fa-key text-yellow-500"></i>
+            NovelAI API設定
+          </h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium mb-1">APIキー</label>
+              <input type="password" id="novelai-api-key" 
+                value="${localStorage.getItem('novelai_api_key') || ''}"
+                placeholder="NovelAI APIキーを入力"
+                class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
+            </div>
+            <button onclick="saveNovelAIKey()" 
+              class="w-full px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
+              <i class="fas fa-save mr-1"></i>保存
+            </button>
+          </div>
+        </div>
+        
+        <!-- Character Selection for Consistency -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <i class="fas fa-user text-purple-500"></i>
+            キャラクター一貫性
+          </h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium mb-1">登場キャラクター</label>
+              <select id="illustration-character" 
+                class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm"
+                onchange="updateCharacterPrompt()">
+                <option value="">キャラクターを選択（任意）</option>
+                ${characters.map(c => `
+                  <option value="${c.id}" data-description="${(c.description || '').replace(/"/g, '&quot;')}">${c.name}</option>
+                `).join('')}
+              </select>
+              <p class="text-xs text-gray-500 mt-1">選択するとキャラ設定がプロンプトに反映されます</p>
+            </div>
+            
+            <!-- Reference Image for Consistency -->
+            <div>
+              <label class="block text-sm font-medium mb-1">参照画像（キャラ一貫性用）</label>
+              <input type="file" id="reference-image" accept="image/*" 
+                onchange="handleReferenceImage(event)"
+                class="w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+              <div id="reference-preview" class="mt-2 hidden">
+                <img src="" alt="Reference" class="w-20 h-20 object-cover rounded-lg border">
+                <button onclick="clearReferenceImage()" class="text-xs text-red-500 hover:underline mt-1">クリア</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Image Generation Settings -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <i class="fas fa-sliders-h text-blue-500"></i>
+            生成設定
+          </h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium mb-1">画像サイズ</label>
+              <select id="illustration-size" 
+                class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
+                <option value="512x768">512×768（縦長・推奨）</option>
+                <option value="768x512">768×512（横長）</option>
+                <option value="640x640">640×640（正方形）</option>
+                <option value="832x1216">832×1216（高解像度縦）</option>
+                <option value="1216x832">1216×832（高解像度横）</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">スタイル</label>
+              <select id="illustration-style" 
+                class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
+                <option value="anime">アニメ・マンガ風</option>
+                <option value="realistic">リアル・写実的</option>
+                <option value="watercolor">水彩画風</option>
+                <option value="oil">油絵風</option>
+                <option value="sketch">スケッチ風</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">品質（ステップ数）</label>
+              <input type="range" id="illustration-steps" min="20" max="50" value="28" 
+                class="w-full" oninput="document.getElementById('steps-value').textContent = this.value">
+              <div class="flex justify-between text-xs text-gray-500">
+                <span>速い(20)</span>
+                <span id="steps-value">28</span>
+                <span>高品質(50)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Prompt Input -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 flex-1">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <i class="fas fa-magic text-pink-500"></i>
+            プロンプト
+          </h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium mb-1">シーン説明</label>
+              <textarea id="illustration-prompt" rows="4" 
+                placeholder="例: 夕暮れの草原で剣を構える少女、風になびく金髪、決意に満ちた瞳"
+                class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm resize-none"></textarea>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">ネガティブプロンプト</label>
+              <textarea id="illustration-negative" rows="2" 
+                placeholder="除外したい要素（例: low quality, blurry, bad anatomy）"
+                class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm resize-none">low quality, bad anatomy, worst quality, blurry, watermark</textarea>
+            </div>
+            
+            <button onclick="generateIllustration()" 
+              class="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 flex items-center justify-center gap-2"
+              ${state.aiGenerating ? 'disabled' : ''}>
+              ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-wand-magic-sparkles"></i>'}
+              <span>挿絵を生成</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Panel: Generated Images Gallery -->
+      <div class="flex-1 flex flex-col">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 flex-1 overflow-y-auto">
+          <h3 class="font-semibold mb-4 flex items-center gap-2">
+            <i class="fas fa-images text-green-500"></i>
+            生成された挿絵
+            <span class="text-sm text-gray-500">(${generatedImages.length}枚)</span>
+          </h3>
+          
+          ${generatedImages.length > 0 ? `
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              ${generatedImages.map((img, idx) => `
+                <div class="relative group rounded-lg overflow-hidden border dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                  <img src="${img.url}" alt="Generated illustration ${idx + 1}" 
+                    class="w-full aspect-[3/4] object-cover cursor-pointer hover:opacity-90 transition"
+                    onclick="openImageModal('${img.url}', '${(img.prompt || '').replace(/'/g, "\\'")}')">
+                  
+                  <!-- Overlay with actions -->
+                  <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
+                    <button onclick="copyImageToClipboard('${img.url}')" 
+                      class="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" title="コピー">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                    <button onclick="downloadImage('${img.url}', 'illustration_${idx + 1}.png')" 
+                      class="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" title="ダウンロード">
+                      <i class="fas fa-download"></i>
+                    </button>
+                    <button onclick="deleteGeneratedImage(${idx})" 
+                      class="p-2 bg-red-500 rounded-lg text-white hover:bg-red-600" title="削除">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                  
+                  <!-- Character tag if used -->
+                  ${img.character ? `
+                    <div class="absolute top-2 left-2 px-2 py-1 bg-purple-600 text-white text-xs rounded-full">
+                      <i class="fas fa-user mr-1"></i>${img.character}
+                    </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="flex flex-col items-center justify-center h-64 text-gray-500">
+              <i class="fas fa-image text-4xl mb-4"></i>
+              <p>まだ挿絵がありません</p>
+              <p class="text-sm mt-2">左のパネルでプロンプトを入力して生成してください</p>
+            </div>
+          `}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Image Preview Modal -->
+    <div id="image-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onclick="closeImageModal(event)">
+      <div class="relative max-w-4xl max-h-full" onclick="event.stopPropagation()">
+        <img id="modal-image" src="" alt="Preview" class="max-w-full max-h-[80vh] object-contain rounded-lg">
+        <div class="absolute top-2 right-2 flex gap-2">
+          <button onclick="copyImageToClipboard(document.getElementById('modal-image').src)" 
+            class="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" title="コピー">
+            <i class="fas fa-copy"></i>
+          </button>
+          <button onclick="closeImageModal()" 
+            class="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <p id="modal-prompt" class="mt-4 text-white text-sm bg-black/50 p-3 rounded-lg"></p>
+      </div>
+    </div>
+  `;
 }
 
 function renderWritingTab() {
@@ -3339,6 +3750,24 @@ window.adoptIdea = async (ideaId) => {
   }
 };
 
+window.copyAdoptedIdea = async (ideaId, title, content) => {
+  try {
+    const text = `【${title}】\n${content}`;
+    await navigator.clipboard.writeText(text);
+    alert('アイディアをコピーしました！');
+  } catch (e) {
+    console.error('Copy error:', e);
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = `【${title}】\n${content}`;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    alert('アイディアをコピーしました！');
+  }
+};
+
 window.unadoptIdea = async (ideaId) => {
   if (!confirm('このアイデアの採用を取り消しますか？\n（プロットからは手動で削除してください）')) return;
   
@@ -3543,6 +3972,398 @@ window.changeFont = (font) => {
 window.toggleExportMenu = () => {
   $('#export-menu')?.classList.toggle('hidden');
 };
+
+// ============================================
+// Illustration Functions (NovelAI Integration)
+// ============================================
+
+window.saveNovelAIKey = () => {
+  const key = $('#novelai-api-key')?.value;
+  if (key) {
+    localStorage.setItem('novelai_api_key', key);
+    alert('NovelAI APIキーを保存しました');
+  }
+};
+
+window.handleReferenceImage = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      state.referenceImage = e.target.result;
+      const preview = $('#reference-preview');
+      if (preview) {
+        preview.classList.remove('hidden');
+        preview.querySelector('img').src = e.target.result;
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+window.clearReferenceImage = () => {
+  state.referenceImage = null;
+  const preview = $('#reference-preview');
+  if (preview) {
+    preview.classList.add('hidden');
+  }
+  const input = $('#reference-image');
+  if (input) input.value = '';
+};
+
+window.updateCharacterPrompt = () => {
+  const select = $('#illustration-character');
+  const promptArea = $('#illustration-prompt');
+  if (!select || !promptArea) return;
+  
+  const selectedOption = select.options[select.selectedIndex];
+  const description = selectedOption?.getAttribute('data-description');
+  
+  if (description && promptArea.value.trim() === '') {
+    // Auto-fill with character description if prompt is empty
+    promptArea.value = description;
+  }
+};
+
+window.generateIllustration = async () => {
+  const apiKey = localStorage.getItem('novelai_api_key');
+  if (!apiKey) {
+    alert('NovelAI APIキーを設定してください');
+    return;
+  }
+  
+  const prompt = $('#illustration-prompt')?.value;
+  if (!prompt) {
+    alert('プロンプトを入力してください');
+    return;
+  }
+  
+  const negative = $('#illustration-negative')?.value || '';
+  const size = $('#illustration-size')?.value || '512x768';
+  const style = $('#illustration-style')?.value || 'anime';
+  const steps = parseInt($('#illustration-steps')?.value || '28');
+  
+  const [width, height] = size.split('x').map(Number);
+  
+  // Build style prefix based on selection
+  const stylePrompts = {
+    anime: 'masterpiece, best quality, anime style, detailed illustration, ',
+    realistic: 'masterpiece, best quality, photorealistic, detailed, ',
+    watercolor: 'masterpiece, best quality, watercolor painting, artistic, ',
+    oil: 'masterpiece, best quality, oil painting, classical art, ',
+    sketch: 'masterpiece, sketch, pencil drawing, artistic, '
+  };
+  
+  const fullPrompt = stylePrompts[style] + prompt;
+  
+  // Get selected character name for tagging
+  const characterSelect = $('#illustration-character');
+  const characterName = characterSelect?.options[characterSelect.selectedIndex]?.text;
+  const hasCharacter = characterSelect?.value !== '';
+  
+  state.aiGenerating = true;
+  render();
+  
+  try {
+    const response = await fetch('/api/novelai/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        apiKey,
+        prompt: fullPrompt,
+        negative_prompt: negative,
+        width,
+        height,
+        steps,
+        reference_image: state.referenceImage || null
+      })
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || '画像生成に失敗しました');
+    }
+    
+    const result = await response.json();
+    
+    // Add to generated images
+    state.generatedImages.unshift({
+      url: result.imageUrl,
+      prompt: prompt,
+      character: hasCharacter ? characterName : null,
+      createdAt: new Date().toISOString()
+    });
+    
+    // Keep only last 50 images in state
+    if (state.generatedImages.length > 50) {
+      state.generatedImages = state.generatedImages.slice(0, 50);
+    }
+    
+    alert('挿絵を生成しました！');
+  } catch (e) {
+    console.error('Illustration generation error:', e);
+    alert(`挿絵生成エラー: ${e.message}`);
+  }
+  
+  state.aiGenerating = false;
+  render();
+};
+
+window.openImageModal = (url, prompt) => {
+  const modal = $('#image-modal');
+  const img = $('#modal-image');
+  const promptEl = $('#modal-prompt');
+  
+  if (modal && img) {
+    img.src = url;
+    if (promptEl) promptEl.textContent = prompt || '';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+};
+
+window.closeImageModal = (event) => {
+  if (event && event.target !== event.currentTarget) return;
+  const modal = $('#image-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+};
+
+window.copyImageToClipboard = async (url) => {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    
+    await navigator.clipboard.write([
+      new ClipboardItem({ [blob.type]: blob })
+    ]);
+    
+    alert('画像をクリップボードにコピーしました！');
+  } catch (e) {
+    console.error('Copy error:', e);
+    // Fallback: copy URL
+    try {
+      await navigator.clipboard.writeText(url);
+      alert('画像URLをコピーしました（画像の直接コピーは非対応のブラウザです）');
+    } catch (e2) {
+      alert('コピーに失敗しました');
+    }
+  }
+};
+
+window.downloadImage = async (url, filename) => {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  } catch (e) {
+    console.error('Download error:', e);
+    alert('ダウンロードに失敗しました');
+  }
+};
+
+window.deleteGeneratedImage = (index) => {
+  if (confirm('この挿絵を削除しますか？')) {
+    state.generatedImages.splice(index, 1);
+    render();
+  }
+};
+
+// ============================================
+// Ideas Tab Functions (Word Processor Style)
+// ============================================
+
+window.toggleStoryOutline = () => {
+  state.showStoryOutline = !state.showStoryOutline;
+  render();
+};
+
+window.toggleQuickIdeas = () => {
+  state.showQuickIdeas = !state.showQuickIdeas;
+  render();
+};
+
+window.updateStoryOutline = (field, value) => {
+  if (!state.storyOutline) {
+    state.storyOutline = { characters: '', terminology: '', worldSetting: '', storyGoal: '', episodes: '' };
+  }
+  state.storyOutline[field] = value;
+};
+
+window.saveStoryOutline = async () => {
+  if (!state.currentProject) {
+    alert('プロジェクトを選択してください');
+    return;
+  }
+  
+  try {
+    // Save story outline to project's world settings
+    const outlineData = state.storyOutline || {};
+    
+    // Save each section as a world setting
+    const sections = [
+      { category: 'characters', title: 'キャラクター設定', content: outlineData.characters },
+      { category: 'terminology', title: '専門用語', content: outlineData.terminology },
+      { category: 'world', title: '世界観設定', content: outlineData.worldSetting },
+      { category: 'story_goal', title: '描きたい物語', content: outlineData.storyGoal },
+      { category: 'episodes', title: '各話アウトライン', content: outlineData.episodes }
+    ];
+    
+    for (const section of sections) {
+      if (section.content) {
+        await fetch(`/api/projects/${state.currentProject.id}/world-settings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(section)
+        });
+      }
+    }
+    
+    alert('アウトラインを保存しました');
+  } catch (e) {
+    console.error('Save outline error:', e);
+    alert('保存に失敗しました');
+  }
+};
+
+window.updateProjectGenre = async () => {
+  if (!state.currentProject) return;
+  
+  const checkboxes = document.querySelectorAll('input[name="project-genre"]:checked');
+  const genres = Array.from(checkboxes).map(cb => cb.value).join(',');
+  
+  try {
+    await fetch(`/api/projects/${state.currentProject.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ genre: genres })
+    });
+    
+    state.currentProject.genre = genres;
+  } catch (e) {
+    console.error('Update genre error:', e);
+  }
+};
+
+window.updateIdeasDocumentCount = (value) => {
+  state.ideasDocument = value;
+  const counter = $('#ideas-doc-chars');
+  if (counter) {
+    counter.textContent = `${value.length} 文字`;
+  }
+};
+
+window.saveIdeasDocument = async () => {
+  if (!state.currentProject) {
+    alert('プロジェクトを選択してください');
+    return;
+  }
+  
+  try {
+    await fetch(`/api/projects/${state.currentProject.id}/world-settings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        category: 'ideas_document',
+        title: 'ネタ・プロットメモ',
+        content: state.ideasDocument
+      })
+    });
+    
+    alert('メモを保存しました');
+  } catch (e) {
+    console.error('Save ideas document error:', e);
+    alert('保存に失敗しました');
+  }
+};
+
+window.sendIdeasChat = async () => {
+  const input = $('#ideas-chat-input');
+  if (!input || !input.value.trim()) return;
+  
+  const message = input.value.trim();
+  input.value = '';
+  
+  await sendIdeasChatMessage(message);
+};
+
+window.sendIdeasChatQuick = async (prompt) => {
+  await sendIdeasChatMessage(prompt);
+};
+
+async function sendIdeasChatMessage(message) {
+  if (!state.ideasChatMessages) {
+    state.ideasChatMessages = [];
+  }
+  
+  // Add user message
+  state.ideasChatMessages.push({ role: 'user', content: message });
+  render();
+  
+  // Scroll to bottom
+  setTimeout(() => {
+    const container = $('#ideas-chat-messages');
+    if (container) container.scrollTop = container.scrollHeight;
+  }, 100);
+  
+  state.aiGenerating = true;
+  render();
+  
+  try {
+    // Build context from story outline
+    const outline = state.storyOutline || {};
+    const context = {
+      characters: state.characters || [],
+      worldSettings: state.worldSettings || [],
+      plot: state.plot,
+      storyOutline: outline,
+      ideasDocument: state.ideasDocument,
+      projectGenres: state.currentProject?.genre
+    };
+    
+    const response = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'ideas_chat',
+        content: message,
+        context,
+        sessionId: state.sessionId
+      })
+    });
+    
+    if (!response.ok) throw new Error('Chat failed');
+    
+    const result = await response.json();
+    
+    // Add AI response
+    state.ideasChatMessages.push({ role: 'assistant', content: result.response });
+    
+  } catch (e) {
+    console.error('Ideas chat error:', e);
+    state.ideasChatMessages.push({ 
+      role: 'assistant', 
+      content: 'すみません、エラーが発生しました。もう一度お試しください。' 
+    });
+  }
+  
+  state.aiGenerating = false;
+  render();
+  
+  // Scroll to bottom again
+  setTimeout(() => {
+    const container = $('#ideas-chat-messages');
+    if (container) container.scrollTop = container.scrollHeight;
+  }, 100);
+}
 
 // Text Style Functions (Google Docs style)
 window.toggleStyleMenu = () => {

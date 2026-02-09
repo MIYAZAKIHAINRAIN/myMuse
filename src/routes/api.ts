@@ -812,4 +812,140 @@ api.post('/ai/generate-achievements', async (c) => {
   }
 });
 
+// AI Chat endpoint for Ideas tab
+api.post('/ai/chat', async (c) => {
+  const { action, content, context, sessionId } = await c.req.json();
+  
+  try {
+    // Build system context from story outline and project settings
+    let systemContext = '';
+    
+    if (context) {
+      if (context.storyOutline) {
+        const outline = context.storyOutline;
+        if (outline.characters) systemContext += `\n【キャラクター設定】\n${outline.characters}`;
+        if (outline.terminology) systemContext += `\n【専門用語】\n${outline.terminology}`;
+        if (outline.worldSetting) systemContext += `\n【世界観】\n${outline.worldSetting}`;
+        if (outline.storyGoal) systemContext += `\n【描きたい物語】\n${outline.storyGoal}`;
+        if (outline.episodes) systemContext += `\n【各話アウトライン】\n${outline.episodes}`;
+      }
+      
+      if (context.projectGenres) {
+        systemContext += `\n【ジャンル】${context.projectGenres}`;
+      }
+      
+      if (context.ideasDocument) {
+        systemContext += `\n【ネタ・プロットメモ】\n${context.ideasDocument.slice(0, 1000)}`;
+      }
+    }
+    
+    const result = await callAI(c.env, {
+      action: action || 'ideas_chat',
+      content: content,
+      context: {
+        ...context,
+        systemContext
+      }
+    });
+    
+    return c.json({ response: result });
+  } catch (error: any) {
+    console.error('AI Chat Error:', error);
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+// ============================================
+// NovelAI Image Generation
+// ============================================
+
+api.post('/novelai/generate', async (c) => {
+  const { apiKey, prompt, negative_prompt, width, height, steps, reference_image } = await c.req.json();
+  
+  if (!apiKey) {
+    return c.json({ error: 'NovelAI API key is required' }, 400);
+  }
+  
+  try {
+    // NovelAI API endpoint for image generation
+    const response = await fetch('https://image.novelai.net/ai/generate-image', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        input: prompt,
+        model: 'nai-diffusion-3', // NAI Diffusion Anime V3
+        action: reference_image ? 'img2img' : 'generate',
+        parameters: {
+          width: width || 512,
+          height: height || 768,
+          scale: 7,
+          sampler: 'k_euler_ancestral',
+          steps: steps || 28,
+          seed: Math.floor(Math.random() * 4294967295),
+          n_samples: 1,
+          ucPreset: 0,
+          qualityToggle: true,
+          negative_prompt: negative_prompt || 'low quality, bad anatomy, worst quality',
+          ...(reference_image && {
+            image: reference_image.replace(/^data:image\/\w+;base64,/, ''),
+            strength: 0.6,
+            noise: 0.1
+          })
+        }
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('NovelAI API error:', errorText);
+      return c.json({ error: `NovelAI API error: ${response.status}` }, response.status);
+    }
+    
+    // NovelAI returns a zip file containing the image
+    const buffer = await response.arrayBuffer();
+    
+    // For simplicity, we'll extract the PNG from the zip
+    // The response is actually a zip file with the image inside
+    // We'll use a simple approach to find the PNG data
+    const bytes = new Uint8Array(buffer);
+    
+    // Find PNG signature (89 50 4E 47 0D 0A 1A 0A)
+    let pngStart = -1;
+    for (let i = 0; i < bytes.length - 8; i++) {
+      if (bytes[i] === 0x89 && bytes[i+1] === 0x50 && bytes[i+2] === 0x4E && bytes[i+3] === 0x47) {
+        pngStart = i;
+        break;
+      }
+    }
+    
+    if (pngStart === -1) {
+      // Fallback: treat entire response as image data
+      const base64 = btoa(String.fromCharCode(...bytes));
+      return c.json({ imageUrl: `data:image/png;base64,${base64}` });
+    }
+    
+    // Find PNG end (IEND chunk: 49 45 4E 44 AE 42 60 82)
+    let pngEnd = bytes.length;
+    for (let i = pngStart; i < bytes.length - 8; i++) {
+      if (bytes[i] === 0x49 && bytes[i+1] === 0x45 && bytes[i+2] === 0x4E && bytes[i+3] === 0x44 &&
+          bytes[i+4] === 0xAE && bytes[i+5] === 0x42 && bytes[i+6] === 0x60 && bytes[i+7] === 0x82) {
+        pngEnd = i + 8;
+        break;
+      }
+    }
+    
+    const pngBytes = bytes.slice(pngStart, pngEnd);
+    const base64 = btoa(String.fromCharCode(...pngBytes));
+    
+    return c.json({ imageUrl: `data:image/png;base64,${base64}` });
+  } catch (error: any) {
+    console.error('NovelAI Generation Error:', error);
+    return c.json({ error: error.message }, 500);
+  }
+});
+
 export default api;
