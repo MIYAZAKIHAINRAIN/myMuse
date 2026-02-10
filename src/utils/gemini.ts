@@ -240,6 +240,35 @@ ${options?.systemContext || ''}
 
 ユーザーの質問: ${content}`;
     
+    case 'analysis_chat':
+      const persona = options?.persona || 'あなたは客観的で冷静な文芸批評家です。';
+      const writing = options?.writing || '';
+      const plot = options?.plot || '';
+      const chatHistory = options?.chatHistory || [];
+      
+      // Build chat history context
+      let historyContext = '';
+      if (chatHistory.length > 0) {
+        historyContext = '\n【これまでの会話】\n' + chatHistory.map((msg: any) => 
+          `${msg.role === 'user' ? 'ユーザー' : 'AI'}: ${msg.content}`
+        ).join('\n');
+      }
+      
+      return `${persona}
+
+ユーザーの作品について、分析・批評・アドバイスを提供してください。
+質問には丁寧に答え、具体的な改善提案があれば示してください。
+回答は適度な長さ（300-500文字程度）で、読みやすく構成してください。
+
+【作品の内容】
+${writing.substring(0, 6000)}
+
+${plot ? `【プロット】\n${plot}` : ''}
+${historyContext}
+
+【ユーザーの質問】
+${content}`;
+    
     default:
       return content;
   }

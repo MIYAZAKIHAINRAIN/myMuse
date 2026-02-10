@@ -35,6 +35,10 @@ const state = {
   ideasChatMessages: [], // Chat messages for ideas AI
   showStoryOutline: true, // Show/hide story outline panel
   showQuickIdeas: false, // Show/hide quick ideas panel
+  analysisChatMessages: [], // Chat messages for analysis AI
+  analysisPersona: 'neutral', // Current analysis persona
+  analysisChartsOpen: true, // Show/hide analysis charts
+  expandedPanel: null, // Currently expanded panel
   adoptedIdeasText: '', // Word processor text for adopted ideas
   showAdoptedIdeasPreview: false, // Show/hide adopted ideas preview
   searchResults: [],
@@ -1495,49 +1499,69 @@ function renderIdeasTab() {
             
             <!-- Story Elements -->
             <div class="space-y-3">
-              <div>
+              <div class="relative">
                 <label class="flex items-center gap-1 text-sm font-medium mb-1">
                   <i class="fas fa-users text-blue-500"></i>キャラクター
                 </label>
                 <textarea id="outline-characters" rows="3" placeholder="主人公、ヒロイン、敵役など..."
                   class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                   oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters}</textarea>
+                <button onclick="expandTextarea('outline-characters', 'キャラクター')" 
+                  class="absolute bottom-1 right-1 p-0.5 text-gray-400 hover:text-indigo-600 text-xs" title="拡大">
+                  <i class="fas fa-expand"></i>
+                </button>
               </div>
               
-              <div>
+              <div class="relative">
                 <label class="flex items-center gap-1 text-sm font-medium mb-1">
                   <i class="fas fa-book text-green-500"></i>専門用語
                 </label>
                 <textarea id="outline-terminology" rows="2" placeholder="魔法、技術、組織名など..."
                   class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                   oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology}</textarea>
+                <button onclick="expandTextarea('outline-terminology', '専門用語')" 
+                  class="absolute bottom-1 right-1 p-0.5 text-gray-400 hover:text-indigo-600 text-xs" title="拡大">
+                  <i class="fas fa-expand"></i>
+                </button>
               </div>
               
-              <div>
+              <div class="relative">
                 <label class="flex items-center gap-1 text-sm font-medium mb-1">
                   <i class="fas fa-globe text-yellow-500"></i>世界観
                 </label>
                 <textarea id="outline-worldSetting" rows="3" placeholder="舞台設定、時代、ルールなど..."
                   class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                   oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting}</textarea>
+                <button onclick="expandTextarea('outline-worldSetting', '世界観')" 
+                  class="absolute bottom-1 right-1 p-0.5 text-gray-400 hover:text-indigo-600 text-xs" title="拡大">
+                  <i class="fas fa-expand"></i>
+                </button>
               </div>
               
-              <div>
+              <div class="relative">
                 <label class="flex items-center gap-1 text-sm font-medium mb-1">
                   <i class="fas fa-bullseye text-red-500"></i>描きたい物語
                 </label>
                 <textarea id="outline-storyGoal" rows="3" placeholder="テーマ、メッセージ、結末のイメージ..."
                   class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                   oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal}</textarea>
+                <button onclick="expandTextarea('outline-storyGoal', '描きたい物語')" 
+                  class="absolute bottom-1 right-1 p-0.5 text-gray-400 hover:text-indigo-600 text-xs" title="拡大">
+                  <i class="fas fa-expand"></i>
+                </button>
               </div>
               
-              <div>
+              <div class="relative">
                 <label class="flex items-center gap-1 text-sm font-medium mb-1">
                   <i class="fas fa-list-ol text-purple-500"></i>各話アウトライン
                 </label>
                 <textarea id="outline-episodes" rows="4" placeholder="第1話: xxx&#10;第2話: xxx&#10;..."
                   class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                   oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes}</textarea>
+                <button onclick="expandTextarea('outline-episodes', '各話アウトライン')" 
+                  class="absolute bottom-1 right-1 p-0.5 text-gray-400 hover:text-indigo-600 text-xs" title="拡大">
+                  <i class="fas fa-expand"></i>
+                </button>
               </div>
             </div>
             
@@ -1574,15 +1598,22 @@ function renderIdeasTab() {
           </div>
           
           <!-- Document Editor -->
-          <textarea id="ideas-document" 
-            class="flex-1 w-full p-4 text-sm resize-none focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-            placeholder="ここにネタやプロットのアイデアを自由に書き込んでください...
+          <div class="flex-1 relative">
+            <textarea id="ideas-document" 
+              class="w-full h-full p-4 text-sm resize-none focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+              placeholder="ここにネタやプロットのアイデアを自由に書き込んでください...
 
 【使い方のヒント】
 ・右側のAIチャットで相談しながらアイデアを膨らませましょう
 ・左のアウトラインに設定を書くと、AIがより良い提案をします
 ・プロット・ライティング・分析タブでもこの設定が反映されます"
-            oninput="updateIdeasDocumentCount(this.value)">${state.ideasDocument || ''}</textarea>
+              oninput="updateIdeasDocumentCount(this.value)">${state.ideasDocument || ''}</textarea>
+            <button onclick="expandTextarea('ideas-document', 'ネタ・プロットメモ')" 
+              class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+              title="拡大表示">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
         </div>
         
         <!-- Quick Ideas Section (collapsed by default) -->
@@ -1754,9 +1785,10 @@ function renderPlotTab() {
           </div>
         </div>
         
-        <textarea id="adopted-ideas-editor" 
-          class="w-full p-4 min-h-[200px] text-sm resize-none focus:outline-none bg-transparent dark:text-gray-100"
-          placeholder="ここにアイディアを自由に記述できます...
+        <div class="relative">
+          <textarea id="adopted-ideas-editor" 
+            class="w-full p-4 min-h-[200px] text-sm resize-none focus:outline-none bg-transparent dark:text-gray-100"
+            placeholder="ここにアイディアを自由に記述できます...
 
 【使い方】
 ・直接アイディアを書き込めます
@@ -1769,7 +1801,13 @@ function renderPlotTab() {
 
 【物語のテーマ】
 友情と成長、自己犠牲の意味"
-          oninput="updateAdoptedIdeasCount(this.value)">${state.adoptedIdeasText || ''}</textarea>
+            oninput="updateAdoptedIdeasCount(this.value)">${state.adoptedIdeasText || ''}</textarea>
+          <button onclick="expandTextarea('adopted-ideas-editor', '採用したアイディア')" 
+            class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded shadow-sm"
+            title="拡大表示">
+            <i class="fas fa-expand text-sm"></i>
+          </button>
+        </div>
       </div>
       
       <!-- Quick adopted ideas preview (collapsible) -->
@@ -1838,11 +1876,16 @@ function renderPlotStructure(template, structure) {
     return `
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         ${['ki', 'sho', 'ten', 'ketsu'].map(part => `
-          <div class="space-y-2">
+          <div class="space-y-2 relative">
             <label class="block font-medium text-indigo-600">${t(`plot.${part}`)}</label>
             <textarea id="plot-${part}" rows="4" 
               class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               placeholder="${getPlotPlaceholder(part)}">${structure[part] || ''}</textarea>
+            <button onclick="expandTextarea('plot-${part}', '${t(`plot.${part}`)}')" 
+              class="absolute bottom-2 right-2 p-1 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded"
+              title="拡大表示">
+              <i class="fas fa-expand text-sm"></i>
+            </button>
           </div>
         `).join('')}
       </div>
@@ -1851,10 +1894,15 @@ function renderPlotStructure(template, structure) {
     return `
       <div class="space-y-4">
         ${['act1', 'act2', 'act3'].map(part => `
-          <div class="space-y-2">
+          <div class="space-y-2 relative">
             <label class="block font-medium text-indigo-600">${t(`plot.${part}`)}</label>
             <textarea id="plot-${part}" rows="3"
               class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none">${structure[part] || ''}</textarea>
+            <button onclick="expandTextarea('plot-${part}', '${t(`plot.${part}`)}')" 
+              class="absolute bottom-2 right-2 p-1 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded"
+              title="拡大表示">
+              <i class="fas fa-expand text-sm"></i>
+            </button>
           </div>
         `).join('')}
       </div>
@@ -2276,7 +2324,7 @@ function renderWritingTab() {
         </div>
         
         <!-- Editor -->
-        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden relative">
           <textarea id="editor" 
             class="w-full h-full p-6 resize-none focus:outline-none dark:bg-gray-800 ${isVertical ? 'writing-vertical' : ''}"
             style="font-family: '${writing?.font_family || 'Noto Sans JP'}', sans-serif; font-size: 16px; line-height: 2;"
@@ -2291,6 +2339,12 @@ function renderWritingTab() {
             oninput="autoSave(this.value); updateOutline();"
             onclick="detectAndUpdateStyleLabel()"
             onkeyup="detectAndUpdateStyleLabel()">${writing?.content || ''}</textarea>
+          <!-- Expand Button (bottom-right) -->
+          <button onclick="expandTextarea('editor', 'エディタ')" 
+            class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+            title="拡大表示">
+            <i class="fas fa-expand"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -2430,39 +2484,213 @@ function parseHeadings(content) {
 }
 
 function renderAnalysisTab() {
+  // ペルソナ選択オプション
+  const personas = [
+    { id: 'neutral', name: '客観的な批評家', icon: 'fa-user-tie', desc: '冷静で客観的な分析' },
+    { id: 'encouraging', name: '応援する編集者', icon: 'fa-heart', desc: '励ましながらアドバイス' },
+    { id: 'strict', name: '厳格な文芸評論家', icon: 'fa-gavel', desc: '厳しくも的確な指摘' },
+    { id: 'reader', name: '熱心な読者', icon: 'fa-book-reader', desc: '読者目線での感想' },
+    { id: 'mentor', name: '経験豊富な作家', icon: 'fa-feather-alt', desc: '先輩作家としてのアドバイス' }
+  ];
+  
+  const currentPersona = state.analysisPersona || 'neutral';
+  const selectedPersona = personas.find(p => p.id === currentPersona);
+  
   return `
-    <div class="max-w-4xl mx-auto space-y-6">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold mb-4"><i class="fas fa-chart-line mr-2 text-indigo-500"></i>${t('analysis.emotionCurve')}</h3>
-        <div class="h-64">
-          <canvas id="emotion-chart"></canvas>
-        </div>
-      </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-          <h3 class="text-lg font-semibold mb-4"><i class="fas fa-chart-pie mr-2 text-indigo-500"></i>${t('analysis.radar')}</h3>
-          <div class="h-64">
-            <canvas id="radar-chart"></canvas>
+    <div class="h-full flex flex-col">
+      <!-- メイン: チャットエリア -->
+      <div class="flex-1 flex gap-4 min-h-0">
+        <!-- ペルソナ設定サイドバー（デスクトップのみ） -->
+        <div class="w-56 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hidden lg:flex flex-col">
+          <div class="p-3 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="font-semibold text-sm flex items-center gap-2">
+              <i class="fas fa-masks-theater text-purple-500"></i>
+              批評家ペルソナ
+            </h3>
+          </div>
+          <div class="overflow-y-auto flex-1 p-2 space-y-1">
+            ${personas.map(p => `
+              <button onclick="setAnalysisPersona('${p.id}')"
+                class="w-full text-left p-2 rounded-lg text-sm transition ${currentPersona === p.id ? 'bg-purple-100 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-600' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}">
+                <div class="flex items-center gap-2">
+                  <i class="fas ${p.icon} ${currentPersona === p.id ? 'text-purple-600' : 'text-gray-400'}"></i>
+                  <span class="${currentPersona === p.id ? 'text-purple-700 dark:text-purple-300 font-medium' : ''}">${p.name}</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1 ml-6">${p.desc}</p>
+              </button>
+            `).join('')}
+          </div>
+          <div class="p-3 border-t border-gray-200 dark:border-gray-700">
+            <button onclick="clearAnalysisChat()" 
+              class="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+              <i class="fas fa-trash-alt mr-1"></i>履歴をクリア
+            </button>
           </div>
         </div>
         
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-          <h3 class="text-lg font-semibold mb-4"><i class="fas fa-users mr-2 text-indigo-500"></i>${t('analysis.reviews')}</h3>
-          <div id="reviews-container" class="space-y-3">
-            <p class="text-gray-500 text-sm">分析ボタンを押して評価を生成してください</p>
+        <!-- チャットエリア -->
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm flex flex-col overflow-hidden">
+          <!-- ヘッダー：モバイルペルソナ選択 + 情報 -->
+          <div class="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fas ${selectedPersona.icon} text-purple-500"></i>
+              <span class="font-medium text-sm">${selectedPersona.name}</span>
+            </div>
+            <!-- モバイル用ペルソナ切り替え -->
+            <div class="lg:hidden">
+              <select onchange="setAnalysisPersona(this.value)" 
+                class="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 dark:bg-gray-700">
+                ${personas.map(p => `<option value="${p.id}" ${currentPersona === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}
+              </select>
+            </div>
+            <button onclick="handleAnalyze()" 
+              class="px-3 py-1 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 flex items-center gap-1"
+              ${state.aiGenerating ? 'disabled' : ''}>
+              ${state.aiGenerating ? '<div class="spinner w-4 h-4"></div>' : '<i class="fas fa-magic"></i>'}
+              自動分析
+            </button>
+          </div>
+          
+          <!-- チャットメッセージ -->
+          <div id="analysis-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4">
+            ${renderAnalysisChatMessages()}
+          </div>
+          
+          <!-- 入力エリア -->
+          <div class="p-3 border-t border-gray-200 dark:border-gray-700">
+            <form id="analysis-chat-form" class="flex gap-2">
+              <input type="text" id="analysis-chat-input" 
+                placeholder="作品について質問・相談..."
+                class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 text-sm">
+              <button type="submit" 
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                ${state.aiGenerating ? 'disabled' : ''}>
+                ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-paper-plane"></i>'}
+              </button>
+            </form>
           </div>
         </div>
       </div>
       
-      <button onclick="handleAnalyze()" 
-        class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2"
-        ${state.aiGenerating ? 'disabled' : ''}>
-        ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-search-plus"></i>'}
-        <span>${t('analysis.analyze')}</span>
-      </button>
+      <!-- 下部: 分析チャート（折りたたみ式） -->
+      <div class="mt-4">
+        <button onclick="toggleAnalysisCharts()" 
+          class="w-full flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700">
+          <span class="font-medium flex items-center gap-2">
+            <i class="fas fa-chart-bar text-indigo-500"></i>
+            分析チャート
+          </span>
+          <i class="fas ${state.analysisChartsOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-gray-400"></i>
+        </button>
+        
+        ${state.analysisChartsOpen ? `
+          <div class="mt-2 grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- 感情曲線 -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 relative">
+              <button onclick="toggleExpandPanel('emotion-chart-panel')" 
+                class="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <i class="fas fa-expand"></i>
+              </button>
+              <h3 class="text-sm font-semibold mb-2 flex items-center gap-2">
+                <i class="fas fa-chart-line text-indigo-500"></i>${t('analysis.emotionCurve')}
+              </h3>
+              <div class="h-48">
+                <canvas id="emotion-chart"></canvas>
+              </div>
+            </div>
+            
+            <!-- 作品成分チャート -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 relative">
+              <button onclick="toggleExpandPanel('radar-chart-panel')" 
+                class="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <i class="fas fa-expand"></i>
+              </button>
+              <h3 class="text-sm font-semibold mb-2 flex items-center gap-2">
+                <i class="fas fa-chart-pie text-indigo-500"></i>${t('analysis.radar')}
+              </h3>
+              <div class="h-48">
+                <canvas id="radar-chart"></canvas>
+              </div>
+            </div>
+            
+            <!-- ペルソナレビュー -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 relative">
+              <button onclick="toggleExpandPanel('reviews-panel')" 
+                class="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <i class="fas fa-expand"></i>
+              </button>
+              <h3 class="text-sm font-semibold mb-2 flex items-center gap-2">
+                <i class="fas fa-users text-indigo-500"></i>${t('analysis.reviews')}
+              </h3>
+              <div id="reviews-container" class="h-48 overflow-y-auto space-y-2 text-sm">
+                <p class="text-gray-500 text-xs">自動分析ボタンで生成</p>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+      </div>
     </div>
   `;
+}
+
+// 分析チャットメッセージのレンダリング
+function renderAnalysisChatMessages() {
+  if (!state.analysisChatMessages || state.analysisChatMessages.length === 0) {
+    return `
+      <div class="text-center text-gray-500 py-8">
+        <i class="fas fa-comments text-4xl mb-4 opacity-50"></i>
+        <p class="font-medium">作品を分析・批評します</p>
+        <p class="text-sm mt-2">「自動分析」で全体分析、または質問を入力してください</p>
+        <div class="mt-4 flex flex-wrap justify-center gap-2">
+          <button onclick="askAnalysisQuestion('この作品の強みは何ですか？')" 
+            class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm hover:bg-purple-200">
+            強みを教えて
+          </button>
+          <button onclick="askAnalysisQuestion('改善点を具体的に教えてください')" 
+            class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm hover:bg-purple-200">
+            改善点は？
+          </button>
+          <button onclick="askAnalysisQuestion('読者がこの作品に惹かれるポイントは？')" 
+            class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm hover:bg-purple-200">
+            読者視点で
+          </button>
+        </div>
+      </div>
+    `;
+  }
+  
+  const personas = {
+    neutral: { name: '批評家', icon: 'fa-user-tie', color: 'text-gray-600' },
+    encouraging: { name: '編集者', icon: 'fa-heart', color: 'text-pink-500' },
+    strict: { name: '評論家', icon: 'fa-gavel', color: 'text-red-600' },
+    reader: { name: '読者', icon: 'fa-book-reader', color: 'text-blue-500' },
+    mentor: { name: '先輩作家', icon: 'fa-feather-alt', color: 'text-green-600' }
+  };
+  
+  return state.analysisChatMessages.map(msg => {
+    if (msg.role === 'user') {
+      return `
+        <div class="flex justify-end">
+          <div class="max-w-[80%] bg-purple-600 text-white rounded-2xl px-4 py-2">
+            <p class="whitespace-pre-wrap">${msg.content}</p>
+          </div>
+        </div>
+      `;
+    } else {
+      const persona = personas[msg.persona || 'neutral'];
+      return `
+        <div class="flex justify-start gap-2">
+          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+            <i class="fas ${persona.icon} ${persona.color} text-sm"></i>
+          </div>
+          <div class="max-w-[80%] bg-gray-100 dark:bg-gray-700 rounded-2xl px-4 py-2">
+            <p class="text-xs ${persona.color} mb-1">${persona.name}</p>
+            <p class="whitespace-pre-wrap">${msg.content}</p>
+          </div>
+        </div>
+      `;
+    }
+  }).join('');
 }
 
 function renderConsultationTab() {
@@ -3504,6 +3732,23 @@ function attachEventListeners() {
     });
   }
   
+  // Analysis chat form
+  const analysisChatForm = $('#analysis-chat-form');
+  if (analysisChatForm) {
+    const newAnalysisForm = analysisChatForm.cloneNode(true);
+    analysisChatForm.parentNode.replaceChild(newAnalysisForm, analysisChatForm);
+    
+    newAnalysisForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = newAnalysisForm.querySelector('#analysis-chat-input');
+      if (input && input.value.trim()) {
+        const message = input.value;
+        input.value = '';
+        await sendAnalysisChatMessage(message);
+      }
+    });
+  }
+  
   // Global search
   const searchInput = $('#global-search');
   if (searchInput) {
@@ -4124,27 +4369,31 @@ window.toggleExportMenu = () => {
 // Illustration Functions (Project-based)
 // ============================================
 
-// Detect characters from project outline and writings
+// Detect characters from project outline, writings, and memos
 function detectCharactersFromProject() {
   const characters = [];
+  const addedNames = new Set(); // Track added names to avoid duplicates
+  
+  const addCharacter = (name, description = '') => {
+    const trimmedName = name.trim();
+    if (trimmedName && trimmedName.length > 1 && trimmedName.length < 20 && !addedNames.has(trimmedName)) {
+      addedNames.add(trimmedName);
+      characters.push({ name: trimmedName, description: description.trim() });
+    }
+  };
   
   // 1. From story outline (キャラクター設定)
   if (state.storyOutline?.characters) {
     const charText = state.storyOutline.characters;
-    // Parse character entries (line by line or comma separated)
     const lines = charText.split(/[\n,、]/);
     lines.forEach(line => {
       const trimmed = line.trim();
       if (trimmed && trimmed.length > 0) {
-        // Try to extract name and description
         const match = trimmed.match(/^([^:：（(]+)[:：（(]?(.*)$/);
         if (match) {
-          characters.push({
-            name: match[1].trim(),
-            description: match[2] ? match[2].replace(/[）)]$/, '').trim() : ''
-          });
+          addCharacter(match[1], match[2] ? match[2].replace(/[）)]$/, '') : '');
         } else if (trimmed.length < 20) {
-          characters.push({ name: trimmed, description: '' });
+          addCharacter(trimmed);
         }
       }
     });
@@ -4153,24 +4402,80 @@ function detectCharactersFromProject() {
   // 2. From registered characters in state
   if (state.characters && state.characters.length > 0) {
     state.characters.forEach(c => {
-      if (!characters.find(ch => ch.name === c.name)) {
-        characters.push({ name: c.name, description: c.description || '' });
-      }
+      addCharacter(c.name, c.description || '');
     });
   }
   
-  // 3. From ideas document (look for 「」 quoted names)
+  // 3. From ideas document (ネタ・プロットメモ)
   if (state.ideasDocument) {
-    const nameMatches = state.ideasDocument.match(/「([^」]{1,10})」/g) || [];
-    nameMatches.forEach(match => {
+    // Look for 「」 quoted names
+    const quoteMatches = state.ideasDocument.match(/「([^」]{1,10})」/g) || [];
+    quoteMatches.forEach(match => {
       const name = match.replace(/[「」]/g, '');
-      if (name.length > 1 && name.length < 10 && !characters.find(c => c.name === name)) {
-        characters.push({ name, description: '' });
+      addCharacter(name);
+    });
+    
+    // Look for character-like patterns: "名前（説明）" or "名前:説明"
+    const charPatterns = state.ideasDocument.match(/^([^:：（(\n]{2,10})[:：（(]([^）)\n]{5,50})[）)]?$/gm) || [];
+    charPatterns.forEach(pattern => {
+      const match = pattern.match(/^([^:：（(]+)[:：（(](.+)/);
+      if (match) {
+        addCharacter(match[1], match[2].replace(/[）)]$/, ''));
+      }
+    });
+    
+    // Look for 【キャラ名】 patterns
+    const bracketMatches = state.ideasDocument.match(/【([^】]{1,10})】/g) || [];
+    bracketMatches.forEach(match => {
+      const name = match.replace(/[【】]/g, '');
+      if (!name.includes('設定') && !name.includes('世界') && !name.includes('目的')) {
+        addCharacter(name);
       }
     });
   }
   
-  return characters.slice(0, 20); // Limit to 20 characters
+  // 4. From adopted ideas text
+  if (state.adoptedIdeasText) {
+    // Look for 「」 quoted names
+    const quoteMatches = state.adoptedIdeasText.match(/「([^」]{1,10})」/g) || [];
+    quoteMatches.forEach(match => {
+      const name = match.replace(/[「」]/g, '');
+      addCharacter(name);
+    });
+    
+    // Look for 【】 patterns (excluding common section headers)
+    const bracketMatches = state.adoptedIdeasText.match(/【([^】]{1,10})】/g) || [];
+    bracketMatches.forEach(match => {
+      const name = match.replace(/[【】]/g, '');
+      if (!name.includes('設定') && !name.includes('世界') && !name.includes('目的') && 
+          !name.includes('テーマ') && !name.includes('あらすじ')) {
+        addCharacter(name);
+      }
+    });
+  }
+  
+  // 5. From current writing content
+  if (state.currentWriting?.content) {
+    const content = state.currentWriting.content.slice(0, 5000); // Limit for performance
+    
+    // Look for dialogue patterns: "「〜」と○○が言った" or "○○は「〜」"
+    const dialoguePatterns = content.match(/([^「」\s]{1,8})(?:は|が|の)「/g) || [];
+    dialoguePatterns.forEach(pattern => {
+      const name = pattern.replace(/(?:は|が|の)「$/, '');
+      addCharacter(name);
+    });
+    
+    // Look for action patterns: "○○は〜した"
+    const actionPatterns = content.match(/「[^」]+」と([^「」\s]{1,8})(?:が|は)/g) || [];
+    actionPatterns.forEach(pattern => {
+      const match = pattern.match(/と([^「」\s]{1,8})(?:が|は)$/);
+      if (match) {
+        addCharacter(match[1]);
+      }
+    });
+  }
+  
+  return characters.slice(0, 30); // Limit to 30 characters
 }
 
 window.handleReferenceFiles = (event) => {
@@ -4380,6 +4685,293 @@ window.deleteGeneratedImage = (index) => {
     state.generatedImages.splice(index, 1);
     render();
   }
+};
+
+// ============================================
+// Analysis Chat Functions (LLM-style)
+// ============================================
+
+window.setAnalysisPersona = (personaId) => {
+  state.analysisPersona = personaId;
+  render();
+};
+
+window.toggleAnalysisCharts = () => {
+  state.analysisChartsOpen = !state.analysisChartsOpen;
+  render();
+  // Re-initialize charts if opened
+  if (state.analysisChartsOpen) {
+    setTimeout(() => initializeCharts(), 100);
+  }
+};
+
+window.clearAnalysisChat = () => {
+  if (confirm('分析チャットの履歴をクリアしますか？')) {
+    state.analysisChatMessages = [];
+    render();
+  }
+};
+
+window.askAnalysisQuestion = (question) => {
+  const input = document.getElementById('analysis-chat-input');
+  if (input) {
+    input.value = question;
+    // Trigger form submit
+    const form = document.getElementById('analysis-chat-form');
+    if (form) {
+      form.dispatchEvent(new Event('submit', { bubbles: true }));
+    }
+  }
+};
+
+window.toggleExpandPanel = (panelId) => {
+  if (state.expandedPanel === panelId) {
+    state.expandedPanel = null;
+  } else {
+    state.expandedPanel = panelId;
+  }
+  render();
+  // Show modal for expanded panel
+  if (state.expandedPanel) {
+    showExpandedPanelModal(panelId);
+  }
+};
+
+function showExpandedPanelModal(panelId) {
+  // Create modal overlay for expanded chart
+  const existingModal = document.getElementById('expanded-panel-modal');
+  if (existingModal) existingModal.remove();
+  
+  const modal = document.createElement('div');
+  modal.id = 'expanded-panel-modal';
+  modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4';
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      modal.remove();
+      state.expandedPanel = null;
+    }
+  };
+  
+  let content = '';
+  if (panelId === 'emotion-chart-panel') {
+    content = `
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold"><i class="fas fa-chart-line mr-2 text-indigo-500"></i>${t('analysis.emotionCurve')}</h3>
+          <button onclick="document.getElementById('expanded-panel-modal').remove(); state.expandedPanel=null;" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+        <div class="h-96">
+          <canvas id="emotion-chart-expanded"></canvas>
+        </div>
+      </div>
+    `;
+  } else if (panelId === 'radar-chart-panel') {
+    content = `
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold"><i class="fas fa-chart-pie mr-2 text-indigo-500"></i>${t('analysis.radar')}</h3>
+          <button onclick="document.getElementById('expanded-panel-modal').remove(); state.expandedPanel=null;" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+        <div class="h-96">
+          <canvas id="radar-chart-expanded"></canvas>
+        </div>
+      </div>
+    `;
+  } else if (panelId === 'reviews-panel') {
+    const reviewsContainer = document.getElementById('reviews-container');
+    const reviewsContent = reviewsContainer ? reviewsContainer.innerHTML : '';
+    content = `
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold"><i class="fas fa-users mr-2 text-indigo-500"></i>${t('analysis.reviews')}</h3>
+          <button onclick="document.getElementById('expanded-panel-modal').remove(); state.expandedPanel=null;" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+        <div class="space-y-3">${reviewsContent}</div>
+      </div>
+    `;
+  }
+  
+  modal.innerHTML = content;
+  document.body.appendChild(modal);
+  
+  // Re-initialize expanded chart
+  setTimeout(() => {
+    if (panelId === 'emotion-chart-panel') {
+      const ctx = document.getElementById('emotion-chart-expanded');
+      if (ctx && window.emotionChartData) {
+        new Chart(ctx, window.emotionChartData);
+      }
+    } else if (panelId === 'radar-chart-panel') {
+      const ctx = document.getElementById('radar-chart-expanded');
+      if (ctx && window.radarChartData) {
+        new Chart(ctx, window.radarChartData);
+      }
+    }
+  }, 100);
+}
+
+async function sendAnalysisChatMessage(message) {
+  if (!message.trim() || state.aiGenerating) return;
+  
+  // Add user message
+  state.analysisChatMessages.push({
+    role: 'user',
+    content: message
+  });
+  render();
+  
+  // Scroll to bottom
+  const chatContainer = document.getElementById('analysis-chat-messages');
+  if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+  
+  state.aiGenerating = true;
+  render();
+  
+  try {
+    // Get writing content for context
+    const writingContent = state.currentWriting?.content || '';
+    const plotContent = state.plot?.structure ? JSON.stringify(state.plot.structure) : '';
+    
+    // Build persona instruction
+    const personaInstructions = {
+      neutral: 'あなたは客観的で冷静な文芸批評家です。感情を排し、論理的に作品を分析してください。',
+      encouraging: 'あなたは作家を応援する熱心な編集者です。良い点を積極的に褒め、改善点も前向きに伝えてください。励ましの言葉を忘れずに。',
+      strict: 'あなたは厳格な文芸評論家です。作品の問題点を鋭く指摘し、プロの水準を求めてください。ただし建設的な批評を心がけてください。',
+      reader: 'あなたは作品を楽しみに待っている熱心な読者です。読者目線での感想や期待を素直に伝えてください。',
+      mentor: 'あなたは経験豊富なベテラン作家です。後輩作家に対して、実践的なアドバイスと経験談を交えて指導してください。'
+    };
+    
+    const persona = state.analysisPersona || 'neutral';
+    
+    const response = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'analysis_chat',
+        message: message,
+        context: {
+          writing: writingContent.substring(0, 8000),
+          plot: plotContent.substring(0, 2000),
+          persona: personaInstructions[persona],
+          chatHistory: state.analysisChatMessages.slice(-6)
+        }
+      })
+    });
+    
+    if (!response.ok) throw new Error('API error');
+    
+    const data = await response.json();
+    
+    // Add AI response
+    state.analysisChatMessages.push({
+      role: 'assistant',
+      content: data.response || data.result || 'すみません、回答を生成できませんでした。',
+      persona: persona
+    });
+    
+  } catch (error) {
+    console.error('Analysis chat error:', error);
+    state.analysisChatMessages.push({
+      role: 'assistant',
+      content: 'エラーが発生しました。もう一度お試しください。',
+      persona: state.analysisPersona
+    });
+  } finally {
+    state.aiGenerating = false;
+    render();
+    
+    // Scroll to bottom
+    const chatContainer = document.getElementById('analysis-chat-messages');
+    if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+}
+
+// ============================================
+// Expand/Fullscreen Panel Functions
+// ============================================
+
+window.expandTextarea = (textareaId, title) => {
+  const textarea = document.getElementById(textareaId);
+  if (!textarea) return;
+  
+  const existingModal = document.getElementById('expand-textarea-modal');
+  if (existingModal) existingModal.remove();
+  
+  const modal = document.createElement('div');
+  modal.id = 'expand-textarea-modal';
+  modal.className = 'fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4';
+  modal.innerHTML = `
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold flex items-center gap-2">
+          <i class="fas fa-expand text-indigo-500"></i>
+          ${title || '編集'}
+        </h3>
+        <button onclick="closeExpandModal('${textareaId}')" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="flex-1 p-4 overflow-hidden">
+        <textarea id="expanded-textarea" 
+          class="w-full h-full min-h-[60vh] px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none focus:ring-2 focus:ring-indigo-500 text-base"
+          placeholder="ここに入力...">${textarea.value || ''}</textarea>
+      </div>
+      <div class="flex justify-between items-center p-4 border-t border-gray-200 dark:border-gray-700">
+        <span class="text-sm text-gray-500">
+          <span id="expanded-char-count">${(textarea.value || '').length}</span> 文字
+        </span>
+        <div class="flex gap-2">
+          <button onclick="document.getElementById('expand-textarea-modal').remove()" 
+            class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+            キャンセル
+          </button>
+          <button onclick="closeExpandModal('${textareaId}')" 
+            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            <i class="fas fa-check mr-1"></i>適用
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Focus and add char count listener
+  const expandedTextarea = document.getElementById('expanded-textarea');
+  if (expandedTextarea) {
+    expandedTextarea.focus();
+    expandedTextarea.addEventListener('input', () => {
+      const countEl = document.getElementById('expanded-char-count');
+      if (countEl) countEl.textContent = expandedTextarea.value.length;
+    });
+  }
+  
+  // Close on backdrop click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      window.closeExpandModal(textareaId);
+    }
+  });
+};
+
+window.closeExpandModal = (textareaId) => {
+  const expandedTextarea = document.getElementById('expanded-textarea');
+  const originalTextarea = document.getElementById(textareaId);
+  
+  if (expandedTextarea && originalTextarea) {
+    originalTextarea.value = expandedTextarea.value;
+    // Trigger input event to update any listeners
+    originalTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  
+  const modal = document.getElementById('expand-textarea-modal');
+  if (modal) modal.remove();
 };
 
 // ============================================

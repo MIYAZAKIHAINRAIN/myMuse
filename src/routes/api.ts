@@ -812,11 +812,27 @@ api.post('/ai/generate-achievements', async (c) => {
   }
 });
 
-// AI Chat endpoint for Ideas tab
+// AI Chat endpoint for Ideas tab and Analysis tab
 api.post('/ai/chat', async (c) => {
-  const { action, content, context, sessionId } = await c.req.json();
+  const { action, message, content, context, sessionId } = await c.req.json();
   
   try {
+    // Handle analysis_chat action
+    if (action === 'analysis_chat') {
+      const result = await callAI(c.env, {
+        action: 'analysis_chat',
+        content: message || content,
+        context: {
+          persona: context?.persona,
+          writing: context?.writing,
+          plot: context?.plot,
+          chatHistory: context?.chatHistory
+        }
+      });
+      
+      return c.json({ response: result });
+    }
+    
     // Build system context from story outline and project settings
     let systemContext = '';
     
