@@ -244,6 +244,7 @@ ${options?.systemContext || ''}
       const persona = options?.persona || 'あなたは客観的で冷静な文芸批評家です。';
       const writing = options?.writing || '';
       const plot = options?.plot || '';
+      const projectContext = options?.projectContext || '';
       const chatHistory = options?.chatHistory || [];
       
       // Build chat history context
@@ -260,10 +261,12 @@ ${options?.systemContext || ''}
 質問には丁寧に答え、具体的な改善提案があれば示してください。
 回答は適度な長さ（300-500文字程度）で、読みやすく構成してください。
 
-【作品の内容】
+${projectContext ? `【作品設定・背景情報】\n${projectContext}` : ''}
+
+【作品の本文】
 ${writing.substring(0, 6000)}
 
-${plot ? `【プロット】\n${plot}` : ''}
+${plot ? `【プロット構成】\n${plot}` : ''}
 ${historyContext}
 
 【ユーザーの質問】

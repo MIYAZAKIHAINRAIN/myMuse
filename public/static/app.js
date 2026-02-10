@@ -39,6 +39,7 @@ const state = {
   analysisPersona: 'neutral', // Current analysis persona
   analysisChartsOpen: true, // Show/hide analysis charts
   expandedPanel: null, // Currently expanded panel
+  lastAnalysisResult: null, // Last analysis result for chart re-rendering
   adoptedIdeasText: '', // Word processor text for adopted ideas
   showAdoptedIdeasPreview: false, // Show/hide adopted ideas preview
   searchResults: [],
@@ -754,6 +755,8 @@ async function analyzeWriting() {
   try {
     const res = await api.post('/ai/analyze', { content: state.currentWriting.content });
     state.aiGenerating = false;
+    // Save result for later re-rendering
+    state.lastAnalysisResult = res.data.analysis;
     return res.data.analysis;
   } catch (e) {
     state.aiGenerating = false;
@@ -2160,6 +2163,10 @@ function renderIllustrationTab() {
             class="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" title="コピー">
             <i class="fas fa-copy"></i>
           </button>
+          <button onclick="downloadImage(document.getElementById('modal-image').src, 'illustration_' + Date.now() + '.png')" 
+            class="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" title="ダウンロード">
+            <i class="fas fa-download"></i>
+          </button>
           <button onclick="closeImageModal()" 
             class="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100">
             <i class="fas fa-times"></i>
@@ -2584,7 +2591,7 @@ function renderAnalysisTab() {
         </button>
         
         ${state.analysisChartsOpen ? `
-          <div class="mt-2 grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
             <!-- 感情曲線 -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 relative">
               <button onclick="toggleExpandPanel('emotion-chart-panel')" 
@@ -2610,20 +2617,6 @@ function renderAnalysisTab() {
               </h3>
               <div class="h-48">
                 <canvas id="radar-chart"></canvas>
-              </div>
-            </div>
-            
-            <!-- ペルソナレビュー -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 relative">
-              <button onclick="toggleExpandPanel('reviews-panel')" 
-                class="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <i class="fas fa-expand"></i>
-              </button>
-              <h3 class="text-sm font-semibold mb-2 flex items-center gap-2">
-                <i class="fas fa-users text-indigo-500"></i>${t('analysis.reviews')}
-              </h3>
-              <div id="reviews-container" class="h-48 overflow-y-auto space-y-2 text-sm">
-                <p class="text-gray-500 text-xs">自動分析ボタンで生成</p>
               </div>
             </div>
           </div>
@@ -4834,9 +4827,23 @@ async function sendAnalysisChatMessage(message) {
   render();
   
   try {
-    // Get writing content for context
+    // Get ALL project content for context
     const writingContent = state.currentWriting?.content || '';
     const plotContent = state.plot?.structure ? JSON.stringify(state.plot.structure) : '';
+    
+    // Get story outline (characters, world, etc.)
+    const storyOutline = state.storyOutline || {};
+    const ideasDocument = state.ideasDocument || '';
+    const adoptedIdeasText = state.adoptedIdeasText || '';
+    
+    // Build comprehensive project context
+    let projectContext = '';
+    if (storyOutline.characters) projectContext += `【キャラクター設定】\n${storyOutline.characters}\n\n`;
+    if (storyOutline.worldSetting) projectContext += `【世界観】\n${storyOutline.worldSetting}\n\n`;
+    if (storyOutline.storyGoal) projectContext += `【物語の目標】\n${storyOutline.storyGoal}\n\n`;
+    if (storyOutline.episodes) projectContext += `【各話アウトライン】\n${storyOutline.episodes}\n\n`;
+    if (adoptedIdeasText) projectContext += `【採用したアイディア】\n${adoptedIdeasText.substring(0, 1000)}\n\n`;
+    if (ideasDocument) projectContext += `【ネタ・プロットメモ】\n${ideasDocument.substring(0, 1000)}\n\n`;
     
     // Build persona instruction
     const personaInstructions = {
@@ -4858,6 +4865,7 @@ async function sendAnalysisChatMessage(message) {
         context: {
           writing: writingContent.substring(0, 8000),
           plot: plotContent.substring(0, 2000),
+          projectContext: projectContext,
           persona: personaInstructions[persona],
           chatHistory: state.analysisChatMessages.slice(-6)
         }
@@ -5381,12 +5389,22 @@ window.handleAnalyze = async () => {
   
   console.log('Analyzing content of length:', state.currentWriting.content.length);
   
+  state.aiGenerating = true;
+  render();
+  
   try {
     const analysis = await analyzeWriting();
     console.log('Analysis result:', analysis);
     
     if (analysis) {
-      renderAnalysisResults(analysis);
+      // Ensure charts section is open
+      state.analysisChartsOpen = true;
+      render();
+      
+      // Wait for DOM to update, then render charts
+      setTimeout(() => {
+        renderAnalysisResults(analysis);
+      }, 100);
       
       // Track analysis for achievements
       if (typeof trackActivity === 'function') {
@@ -5398,6 +5416,15 @@ window.handleAnalyze = async () => {
   } catch (error) {
     console.error('Analysis error:', error);
     alert('分析エラー: ' + error.message);
+  } finally {
+    state.aiGenerating = false;
+    render();
+    // Re-render charts after state update
+    setTimeout(() => {
+      if (state.lastAnalysisResult) {
+        renderAnalysisResults(state.lastAnalysisResult);
+      }
+    }, 100);
   }
 };
 
@@ -5419,8 +5446,22 @@ window.startNewThread = async () => {
 };
 
 window.loadChatMessages = async (threadId) => {
-  await loadChatMessages(threadId);
-  render();
+  console.log('Loading chat messages for thread:', threadId);
+  if (!state.currentProject || !threadId) {
+    console.error('Cannot load chat: no project or threadId');
+    return;
+  }
+  
+  try {
+    const res = await api.get(`/projects/${state.currentProject.id}/chat?threadId=${threadId}`);
+    console.log('Chat messages loaded:', res.data);
+    state.chatMessages = res.data.messages || [];
+    state.currentThread = threadId;
+    render();
+  } catch (e) {
+    console.error('Load chat error:', e);
+    alert('チャット履歴の読み込みに失敗しました');
+  }
 };
 
 window.handleMobileNav = (nav) => {
@@ -5638,20 +5679,49 @@ function renderAnalysisResults(analysis) {
         scales: { r: { min: 0, max: 100 } }
       }
     });
+    
+    // Store chart data for expanded view
+    window.radarChartData = {
+      type: 'radar',
+      data: {
+        labels: analysis.radarChart.map(p => p.axis),
+        datasets: [{
+          label: '作品成分',
+          data: analysis.radarChart.map(p => p.value),
+          backgroundColor: 'rgba(139, 92, 246, 0.2)',
+          borderColor: '#8b5cf6',
+          pointBackgroundColor: '#8b5cf6',
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { r: { min: 0, max: 100 } }
+      }
+    };
   }
   
-  // Update reviews
-  const reviewsContainer = $('#reviews-container');
-  if (reviewsContainer && analysis.reviews) {
-    reviewsContainer.innerHTML = analysis.reviews.map(review => `
-      <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-        <div class="flex items-center justify-between mb-2">
-          <span class="font-medium text-sm">${review.name}</span>
-          <span class="text-yellow-500">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>
-        </div>
-        <p class="text-sm text-gray-600 dark:text-gray-400">${review.comment}</p>
-      </div>
-    `).join('');
+  // Store emotion chart data for expanded view
+  if (analysis.emotionCurve) {
+    window.emotionChartData = {
+      type: 'line',
+      data: {
+        labels: analysis.emotionCurve.map(p => p.label || `${p.point}%`),
+        datasets: [{
+          label: '感情値',
+          data: analysis.emotionCurve.map(p => p.emotion),
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          fill: true,
+          tension: 0.4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { min: -100, max: 100 } }
+      }
+    };
   }
 }
 

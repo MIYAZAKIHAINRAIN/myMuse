@@ -826,6 +826,7 @@ api.post('/ai/chat', async (c) => {
           persona: context?.persona,
           writing: context?.writing,
           plot: context?.plot,
+          projectContext: context?.projectContext,
           chatHistory: context?.chatHistory
         }
       });
