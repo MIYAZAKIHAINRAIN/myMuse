@@ -94,18 +94,22 @@ app.get('*', (c) => {
     .zen-mode .main-content { margin: 0 !important; width: 100% !important; max-width: 100% !important; }
     .zen-mode { position: relative; }
     .zen-mode::before {
-      content: 'ESCキーまたは空白部分をクリックで解除';
+      content: 'ESCで終了';
       position: fixed;
-      top: 10px;
-      right: 10px;
-      background: rgba(0,0,0,0.5);
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.3);
       color: white;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
       z-index: 1000;
-      opacity: 0.7;
+      opacity: 0.4;
       pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .zen-mode:hover::before {
+      opacity: 0.7;
     }
     
     /* RTL Support */

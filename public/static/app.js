@@ -435,12 +435,8 @@ function debounce(fn, delay) {
 async function loadProjects() {
   if (!state.user) return;
   try {
-    const [projectsRes, foldersRes] = await Promise.all([
-      api.get(`/projects?userId=${state.user.id}`),
-      api.get(`/folders?userId=${state.user.id}`)
-    ]);
+    const projectsRes = await api.get(`/projects?userId=${state.user.id}`);
     state.projects = projectsRes.data.projects || [];
-    state.folders = foldersRes.data.folders || [];
   } catch (e) { console.error('Load projects error:', e); }
 }
 
@@ -1386,8 +1382,8 @@ function renderHeader() {
 function renderLeftSidebar() {
   if (!state.sidebarOpen.left) return '';
   
-  // ライブラリに属さないプロジェクト
-  const standaloneProjects = state.projects.filter(p => !p.folder_id && !p.library_id && !p.is_library);
+  // ライブラリに属さないプロジェクト（スタンドアローン）
+  const standaloneProjects = state.projects.filter(p => !p.library_id && !p.is_library);
   // ライブラリ（親プロジェクト）一覧
   const libraries = state.projects.filter(p => p.is_library);
   
@@ -1426,15 +1422,6 @@ function renderLeftSidebar() {
         <!-- Projects List -->
         <div class="space-y-2">
           <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">${t('sidebar.projects')}</h3>
-          ${state.folders.map(folder => `
-            <div class="space-y-1">
-              <div class="flex items-center gap-2 px-2 py-1 text-sm text-gray-600 dark:text-gray-400">
-                <i class="fas fa-folder"></i>
-                <span>${folder.name}</span>
-              </div>
-              ${state.projects.filter(p => p.folder_id === folder.id && !p.is_library).map(project => renderProjectItem(project)).join('')}
-            </div>
-          `).join('')}
           
           <!-- Standalone Projects (not in library) -->
           ${standaloneProjects.map(project => renderProjectItem(project)).join('')}
@@ -1720,9 +1707,9 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
         </div>
       </div>
       
-      <div class="flex gap-6 flex-1">
+      <div class="flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1">
         <!-- Left Column -->
-        <div class="w-1/3 flex flex-col gap-4">
+        <div class="w-full lg:w-1/3 flex flex-col gap-4">
           <!-- Genre Settings -->
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-600">
@@ -1780,7 +1767,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
         </div>
         
         <!-- Middle Column: Shared Characters -->
-        <div class="w-1/3 flex flex-col gap-4">
+        <div class="w-full lg:w-1/3 flex flex-col gap-4">
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1 border-2 border-purple-200 dark:border-purple-800">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
               <i class="fas fa-users"></i>
@@ -1821,7 +1808,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
         </div>
         
         <!-- Right Column: World Setting & Save -->
-        <div class="w-1/3 flex flex-col gap-4">
+        <div class="w-full lg:w-1/3 flex flex-col gap-4">
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1 border-2 border-purple-200 dark:border-purple-800">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
               <i class="fas fa-globe"></i>
@@ -1914,9 +1901,9 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
       </div>
       
       <!-- This Episode's Settings -->
-      <div class="flex gap-6 flex-1">
+      <div class="flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1">
         <!-- Left Column -->
-        <div class="w-1/3 flex flex-col gap-4">
+        <div class="w-full lg:w-1/3 flex flex-col gap-4">
           <!-- Genre (inherited from series) -->
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-indigo-600">
@@ -1952,7 +1939,7 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
         </div>
         
         <!-- Middle Column -->
-        <div class="w-1/3 flex flex-col gap-4">
+        <div class="w-full lg:w-1/3 flex flex-col gap-4">
           <!-- Episode-specific Characters -->
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
@@ -1992,7 +1979,7 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
         </div>
         
         <!-- Right Column -->
-        <div class="w-1/3 flex flex-col gap-4">
+        <div class="w-full lg:w-1/3 flex flex-col gap-4">
           <!-- Episode World/Scene -->
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
@@ -2044,9 +2031,9 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
 // Render settings tab for a Standalone Project (not in a library)
 function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
   return `
-    <div class="h-full flex gap-6">
+    <div class="h-full flex flex-col lg:flex-row gap-4 lg:gap-6">
       <!-- Left Column: Basic Settings -->
-      <div class="w-1/3 flex flex-col gap-4 overflow-y-auto">
+      <div class="w-full lg:w-1/3 flex flex-col gap-4 overflow-y-auto">
         <!-- Genre Settings Card -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
           <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
@@ -2087,7 +2074,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
       </div>
       
       <!-- Middle Column: Characters & World -->
-      <div class="w-1/3 flex flex-col gap-4 overflow-y-auto">
+      <div class="w-full lg:w-1/3 flex flex-col gap-4 overflow-y-auto">
         <!-- Characters Card -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
           <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
@@ -2128,7 +2115,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
       </div>
       
       <!-- Right Column: World & Episodes -->
-      <div class="w-1/3 flex flex-col gap-4 overflow-y-auto">
+      <div class="w-full lg:w-1/3 flex flex-col gap-4 overflow-y-auto">
         <!-- World Setting Card -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
           <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
@@ -2439,111 +2426,80 @@ function renderPlotTab() {
   
   return `
     <div class="max-w-4xl mx-auto space-y-6">
-      <!-- Adopted Ideas Section - Word Processor Style -->
+      <!-- Adopted Ideas Section - READ ONLY Preview -->
       <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl shadow-sm border border-green-200 dark:border-green-800 overflow-hidden">
         <div class="flex items-center justify-between p-3 border-b border-green-200 dark:border-green-700 bg-white/50 dark:bg-gray-800/50">
           <h3 class="font-semibold text-green-700 dark:text-green-400 flex items-center gap-2">
             <i class="fas fa-lightbulb"></i>採用したアイディア
+            <span class="text-xs bg-green-200 dark:bg-green-800 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
+              参照のみ
+            </span>
           </h3>
-          <div class="flex items-center gap-2">
-            ${adoptedIdeas.length > 0 ? `
-              <button onclick="importAdoptedIdeasToText()" 
-                class="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700" 
-                title="採用済みアイディアをテキストに追加">
-                <i class="fas fa-plus mr-1"></i>採用を追加
-              </button>
-            ` : ''}
-            <button onclick="saveAdoptedIdeasText()" 
-              class="px-2 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700">
-              <i class="fas fa-save mr-1"></i>保存
-            </button>
-            <span class="text-xs text-gray-500" id="adopted-ideas-chars">
-              ${(state.adoptedIdeasText || '').length} 文字
-            </span>
-          </div>
+          <button onclick="switchTab('ideas')" 
+            class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1">
+            <i class="fas fa-edit"></i>ネタ考案タブで編集
+          </button>
         </div>
         
-        <div class="relative">
-          <textarea id="adopted-ideas-editor" 
-            class="w-full p-4 min-h-[200px] text-sm resize-none focus:outline-none bg-transparent dark:text-gray-100"
-            placeholder="ここにアイディアを自由に記述できます...
-
-【使い方】
-・直接アイディアを書き込めます
-・「採用を追加」ボタンで、ネタ考案タブで採用したアイディアを追加できます
-・この内容はAIに反映され、プロット生成や相談で活用されます
-
-【例】
-【主人公の目的】
-世界を救うために魔王を倒す旅に出る
-
-【物語のテーマ】
-友情と成長、自己犠牲の意味"
-            oninput="updateAdoptedIdeasCount(this.value)">${state.adoptedIdeasText || ''}</textarea>
-          <button onclick="expandTextarea('adopted-ideas-editor', '採用したアイディア')" 
-            class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded shadow-sm"
-            title="拡大表示">
-            <i class="fas fa-expand text-sm"></i>
-          </button>
-        </div>
-      </div>
-      
-      <!-- Quick adopted ideas preview (collapsible) -->
-      ${adoptedIdeas.length > 0 ? `
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3">
-          <button onclick="toggleAdoptedIdeasPreview()" class="w-full flex items-center justify-between text-sm">
-            <span class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-              <i class="fas fa-list-check"></i>
-              ネタ考案から採用中のアイディア（${adoptedIdeas.length}件）
-            </span>
-            <i class="fas fa-chevron-${state.showAdoptedIdeasPreview ? 'up' : 'down'} text-gray-400"></i>
-          </button>
-          
-          ${state.showAdoptedIdeasPreview ? `
-            <div class="mt-3 space-y-2">
-              ${adoptedIdeas.map(idea => `
-                <div class="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-900 rounded text-sm">
-                  <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
-                  <div class="flex-1">
-                    <span class="font-medium">${idea.title}</span>
-                    <span class="text-gray-500 ml-2">${(idea.content || '').slice(0, 50)}...</span>
+        ${adoptedIdeas.length > 0 || state.adoptedIdeasText ? `
+          <div class="p-4 max-h-[300px] overflow-y-auto">
+            ${state.adoptedIdeasText ? `
+              <div class="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
+                ${state.adoptedIdeasText}
+              </div>
+            ` : `
+              <div class="space-y-2">
+                ${adoptedIdeas.map(idea => `
+                  <div class="flex items-start gap-2 p-2 bg-white dark:bg-gray-800 rounded-lg">
+                    <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+                    <div>
+                      <span class="font-medium">${idea.title}</span>
+                      <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${idea.content || ''}</p>
+                    </div>
                   </div>
-                  <button onclick="unadoptIdea('${idea.id}')" class="text-gray-400 hover:text-red-500 text-xs">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              `).join('')}
-            </div>
-          ` : ''}
-        </div>
-      ` : ''}
-      
-      <!-- Template Selector -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <div class="flex flex-wrap gap-2">
-          ${['kishotenketsu', 'three_act', 'blake_snyder'].map(t => `
-            <button onclick="changePlotTemplate('${t}')"
-              class="px-4 py-2 rounded-lg transition ${template === t ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'}">
-              ${t === 'kishotenketsu' ? '起承転結' : t === 'three_act' ? '三幕構成' : 'ブレイク・スナイダー'}
-            </button>
-          `).join('')}
-        </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+        ` : `
+          <div class="p-6 text-center text-gray-500">
+            <i class="fas fa-lightbulb text-4xl mb-2 opacity-30"></i>
+            <p>まだアイディアが採用されていません</p>
+            <p class="text-sm mt-1">「ネタ考案」タブでアイディアを生成・採用してください</p>
+          </div>
+        `}
       </div>
       
-      <!-- Plot Structure -->
+      <!-- Template Selector (read-only display) -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">プロット構成テンプレート</span>
+          <span class="px-3 py-1 rounded-lg bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 text-sm">
+            ${template === 'kishotenketsu' ? '起承転結' : template === 'three_act' ? '三幕構成' : 'ブレイク・スナイダー'}
+          </span>
+        </div>
+        <p class="text-xs text-gray-500">
+          <i class="fas fa-info-circle mr-1"></i>
+          テンプレートの変更や構成の編集は「ネタ考案」タブで行えます
+        </p>
+      </div>
+      
+      <!-- Plot Structure (READ ONLY) -->
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        ${renderPlotStructure(template, structure)}
-        
-        <div class="mt-4 flex gap-2">
-          <button onclick="savePlot()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-            <i class="fas fa-save mr-1"></i>${t('common.save')}
-          </button>
-          <button onclick="generatePlotFromIdeas()" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700"
-            ${state.aiGenerating ? 'disabled' : ''}>
-            ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-magic mr-1"></i>'}
-            構成を生成
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+            <i class="fas fa-sitemap text-indigo-500"></i>
+            プロット構成
+            <span class="text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full">
+              参照のみ
+            </span>
+          </h3>
+          <button onclick="switchTab('ideas')" 
+            class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1">
+            <i class="fas fa-edit"></i>ネタ考案タブで編集
           </button>
         </div>
+        ${renderPlotStructureReadOnly(template, structure)}
       </div>
     </div>
   `;
@@ -2589,6 +2545,50 @@ function renderPlotStructure(template, structure) {
   return '<p class="text-gray-500">テンプレートを選択してください</p>';
 }
 
+// Read-only version of plot structure for Plot tab
+function renderPlotStructureReadOnly(template, structure) {
+  const hasContent = Object.values(structure).some(v => v && v.trim());
+  
+  if (!hasContent) {
+    return `
+      <div class="text-center py-8 text-gray-500">
+        <i class="fas fa-sitemap text-4xl mb-3 opacity-30"></i>
+        <p>まだプロット構成が作成されていません</p>
+        <p class="text-sm mt-1">「ネタ考案」タブで構成を作成してください</p>
+      </div>
+    `;
+  }
+  
+  if (template === 'kishotenketsu') {
+    return `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        ${['ki', 'sho', 'ten', 'ketsu'].map(part => `
+          <div class="space-y-2">
+            <label class="block font-medium text-indigo-600">${t(`plot.${part}`)}</label>
+            <div class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-900 dark:border-gray-700 min-h-[100px] text-sm whitespace-pre-wrap">
+              ${structure[part] || '<span class="text-gray-400 italic">未入力</span>'}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else if (template === 'three_act') {
+    return `
+      <div class="space-y-4">
+        ${['act1', 'act2', 'act3'].map(part => `
+          <div class="space-y-2">
+            <label class="block font-medium text-indigo-600">${t(`plot.${part}`)}</label>
+            <div class="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-900 dark:border-gray-700 min-h-[80px] text-sm whitespace-pre-wrap">
+              ${structure[part] || '<span class="text-gray-400 italic">未入力</span>'}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  return '<p class="text-gray-500">テンプレートを選択してください</p>';
+}
+
 function getPlotPlaceholder(part) {
   const placeholders = {
     ki: '物語の始まり、登場人物や世界観の紹介...',
@@ -2609,9 +2609,9 @@ function renderIllustrationTab() {
   const referenceFiles = state.illustrationFiles || [];
   
   return `
-    <div class="h-full flex gap-4">
+    <div class="h-full flex flex-col lg:flex-row gap-4">
       <!-- Left Panel: Generation Controls -->
-      <div class="w-1/3 flex flex-col gap-4 overflow-y-auto">
+      <div class="w-full lg:w-1/3 flex flex-col gap-4 overflow-y-auto">
         <!-- Project Context -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
           <h3 class="font-semibold mb-3 flex items-center gap-2">
@@ -2766,12 +2766,23 @@ function renderIllustrationTab() {
                 class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm resize-none">low quality, bad anatomy, worst quality, blurry, watermark</textarea>
             </div>
             
-            <button onclick="generateIllustration()" 
-              class="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 flex items-center justify-center gap-2"
-              ${state.aiGenerating ? 'disabled' : ''}>
-              ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-wand-magic-sparkles"></i>'}
-              <span>挿絵を生成</span>
-            </button>
+            <!-- Coming Soon Notice -->
+            <div class="relative">
+              <button disabled
+                class="w-full px-4 py-3 bg-gray-400 text-white rounded-lg cursor-not-allowed flex items-center justify-center gap-2 opacity-75">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <span>挿絵を生成</span>
+              </button>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold rounded-full shadow-lg animate-pulse">
+                  ✨ Coming Soon ✨
+                </span>
+              </div>
+            </div>
+            <p class="text-xs text-center text-gray-500 mt-2">
+              <i class="fas fa-info-circle mr-1"></i>
+              AI画像生成機能は現在開発中です。近日公開予定！
+            </p>
           </div>
         </div>
       </div>
@@ -3378,8 +3389,20 @@ function renderConsultationTab() {
             <i class="fas fa-plus mr-1"></i>新しい相談
           </button>
         </div>
-        <div class="overflow-y-auto h-full">
-          ${state.chatThreads.map(thread => `
+        <!-- Thread Usage Hint -->
+        <div class="p-2 bg-blue-50 dark:bg-blue-900/20 border-b border-gray-200 dark:border-gray-700">
+          <p class="text-xs text-blue-700 dark:text-blue-300">
+            <i class="fas fa-info-circle mr-1"></i>
+            トピックごとに相談を分けると、AIがより的確に回答できます
+          </p>
+        </div>
+        <div class="overflow-y-auto h-[calc(100%-120px)]">
+          ${state.chatThreads.length === 0 ? `
+            <div class="p-4 text-center text-gray-500 text-sm">
+              <p>まだ相談がありません</p>
+              <p class="mt-1 text-xs">「新しい相談」で始めましょう</p>
+            </div>
+          ` : state.chatThreads.map(thread => `
             <div onclick="loadChatMessages('${thread.thread_id}')"
               class="p-3 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 ${state.currentThread === thread.thread_id ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''}">
               <p class="text-sm truncate">${thread.first_message || '新しい相談'}</p>
@@ -3414,9 +3437,28 @@ function renderChatMessages() {
   if (state.chatMessages.length === 0) {
     return `
       <div class="text-center text-gray-500 py-8">
-        <i class="fas fa-comments text-4xl mb-4 opacity-50"></i>
-        <p>AIに相談してみましょう</p>
+        <i class="fas fa-robot text-5xl mb-4 text-indigo-400 opacity-70"></i>
+        <p class="text-lg font-medium">創作AIアシスタント</p>
         <p class="text-sm mt-2">プロット、キャラクター、文章の悩みなど何でも相談できます</p>
+        
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-md mx-auto text-left">
+          <button onclick="setQuickPrompt('主人公のキャラクター設定について相談したいです')" 
+            class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm transition">
+            <i class="fas fa-user text-purple-500 mr-2"></i>キャラクター相談
+          </button>
+          <button onclick="setQuickPrompt('物語の展開に悩んでいます。アドバイスをください')" 
+            class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm transition">
+            <i class="fas fa-route text-blue-500 mr-2"></i>プロット相談
+          </button>
+          <button onclick="setQuickPrompt('この文章を推敲してほしいです')" 
+            class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm transition">
+            <i class="fas fa-pen-fancy text-green-500 mr-2"></i>文章添削
+          </button>
+          <button onclick="setQuickPrompt('創作のモチベーションを上げる方法を教えてください')" 
+            class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm transition">
+            <i class="fas fa-heart text-pink-500 mr-2"></i>モチベーション
+          </button>
+        </div>
       </div>
     `;
   }
@@ -3429,6 +3471,15 @@ function renderChatMessages() {
     </div>
   `).join('');
 }
+  
+// Quick prompt helper for consultation
+window.setQuickPrompt = (text) => {
+  const input = document.getElementById('chat-input');
+  if (input) {
+    input.value = text;
+    input.focus();
+  }
+};
 
 // ============================================
 // Achievements Tab
@@ -3534,10 +3585,21 @@ function renderAchievementsTab() {
 
 // Generate achievements based on actual user activity
 function generateAutoAchievements(activityLog) {
+  // Use activity log data primarily, fall back to current state for real-time updates
   const writings = state.writings || [];
-  const totalWords = writings.reduce((sum, w) => sum + (w.word_count || 0), 0);
-  const projectCount = state.projects?.length || 0;
-  const adoptedIdeas = (state.ideas || []).filter(i => i.adopted).length;
+  const currentWordCount = writings.reduce((sum, w) => sum + (w.word_count || 0), 0);
+  // Use the larger of activity log total or current state (handles page refresh)
+  const totalWords = Math.max(activityLog.totalWordsThisMonth || 0, currentWordCount);
+  
+  const adoptedIdeas = Math.max(
+    activityLog.ideasAdopted || 0,
+    (state.ideas || []).filter(i => i.adopted).length
+  );
+  
+  const chaptersCount = Math.max(
+    activityLog.chaptersWritten || 0,
+    writings.filter(w => (w.word_count || 0) > 500).length // chapters with content
+  );
   
   return [
     {
@@ -3577,8 +3639,8 @@ function generateAutoAchievements(activityLog) {
       title: '章の完成',
       description: '3章以上を執筆する',
       emoji: '📝',
-      completed: writings.length >= 3,
-      progress: `${writings.length} / 3 章`
+      completed: chaptersCount >= 3,
+      progress: `${chaptersCount} / 3 章`
     },
     {
       id: 6,
@@ -3597,10 +3659,15 @@ function shouldResetMonthlyAchievements() {
   return lastReset !== currentMonth;
 }
 
-// Badge history stored in localStorage
+// Badge history stored in localStorage (per user)
+function getBadgeHistoryKey() {
+  const userId = state.user?.id || 'anonymous';
+  return `badgeHistory_${userId}`;
+}
+
 function getBadgeHistory() {
   try {
-    const saved = localStorage.getItem('badgeHistory');
+    const saved = localStorage.getItem(getBadgeHistoryKey());
     return saved ? JSON.parse(saved) : { platinum: 0, gold: 0, silver: 0, bronze: 0, encouragement: 0 };
   } catch (e) {
     return { platinum: 0, gold: 0, silver: 0, bronze: 0, encouragement: 0 };
@@ -3608,7 +3675,7 @@ function getBadgeHistory() {
 }
 
 function saveBadgeHistory(history) {
-  localStorage.setItem('badgeHistory', JSON.stringify(history));
+  localStorage.setItem(getBadgeHistoryKey(), JSON.stringify(history));
 }
 
 function renderBadgeHistory() {
@@ -3729,30 +3796,58 @@ window.toggleAchievement = (index) => {
 };
 
 // Activity log for automatic achievement tracking
+// Uses user ID as key to separate data per user
+function getActivityLogKey() {
+  const userId = state.user?.id || 'anonymous';
+  return `activityLog_${userId}`;
+}
+
 function getActivityLog() {
   try {
-    const saved = localStorage.getItem('activityLog');
-    return saved ? JSON.parse(saved) : {
-      wordsWrittenToday: 0,
-      loginDaysThisWeek: [],
-      aiConsultations: 0,
-      plotCompleted: false,
-      ideasAdopted: 0,
-      analysisPerformed: 0,
-      lastUpdated: new Date().toDateString()
-    };
+    const saved = localStorage.getItem(getActivityLogKey());
+    const currentMonth = new Date().getMonth() + '-' + new Date().getFullYear();
+    
+    if (saved) {
+      const log = JSON.parse(saved);
+      // Auto reset if month changed
+      if (log.currentMonth !== currentMonth) {
+        console.log('New month detected, resetting activity log');
+        return createNewActivityLog();
+      }
+      return log;
+    }
+    return createNewActivityLog();
   } catch (e) {
-    return { wordsWrittenToday: 0, loginDaysThisWeek: [], aiConsultations: 0, plotCompleted: false, ideasAdopted: 0, analysisPerformed: 0, lastUpdated: new Date().toDateString() };
+    console.error('Error loading activity log:', e);
+    return createNewActivityLog();
   }
+}
+
+function createNewActivityLog() {
+  const currentMonth = new Date().getMonth() + '-' + new Date().getFullYear();
+  return {
+    totalWordsThisMonth: 0,
+    wordsWrittenToday: 0,
+    loginDaysThisWeek: [],
+    loginDaysThisMonth: [],
+    aiConsultations: 0,
+    ideasAdopted: 0,
+    analysisPerformed: 0,
+    chaptersWritten: 0,
+    currentMonth: currentMonth,
+    lastUpdated: new Date().toDateString()
+  };
 }
 
 function saveActivityLog(log) {
   log.lastUpdated = new Date().toDateString();
-  localStorage.setItem('activityLog', JSON.stringify(log));
+  localStorage.setItem(getActivityLogKey(), JSON.stringify(log));
 }
 
 // Track activity and auto-unlock achievements
 function trackActivity(activityType, value = 1) {
+  if (!state.user) return; // Don't track for unauthenticated users
+  
   const log = getActivityLog();
   const today = new Date().toDateString();
   
@@ -3765,8 +3860,10 @@ function trackActivity(activityType, value = 1) {
   switch(activityType) {
     case 'words':
       log.wordsWrittenToday += value;
+      log.totalWordsThisMonth = (log.totalWordsThisMonth || 0) + value;
       break;
     case 'login':
+      // Track weekly logins
       if (!log.loginDaysThisWeek.includes(today)) {
         log.loginDaysThisWeek.push(today);
         // Keep only last 7 days
@@ -3774,80 +3871,36 @@ function trackActivity(activityType, value = 1) {
         weekAgo.setDate(weekAgo.getDate() - 7);
         log.loginDaysThisWeek = log.loginDaysThisWeek.filter(d => new Date(d) >= weekAgo);
       }
+      // Track monthly logins
+      if (!log.loginDaysThisMonth) log.loginDaysThisMonth = [];
+      if (!log.loginDaysThisMonth.includes(today)) {
+        log.loginDaysThisMonth.push(today);
+      }
       break;
     case 'aiConsultation':
-      log.aiConsultations += value;
-      break;
-    case 'plotComplete':
-      log.plotCompleted = true;
+      log.aiConsultations = (log.aiConsultations || 0) + value;
       break;
     case 'ideaAdopt':
-      log.ideasAdopted += value;
+      log.ideasAdopted = (log.ideasAdopted || 0) + value;
       break;
     case 'analysis':
-      log.analysisPerformed += value;
+      log.analysisPerformed = (log.analysisPerformed || 0) + value;
+      break;
+    case 'chapterComplete':
+      log.chaptersWritten = (log.chaptersWritten || 0) + value;
       break;
   }
   
   saveActivityLog(log);
-  checkAchievementsFromLog(log);
+  
+  // Optionally show achievement unlock notification
+  // (removed auto-alert to reduce interruptions)
 }
 
-// Check achievements based on activity log
+// This function is no longer used - achievements are calculated real-time in generateAutoAchievements
 function checkAchievementsFromLog(log) {
-  if (!state.monthlyAchievements) {
-    state.monthlyAchievements = getDefaultMonthlyGoals();
-  }
-  
-  let unlockedAchievements = [];
-  
-  state.monthlyAchievements.forEach((goal, index) => {
-    if (goal.completed) return; // Already completed
-    
-    let shouldUnlock = false;
-    
-    // Check conditions based on goal id
-    switch(goal.id) {
-      case 1: // 1日1000文字
-        shouldUnlock = log.wordsWrittenToday >= 1000;
-        break;
-      case 2: // 週5日ログイン
-        shouldUnlock = log.loginDaysThisWeek.length >= 5;
-        break;
-      case 3: // AIと10回相談
-        shouldUnlock = log.aiConsultations >= 10;
-        break;
-      case 4: // プロット完成
-        shouldUnlock = log.plotCompleted;
-        break;
-      case 5: // 5つのアイデア採用
-        shouldUnlock = log.ideasAdopted >= 5;
-        break;
-      case 6: // 作品を1回分析
-        shouldUnlock = log.analysisPerformed >= 1;
-        break;
-    }
-    
-    if (shouldUnlock) {
-      state.monthlyAchievements[index].completed = true;
-      unlockedAchievements.push(goal.title);
-    }
-  });
-  
-  // Show notification if achievements were unlocked
-  if (unlockedAchievements.length > 0) {
-    localStorage.setItem('monthlyAchievements', JSON.stringify(state.monthlyAchievements));
-    localStorage.setItem('achievementMonth', new Date().getMonth().toString());
-    
-    const message = unlockedAchievements.map(t => `実績『${t}』を解除しました！`).join('\n');
-    setTimeout(() => alert(message), 100);
-    
-    // Check if all completed and update badge history
-    checkAndUpdateBadgeHistory();
-    render();
-  }
-  
-  return unlockedAchievements.length > 0 ? unlockedAchievements : '更新なし';
+  // Deprecated - achievements are now calculated dynamically
+  return [];
 }
 
 // Check completion and update badge history (auto-tracked version)
@@ -3861,8 +3914,9 @@ function checkAndUpdateBadgeHistory() {
   const history = getBadgeHistory();
   const currentMonth = new Date().getMonth().toString() + '-' + new Date().getFullYear().toString();
   const currentDay = new Date().getDate();
-  const lastBadgeMonth = localStorage.getItem('lastBadgeMonth');
-  const lastBadgeTier = localStorage.getItem('lastBadgeTier') || '';
+  const userId = state.user?.id || 'anonymous';
+  const lastBadgeMonth = localStorage.getItem(`lastBadgeMonth_${userId}`);
+  const lastBadgeTier = localStorage.getItem(`lastBadgeTier_${userId}`) || '';
   
   // Check if it's the 25th or later and we should finalize this month
   const shouldFinalize = currentDay >= 25;
@@ -3887,9 +3941,9 @@ function checkAndUpdateBadgeHistory() {
     
     // Add new tier badge
     history[currentTier]++;
-    localStorage.setItem('lastBadgeMonth', currentMonth);
-    localStorage.setItem('lastBadgeTier', currentTier);
-    localStorage.setItem('lastAchievementReset', currentMonth);
+    localStorage.setItem(`lastBadgeMonth_${userId}`, currentMonth);
+    localStorage.setItem(`lastBadgeTier_${userId}`, currentTier);
+    localStorage.setItem(`lastAchievementReset_${userId}`, currentMonth);
     saveBadgeHistory(history);
     
     // Show congratulation message
@@ -3902,16 +3956,8 @@ function checkAndUpdateBadgeHistory() {
 }
 
 function resetActivityLogForNewMonth() {
-  const newLog = {
-    wordsWrittenToday: 0,
-    loginDaysThisWeek: [],
-    aiConsultations: 0,
-    plotCompleted: false,
-    ideasAdopted: 0,
-    analysisPerformed: 0,
-    lastUpdated: new Date().toDateString()
-  };
-  localStorage.setItem('activityLog', JSON.stringify(newLog));
+  const newLog = createNewActivityLog();
+  localStorage.setItem(getActivityLogKey(), JSON.stringify(newLog));
 }
 
 function getTierRank(tier) {
@@ -5543,10 +5589,83 @@ window.toggleWritingDirection = async () => {
   const newDirection = state.currentWriting.writing_direction === 'vertical' ? 'horizontal' : 'vertical';
   state.currentWriting.writing_direction = newDirection;
   
+  // 縦書きに切り替えた時、モード選択ダイアログを表示
+  if (newDirection === 'vertical') {
+    showVerticalModeDialog();
+  }
+  
   // autoSaveを呼び出して設定を保存（1秒後にサーバーに保存される）
   autoSave(state.currentWriting.content || '');
   
   render();
+};
+
+// 縦書きモード選択ダイアログ
+window.showVerticalModeDialog = () => {
+  const existing = document.getElementById('vertical-mode-dialog');
+  if (existing) existing.remove();
+  
+  const dialog = document.createElement('div');
+  dialog.id = 'vertical-mode-dialog';
+  dialog.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+  dialog.innerHTML = `
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md mx-4 animate-fade-in">
+      <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+        <i class="fas fa-text-height text-indigo-500"></i>
+        縦書き表示モード
+      </h3>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        英数字の表示方法を選択してください
+      </p>
+      
+      <div class="space-y-3">
+        <button onclick="selectVerticalMode('mixed')" 
+          class="w-full p-4 border-2 rounded-xl text-left hover:border-indigo-500 transition ${state.verticalTextMode === 'mixed' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30' : 'border-gray-200 dark:border-gray-700'}">
+          <div class="flex items-center gap-3">
+            <div class="text-3xl writing-mode-vertical" style="writing-mode: vertical-rl; text-orientation: mixed;">A1あ</div>
+            <div>
+              <p class="font-medium">横倒し（伝統的）</p>
+              <p class="text-xs text-gray-500">英数字が横に倒れて表示されます</p>
+            </div>
+          </div>
+        </button>
+        
+        <button onclick="selectVerticalMode('upright')" 
+          class="w-full p-4 border-2 rounded-xl text-left hover:border-indigo-500 transition ${state.verticalTextMode === 'upright' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30' : 'border-gray-200 dark:border-gray-700'}">
+          <div class="flex items-center gap-3">
+            <div class="text-3xl" style="writing-mode: vertical-rl; text-orientation: upright;">A1あ</div>
+            <div>
+              <p class="font-medium">正立（読みやすい）</p>
+              <p class="text-xs text-gray-500">英数字も正立で表示されます</p>
+            </div>
+          </div>
+        </button>
+      </div>
+      
+      <div class="mt-4 text-center">
+        <button onclick="closeVerticalModeDialog()" 
+          class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+          後で設定する
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(dialog);
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) closeVerticalModeDialog();
+  });
+};
+
+window.selectVerticalMode = (mode) => {
+  state.verticalTextMode = mode;
+  localStorage.setItem('verticalTextMode', mode);
+  closeVerticalModeDialog();
+  render();
+};
+
+window.closeVerticalModeDialog = () => {
+  const dialog = document.getElementById('vertical-mode-dialog');
+  if (dialog) dialog.remove();
 };
 
 window.toggleVerticalTextMode = () => {
