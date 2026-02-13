@@ -4301,9 +4301,14 @@ window.deleteProject = async (projectId, projectTitle) => {
 
 // Create a new library (parent project for series)
 window.createLibrary = async (title, description = '', genre = '') => {
+  if (!state.user) {
+    alert('ログインが必要です');
+    return;
+  }
   try {
     // Create a project with is_library flag
     const res = await api.post('/projects', {
+      user_id: state.user.id,
       title,
       genre,
       is_library: true,
@@ -4431,12 +4436,17 @@ window.openAddChildProjectModal = (libraryId) => {
 
 // Create a child project within a library
 window.createChildProject = async (libraryId, title, inheritSettings = true) => {
+  if (!state.user) {
+    alert('ログインが必要です');
+    return;
+  }
   try {
     const library = state.projects.find(p => p.id === libraryId);
     if (!library) throw new Error('ライブラリが見つかりません');
     
     // Create child project linked to library
     const res = await api.post('/projects', {
+      user_id: state.user.id,
       title,
       genre: library.genre || '',
       library_id: libraryId,
