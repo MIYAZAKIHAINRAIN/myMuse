@@ -65,6 +65,7 @@ const i18n = {
     'sidebar.trash': 'ゴミ箱', 'sidebar.search': '全文検索', 'sidebar.calendar': '創作カレンダー',
     'sidebar.language': '言語', 'sidebar.aiCredits': 'AI利用量',
     'tab.ideas': 'ネタ考案', 'tab.plot': 'プロット', 'tab.writing': 'ライティング',
+    'tab.settings_materials': '設定・資料',
     'tab.illustration': '挿絵', 'tab.analysis': '分析・批評', 'tab.consultation': '相談AI', 'tab.achievements': '実績',
     'achievement.title': '実績トロフィー', 'achievement.monthly': '今月の実績', 'achievement.all': '獲得バッジ',
     'achievement.progress': '進捗', 'achievement.unlocked': '解除済み', 'achievement.locked': '未解除',
@@ -109,6 +110,7 @@ const i18n = {
     'sidebar.trash': 'Trash', 'sidebar.search': 'Search', 'sidebar.calendar': 'Calendar',
     'sidebar.language': 'Language', 'sidebar.aiCredits': 'AI Credits',
     'tab.ideas': 'Ideas', 'tab.plot': 'Plot', 'tab.writing': 'Writing',
+    'tab.settings_materials': 'Settings',
     'tab.illustration': 'Illustration', 'tab.analysis': 'Analysis', 'tab.consultation': 'AI Chat', 'tab.achievements': 'Achievements',
     'achievement.title': 'Achievements', 'achievement.monthly': 'Monthly Goals', 'achievement.all': 'Badges',
     'achievement.progress': 'Progress', 'achievement.unlocked': 'Unlocked', 'achievement.locked': 'Locked',
@@ -1414,7 +1416,7 @@ function renderMainContent() {
     <div class="h-full flex flex-col">
       <!-- Tabs -->
       <div class="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4">
-        ${['ideas', 'plot', 'writing', 'illustration', 'analysis', 'consultation', 'achievements'].map(tab => `
+        ${['settings_materials', 'ideas', 'plot', 'writing', 'illustration', 'analysis', 'consultation', 'achievements'].map(tab => `
           <button onclick="switchTab('${tab}')" 
             class="px-4 py-3 text-sm font-medium transition ${state.currentTab === tab ? 'tab-active' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'} ${tab === 'achievements' ? 'ml-auto bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent' : ''}">
             <i class="fas ${getTabIcon(tab)} mr-1 ${tab === 'achievements' ? 'text-yellow-500' : ''}"></i>
@@ -1432,12 +1434,13 @@ function renderMainContent() {
 }
 
 function getTabIcon(tab) {
-  const icons = { ideas: 'fa-lightbulb', plot: 'fa-sitemap', writing: 'fa-pen-fancy', illustration: 'fa-image', analysis: 'fa-chart-pie', consultation: 'fa-comments', achievements: 'fa-trophy' };
+  const icons = { settings_materials: 'fa-cog', ideas: 'fa-lightbulb', plot: 'fa-sitemap', writing: 'fa-pen-fancy', illustration: 'fa-image', analysis: 'fa-chart-pie', consultation: 'fa-comments', achievements: 'fa-trophy' };
   return icons[tab] || 'fa-circle';
 }
 
 function renderTabContent() {
   switch (state.currentTab) {
+    case 'settings_materials': return renderSettingsMaterialsTab();
     case 'ideas': return renderIdeasTab();
     case 'plot': return renderPlotTab();
     case 'writing': return renderWritingTab();
@@ -1449,7 +1452,10 @@ function renderTabContent() {
   }
 }
 
-function renderIdeasTab() {
+// ============================================
+// Settings & Materials Tab (C案: 設定・資料タブ)
+// ============================================
+function renderSettingsMaterialsTab() {
   const allGenres = [
     { value: 'literary', label: t('genre.literary') },
     { value: 'contemporary', label: t('genre.contemporary') },
@@ -1483,131 +1489,153 @@ function renderIdeasTab() {
     episodes: ''
   };
   
-  const projectGenres = state.currentProject?.genre?.split(',') || [];
-  const showStoryOutline = state.showStoryOutline !== false;
+  const projectGenres = state.currentProject?.genre?.split(',') || state.tempGenres?.split(',') || [];
   
   return `
-    <div class="h-full flex gap-4">
-      <!-- Left: Story Outline Panel (collapsible) -->
-      ${showStoryOutline ? `
-        <div class="w-80 flex flex-col gap-3 overflow-y-auto">
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="font-semibold flex items-center gap-2">
-                <i class="fas fa-list-alt text-purple-500"></i>
-                物語の構成
-              </h3>
-              <button onclick="toggleStoryOutline()" class="text-gray-400 hover:text-gray-600" title="アウトラインを非表示">
-                <i class="fas fa-chevron-left"></i>
-              </button>
-            </div>
-            
-            <!-- Genre Settings -->
-            <div class="mb-4 pb-4 border-b dark:border-gray-700">
-              <label class="block text-sm font-medium mb-2">
-                <i class="fas fa-tags mr-1 text-indigo-500"></i>ジャンル設定
+    <div class="h-full flex gap-6">
+      <!-- Left Column: Basic Settings -->
+      <div class="w-1/3 flex flex-col gap-4 overflow-y-auto">
+        <!-- Genre Settings Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
+          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+            <i class="fas fa-tags"></i>
+            ジャンル設定
+          </h3>
+          <p class="text-sm text-gray-500 mb-3">作品のジャンルを選択してください（複数選択可）</p>
+          <div class="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto p-3 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-900">
+            ${allGenres.map(g => `
+              <label class="flex items-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-gray-800 p-2 rounded-lg transition">
+                <input type="checkbox" name="project-genre" value="${g.value}" 
+                  ${projectGenres.includes(g.value) ? 'checked' : ''}
+                  onchange="updateProjectGenre()" class="rounded text-indigo-600 focus:ring-indigo-500">
+                <span class="text-sm">${g.label}</span>
               </label>
-              <div class="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto p-2 border rounded-lg dark:border-gray-600 text-xs">
-                ${allGenres.map(g => `
-                  <label class="flex items-center gap-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">
-                    <input type="checkbox" name="project-genre" value="${g.value}" 
-                      ${projectGenres.includes(g.value) ? 'checked' : ''}
-                      onchange="updateProjectGenre()" class="rounded">
-                    <span class="truncate">${g.label}</span>
-                  </label>
-                `).join('')}
-              </div>
-            </div>
-            
-            <!-- Story Elements -->
-            <div class="space-y-3">
-              <div class="relative">
-                <label class="flex items-center gap-1 text-sm font-medium mb-1">
-                  <i class="fas fa-users text-blue-500"></i>キャラクター
-                </label>
-                <textarea id="outline-characters" rows="3" placeholder="主人公、ヒロイン、敵役など..."
-                  class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-                  oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters}</textarea>
-                <button onclick="expandTextarea('outline-characters', 'キャラクター')" 
-                  class="absolute bottom-1 right-1 p-0.5 text-gray-400 hover:text-indigo-600 text-xs" title="拡大">
-                  <i class="fas fa-expand"></i>
-                </button>
-              </div>
-              
-              <div class="relative">
-                <label class="flex items-center gap-1 text-sm font-medium mb-1">
-                  <i class="fas fa-book text-green-500"></i>専門用語
-                </label>
-                <textarea id="outline-terminology" rows="2" placeholder="魔法、技術、組織名など..."
-                  class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-                  oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology}</textarea>
-                <button onclick="expandTextarea('outline-terminology', '専門用語')" 
-                  class="absolute bottom-1 right-1 p-0.5 text-gray-400 hover:text-indigo-600 text-xs" title="拡大">
-                  <i class="fas fa-expand"></i>
-                </button>
-              </div>
-              
-              <div class="relative">
-                <label class="flex items-center gap-1 text-sm font-medium mb-1">
-                  <i class="fas fa-globe text-yellow-500"></i>世界観
-                </label>
-                <textarea id="outline-worldSetting" rows="3" placeholder="舞台設定、時代、ルールなど..."
-                  class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-                  oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting}</textarea>
-                <button onclick="expandTextarea('outline-worldSetting', '世界観')" 
-                  class="absolute bottom-1 right-1 p-0.5 text-gray-400 hover:text-indigo-600 text-xs" title="拡大">
-                  <i class="fas fa-expand"></i>
-                </button>
-              </div>
-              
-              <div class="relative">
-                <label class="flex items-center gap-1 text-sm font-medium mb-1">
-                  <i class="fas fa-bullseye text-red-500"></i>描きたい物語
-                </label>
-                <textarea id="outline-storyGoal" rows="3" placeholder="テーマ、メッセージ、結末のイメージ..."
-                  class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-                  oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal}</textarea>
-                <button onclick="expandTextarea('outline-storyGoal', '描きたい物語')" 
-                  class="absolute bottom-1 right-1 p-0.5 text-gray-400 hover:text-indigo-600 text-xs" title="拡大">
-                  <i class="fas fa-expand"></i>
-                </button>
-              </div>
-              
-              <div class="relative">
-                <label class="flex items-center gap-1 text-sm font-medium mb-1">
-                  <i class="fas fa-list-ol text-purple-500"></i>各話アウトライン
-                </label>
-                <textarea id="outline-episodes" rows="4" placeholder="第1話: xxx&#10;第2話: xxx&#10;..."
-                  class="w-full px-2 py-1 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-                  oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes}</textarea>
-                <button onclick="expandTextarea('outline-episodes', '各話アウトライン')" 
-                  class="absolute bottom-1 right-1 p-0.5 text-gray-400 hover:text-indigo-600 text-xs" title="拡大">
-                  <i class="fas fa-expand"></i>
-                </button>
-              </div>
-            </div>
-            
-            <button onclick="saveStoryOutline()" 
-              class="w-full mt-4 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
-              <i class="fas fa-save mr-1"></i>アウトラインを保存
+            `).join('')}
+          </div>
+        </div>
+        
+        <!-- Story Goal Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
+          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-red-500">
+            <i class="fas fa-bullseye"></i>
+            描きたい物語
+          </h3>
+          <p class="text-sm text-gray-500 mb-3">テーマ、メッセージ、結末のイメージなど</p>
+          <div class="relative">
+            <textarea id="settings-storyGoal" rows="6" 
+              placeholder="この物語で伝えたいこと、読者に感じてほしいこと、理想の結末..."
+              class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+              oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal}</textarea>
+            <button onclick="expandTextarea('settings-storyGoal', '描きたい物語')" 
+              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <i class="fas fa-expand text-xs"></i>
             </button>
           </div>
         </div>
-      ` : `
-        <button onclick="toggleStoryOutline()" 
-          class="px-2 py-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-          title="アウトラインを表示">
-          <i class="fas fa-chevron-right text-gray-400"></i>
-        </button>
-      `}
+      </div>
       
-      <!-- Center: Main Document Area -->
+      <!-- Middle Column: Characters & World -->
+      <div class="w-1/3 flex flex-col gap-4 overflow-y-auto">
+        <!-- Characters Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
+          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
+            <i class="fas fa-users"></i>
+            キャラクター設定
+          </h3>
+          <p class="text-sm text-gray-500 mb-3">登場人物の名前、性格、役割など</p>
+          <div class="relative h-[calc(100%-80px)]">
+            <textarea id="settings-characters" 
+              placeholder="【主人公】&#10;名前: &#10;年齢: &#10;性格: &#10;目標: &#10;&#10;【ヒロイン】&#10;名前: &#10;..."
+              class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+              oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters}</textarea>
+            <button onclick="expandTextarea('settings-characters', 'キャラクター設定')" 
+              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <i class="fas fa-expand text-xs"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Terminology Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
+          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-green-500">
+            <i class="fas fa-book"></i>
+            専門用語・設定
+          </h3>
+          <p class="text-sm text-gray-500 mb-3">魔法、技術、組織、独自の概念など</p>
+          <div class="relative">
+            <textarea id="settings-terminology" rows="5"
+              placeholder="【魔法】&#10;・ファイアボール: 炎の球を放つ初級魔法&#10;&#10;【組織】&#10;・騎士団: ..."
+              class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+              oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology}</textarea>
+            <button onclick="expandTextarea('settings-terminology', '専門用語・設定')" 
+              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <i class="fas fa-expand text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Column: World & Episodes -->
+      <div class="w-1/3 flex flex-col gap-4 overflow-y-auto">
+        <!-- World Setting Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
+          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
+            <i class="fas fa-globe"></i>
+            世界観設定
+          </h3>
+          <p class="text-sm text-gray-500 mb-3">舞台、時代、ルール、雰囲気など</p>
+          <div class="relative">
+            <textarea id="settings-worldSetting" rows="6"
+              placeholder="【舞台】&#10;・時代: &#10;・場所: &#10;&#10;【世界のルール】&#10;・魔法が存在する&#10;..."
+              class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+              oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting}</textarea>
+            <button onclick="expandTextarea('settings-worldSetting', '世界観設定')" 
+              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <i class="fas fa-expand text-xs"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Episodes Outline Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
+          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-500">
+            <i class="fas fa-list-ol"></i>
+            各話アウトライン
+          </h3>
+          <p class="text-sm text-gray-500 mb-3">章・話ごとのあらすじ</p>
+          <div class="relative h-[calc(100%-80px)]">
+            <textarea id="settings-episodes"
+              placeholder="第1話: プロローグ - 主人公の日常&#10;第2話: 事件発生 - 異変の始まり&#10;第3話: 旅立ち - 冒険への決意&#10;..."
+              class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+              oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes}</textarea>
+            <button onclick="expandTextarea('settings-episodes', '各話アウトライン')" 
+              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <i class="fas fa-expand text-xs"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Save Button -->
+        <button onclick="saveStoryOutline()" 
+          class="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
+          <i class="fas fa-save"></i>
+          設定を保存
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderIdeasTab() {
+  return `
+    <div class="h-full flex gap-4">
+      <!-- Main Document Area (expanded) -->
       <div class="flex-1 flex flex-col">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm flex-1 flex flex-col overflow-hidden">
           <!-- Document Header/Toolbar -->
           <div class="flex flex-wrap items-center gap-2 p-3 border-b dark:border-gray-700">
             <h3 class="font-semibold flex items-center gap-2">
-              <i class="fas fa-file-alt text-indigo-500"></i>
+              <i class="fas fa-lightbulb text-yellow-500"></i>
               ネタ・プロットメモ
             </h3>
             
@@ -1651,6 +1679,14 @@ function renderIdeasTab() {
               アウトライン
             </button>
             
+            <!-- Link to Settings Tab -->
+            <button onclick="switchTab('settings_materials')" 
+              class="px-3 py-1.5 text-sm bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50" 
+              title="設定・資料タブを開く">
+              <i class="fas fa-cog mr-1"></i>
+              設定を編集
+            </button>
+            
             <div class="flex-1"></div>
             <span class="text-xs text-gray-500" id="ideas-doc-chars">
               ${(state.ideasDocument || '').length} 文字
@@ -1674,20 +1710,20 @@ function renderIdeasTab() {
             
             <!-- Document Editor -->
             <div class="flex-1 relative">
-            <textarea id="ideas-document" 
-              class="w-full h-full p-4 text-sm resize-none focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-              placeholder="ここにネタやプロットのアイデアを自由に書き込んでください...
+              <textarea id="ideas-document" 
+                class="w-full h-full p-4 text-sm resize-none focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                placeholder="ここにネタやプロットのアイデアを自由に書き込んでください...
 
 【使い方のヒント】
 ・右側のAIチャットで相談しながらアイデアを膨らませましょう
-・左のアウトラインに設定を書くと、AIがより良い提案をします
-・プロット・ライティング・分析タブでもこの設定が反映されます"
-              oninput="updateIdeasDocumentCount(this.value); updateIdeasOutline();">${state.ideasDocument || ''}</textarea>
-            <button onclick="expandTextarea('ideas-document', 'ネタ・プロットメモ')" 
-              class="absolute bottom-12 right-3 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
-              title="拡大表示">
-              <i class="fas fa-expand"></i>
-            </button>
+・「設定・資料」タブで世界観やキャラクターを設定すると、AIがより良い提案をします
+・プロット・ライティング・分析タブでも設定が反映されます"
+                oninput="updateIdeasDocumentCount(this.value); updateIdeasOutline();">${state.ideasDocument || ''}</textarea>
+              <button onclick="expandTextarea('ideas-document', 'ネタ・プロットメモ')" 
+                class="absolute bottom-12 right-3 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+                title="拡大表示">
+                <i class="fas fa-expand"></i>
+              </button>
             </div>
           </div>
           
@@ -1701,70 +1737,75 @@ function renderIdeasTab() {
           </div>
         </div>
         
-        <!-- Quick Ideas Section (collapsed by default) -->
+        <!-- Quick Ideas Section (expanded by default in new layout) -->
         <div class="mt-3">
-          <button onclick="toggleQuickIdeas()" class="w-full px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700">
-            <span class="flex items-center gap-2">
-              <i class="fas fa-lightbulb text-yellow-500"></i>
-              <span class="font-medium">クイックアイデア生成</span>
-              <span class="text-xs text-gray-500">(${state.ideas?.length || 0}件)</span>
-            </span>
-            <i class="fas fa-chevron-${state.showQuickIdeas ? 'up' : 'down'} text-gray-400"></i>
-          </button>
-          
-          ${state.showQuickIdeas ? `
-            <div class="mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-              <div class="flex gap-2 mb-3">
-                <input type="text" id="quick-idea-keywords" placeholder="キーワード（任意）"
-                  class="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
-                <select id="quick-idea-count" class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
-                  <option value="3">3件</option>
-                  <option value="5" selected>5件</option>
-                  <option value="10">10件</option>
-                </select>
-                <button onclick="handleGenerateIdeas()" 
-                  class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 text-sm"
-                  ${state.aiGenerating ? 'disabled' : ''}>
-                  ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-magic mr-1"></i>生成'}
-                </button>
-              </div>
-              
-              ${state.ideas?.length > 0 ? `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                  ${state.ideas.map(idea => `
-                    <div class="relative bg-gray-50 dark:bg-gray-900 rounded-lg p-3 text-sm ${idea.adopted ? 'ring-2 ring-green-500' : ''} group">
-                      <button onclick="deleteIdea('${idea.id}', '${(idea.title || '').replace(/'/g, "\\'")}')"
-                        class="absolute top-1 right-1 w-5 h-5 flex items-center justify-center text-gray-400 hover:text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-xs">
-                        <i class="fas fa-times"></i>
-                      </button>
-                      <div class="font-medium mb-1 pr-5">${idea.title}</div>
-                      <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">${idea.content || ''}</p>
-                      <div class="flex justify-between items-center mt-2">
-                        <span class="text-xs text-gray-500">${idea.genre || ''}</span>
-                        ${idea.adopted ? 
-                          `<button onclick="unadoptIdea('${idea.id}')" class="text-xs text-red-500 hover:underline">取消</button>` :
-                          `<button onclick="adoptIdea('${idea.id}')" class="text-xs text-indigo-600 hover:underline">採用</button>`
-                        }
-                      </div>
-                    </div>
-                  `).join('')}
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <button onclick="toggleQuickIdeas()" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+              <span class="flex items-center gap-2 font-semibold">
+                <i class="fas fa-magic text-purple-500"></i>
+                <span>クイックアイデア生成</span>
+                <span class="text-xs text-gray-500 font-normal">(${state.ideas?.length || 0}件)</span>
+              </span>
+              <i class="fas fa-chevron-${state.showQuickIdeas ? 'up' : 'down'} text-gray-400"></i>
+            </button>
+            
+            ${state.showQuickIdeas ? `
+              <div class="p-4">
+                <div class="flex gap-2 mb-3">
+                  <input type="text" id="quick-idea-keywords" placeholder="キーワード（任意）"
+                    class="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
+                  <select id="quick-idea-count" class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
+                    <option value="3">3件</option>
+                    <option value="5" selected>5件</option>
+                    <option value="10">10件</option>
+                  </select>
+                  <button onclick="handleGenerateIdeas()" 
+                    class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 text-sm"
+                    ${state.aiGenerating ? 'disabled' : ''}>
+                    ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-magic mr-1"></i>生成'}
+                  </button>
                 </div>
-              ` : `
-                <p class="text-center text-gray-500 text-sm py-4">アイデアを生成してください</p>
-              `}
-            </div>
-          ` : ''}
+                
+                ${state.ideas?.length > 0 ? `
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-64 overflow-y-auto">
+                    ${state.ideas.map(idea => `
+                      <div class="relative bg-gray-50 dark:bg-gray-900 rounded-lg p-3 text-sm ${idea.adopted ? 'ring-2 ring-green-500' : ''} group hover:shadow-md transition-shadow">
+                        <button onclick="deleteIdea('${idea.id}', '${(idea.title || '').replace(/'/g, "\\'")}')"
+                          class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-xs">
+                          <i class="fas fa-times"></i>
+                        </button>
+                        <div class="font-medium mb-1 pr-6">${idea.title}</div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">${idea.content || ''}</p>
+                        <div class="flex justify-between items-center mt-2">
+                          <span class="text-xs text-gray-500">${idea.genre || ''}</span>
+                          ${idea.adopted ? 
+                            `<button onclick="unadoptIdea('${idea.id}')" class="text-xs text-red-500 hover:underline">取消</button>` :
+                            `<button onclick="adoptIdea('${idea.id}')" class="text-xs text-indigo-600 hover:underline">採用</button>`
+                          }
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : `
+                  <p class="text-center text-gray-500 text-sm py-6">
+                    <i class="fas fa-lightbulb text-2xl mb-2 text-yellow-400"></i><br>
+                    AIでアイデアを生成してみましょう
+                  </p>
+                `}
+              </div>
+            ` : ''}
+          </div>
         </div>
       </div>
       
-      <!-- Right: AI Chat Panel (Monica-like) -->
+      <!-- Right: AI Chat Panel -->
       <div class="w-80 flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
         <div class="p-3 border-b dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
           <h3 class="font-semibold flex items-center gap-2">
             <i class="fas fa-robot"></i>
             ネタ考案AIアシスタント
           </h3>
-          <p class="text-xs text-indigo-100 mt-1">設定やアイデアについて相談できます</p>
+          <p class="text-xs text-indigo-100 mt-1">アイデアについて相談できます</p>
         </div>
         
         <!-- Chat Messages -->
@@ -1782,9 +1823,9 @@ function renderIdeasTab() {
               </div>
             `).join('') : `
               <div class="text-center text-gray-500 text-sm py-8">
-                <i class="fas fa-comments text-3xl mb-3"></i>
-                <p>AIに質問してみましょう！</p>
-                <p class="text-xs mt-2">例: 「ファンタジー世界で使える魔法のアイデアをください」</p>
+                <i class="fas fa-comments text-3xl mb-3 text-indigo-300"></i>
+                <p class="font-medium">AIに質問してみましょう！</p>
+                <p class="text-xs mt-2 text-gray-400">例: 「ファンタジー世界の魔法システムを考えて」</p>
               </div>
             `
           }
