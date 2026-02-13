@@ -178,30 +178,70 @@ api.get('/projects', async (c) => {
   }
   query += ' ORDER BY updated_at DESC';
   
-  const projects = await c.env.DB.prepare(query).bind(userId).all();
-  return c.json({ projects: projects.results });
+  const result = await c.env.DB.prepare(query).bind(userId).all();
+  
+  // Parse library_settings for each project
+  const projects = (result.results || []).map((project: any) => {
+    if (project.library_settings) {
+      try {
+        project.library_settings = JSON.parse(project.library_settings);
+      } catch (e) {
+        // Keep as string if parse fails
+      }
+    }
+    return project;
+  });
+  
+  return c.json({ projects });
 });
 
 api.post('/projects', async (c) => {
   const data = await c.req.json();
   const id = generateId();
   
-  await c.env.DB.prepare(
-    `INSERT INTO projects (id, user_id, title, description, genre, folder_id, target_word_count)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).bind(id, data.user_id, data.title, data.description || null, data.genre || null, data.folder_id || null, data.target_word_count || 0).run();
+  // Handle library_settings as JSON string
+  const librarySettings = data.library_settings ? JSON.stringify(data.library_settings) : null;
   
-  // Create default writing
   await c.env.DB.prepare(
-    'INSERT INTO writings (id, project_id, chapter_number, chapter_title) VALUES (?, ?, 1, ?)'
-  ).bind(generateId(), id, '第一章').run();
+    `INSERT INTO projects (id, user_id, title, description, genre, folder_id, target_word_count, is_library, library_id, library_settings)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(
+    id, 
+    data.user_id, 
+    data.title, 
+    data.description || null, 
+    data.genre || null, 
+    data.folder_id || null, 
+    data.target_word_count || 0,
+    data.is_library ? 1 : 0,
+    data.library_id || null,
+    librarySettings
+  ).run();
   
-  // Create default plot
-  await c.env.DB.prepare(
-    'INSERT INTO plots (id, project_id, template, structure) VALUES (?, ?, ?, ?)'
-  ).bind(generateId(), id, 'kishotenketsu', '{}').run();
+  // Create default writing (only for non-library projects)
+  if (!data.is_library) {
+    await c.env.DB.prepare(
+      'INSERT INTO writings (id, project_id, chapter_number, chapter_title) VALUES (?, ?, 1, ?)'
+    ).bind(generateId(), id, '第一章').run();
+    
+    // Create default plot
+    await c.env.DB.prepare(
+      'INSERT INTO plots (id, project_id, template, structure) VALUES (?, ?, ?, ?)'
+    ).bind(generateId(), id, 'kishotenketsu', '{}').run();
+  }
   
-  const project = await c.env.DB.prepare('SELECT * FROM projects WHERE id = ?').bind(id).first();
+  const result = await c.env.DB.prepare('SELECT * FROM projects WHERE id = ?').bind(id).first();
+  
+  // Parse library_settings if it exists
+  const project = result as any;
+  if (project && project.library_settings) {
+    try {
+      project.library_settings = JSON.parse(project.library_settings);
+    } catch (e) {
+      // Keep as string if parse fails
+    }
+  }
+  
   return c.json({ project });
 });
 
@@ -225,6 +265,12 @@ api.put('/projects/:id', async (c) => {
   if (updates.target_word_count !== undefined) { fields.push('target_word_count = ?'); values.push(updates.target_word_count); }
   if (updates.folder_id !== undefined) { fields.push('folder_id = ?'); values.push(updates.folder_id); }
   if (updates.pinned_plot !== undefined) { fields.push('pinned_plot = ?'); values.push(updates.pinned_plot); }
+  if (updates.library_id !== undefined) { fields.push('library_id = ?'); values.push(updates.library_id); }
+  if (updates.is_library !== undefined) { fields.push('is_library = ?'); values.push(updates.is_library ? 1 : 0); }
+  if (updates.library_settings !== undefined) { 
+    fields.push('library_settings = ?'); 
+    values.push(typeof updates.library_settings === 'string' ? updates.library_settings : JSON.stringify(updates.library_settings)); 
+  }
   
   if (fields.length > 0) {
     fields.push('updated_at = datetime("now")');
@@ -234,7 +280,18 @@ api.put('/projects/:id', async (c) => {
     ).bind(...values).run();
   }
   
-  const project = await c.env.DB.prepare('SELECT * FROM projects WHERE id = ?').bind(id).first();
+  const result = await c.env.DB.prepare('SELECT * FROM projects WHERE id = ?').bind(id).first();
+  
+  // Parse library_settings if it exists
+  const project = result as any;
+  if (project && project.library_settings) {
+    try {
+      project.library_settings = JSON.parse(project.library_settings);
+    } catch (e) {
+      // Keep as string if parse fails
+    }
+  }
+  
   return c.json({ project });
 });
 

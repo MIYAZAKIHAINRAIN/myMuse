@@ -10,6 +10,8 @@ const state = {
   currentProject: null,
   projects: [],
   folders: [],
+  libraries: [], // ライブラリ（親プロジェクト）一覧
+  expandedLibraries: JSON.parse(localStorage.getItem('expandedLibraries') || '{}'), // 展開状態
   currentTab: 'writing',
   language: localStorage.getItem('language') || 'ja',
   theme: localStorage.getItem('theme') || 'light',
@@ -1323,6 +1325,11 @@ function renderHeader() {
 function renderLeftSidebar() {
   if (!state.sidebarOpen.left) return '';
   
+  // ライブラリに属さないプロジェクト
+  const standaloneProjects = state.projects.filter(p => !p.folder_id && !p.library_id && !p.is_library);
+  // ライブラリ（親プロジェクト）一覧
+  const libraries = state.projects.filter(p => p.is_library);
+  
   return `
     <aside class="sidebar-left fixed left-0 top-14 bottom-0 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto z-30 animate-slide-in">
       <div class="p-4 space-y-4">
@@ -1333,11 +1340,27 @@ function renderLeftSidebar() {
           <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
         </div>
         
-        <!-- New Project Button -->
-        <button onclick="openModal('newProject')" class="w-full flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
-          <i class="fas fa-plus"></i>
-          <span>${t('sidebar.newProject')}</span>
-        </button>
+        <!-- New Project/Library Buttons -->
+        <div class="flex gap-2">
+          <button onclick="openModal('newProject')" class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm">
+            <i class="fas fa-plus"></i>
+            <span>プロジェクト</span>
+          </button>
+          <button onclick="openModal('newLibrary')" class="flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm" title="シリーズ（ライブラリ）を作成">
+            <i class="fas fa-layer-group"></i>
+          </button>
+        </div>
+        
+        <!-- Libraries Section -->
+        ${libraries.length > 0 ? `
+          <div class="space-y-1">
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+              <i class="fas fa-layer-group text-purple-500"></i>
+              シリーズ
+            </h3>
+            ${libraries.map(library => renderLibraryItem(library)).join('')}
+          </div>
+        ` : ''}
         
         <!-- Projects List -->
         <div class="space-y-2">
@@ -1348,12 +1371,12 @@ function renderLeftSidebar() {
                 <i class="fas fa-folder"></i>
                 <span>${folder.name}</span>
               </div>
-              ${state.projects.filter(p => p.folder_id === folder.id).map(project => renderProjectItem(project)).join('')}
+              ${state.projects.filter(p => p.folder_id === folder.id && !p.is_library).map(project => renderProjectItem(project)).join('')}
             </div>
           `).join('')}
           
-          <!-- Projects without folder -->
-          ${state.projects.filter(p => !p.folder_id).map(project => renderProjectItem(project)).join('')}
+          <!-- Standalone Projects (not in library) -->
+          ${standaloneProjects.map(project => renderProjectItem(project)).join('')}
         </div>
         
         <!-- Calendar -->
@@ -1386,6 +1409,87 @@ function renderLeftSidebar() {
         </select>
       </div>
     </aside>
+  `;
+}
+
+// ライブラリ（シリーズ）のレンダリング
+function renderLibraryItem(library) {
+  const isExpanded = state.expandedLibraries[library.id];
+  const childProjects = state.projects.filter(p => p.library_id === library.id);
+  const isActive = state.currentProject?.id === library.id;
+  
+  return `
+    <div class="rounded-lg overflow-hidden border border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-900/20 mb-2">
+      <!-- Library Header -->
+      <div class="flex items-center gap-2 px-3 py-2 cursor-pointer transition group
+          ${isActive ? 'bg-purple-200 dark:bg-purple-800' : 'hover:bg-purple-100 dark:hover:bg-purple-900/40'}">
+        <button onclick="event.stopPropagation(); toggleLibraryExpand('${library.id}')" class="text-purple-500 hover:text-purple-700">
+          <i class="fas fa-chevron-${isExpanded ? 'down' : 'right'} text-xs"></i>
+        </button>
+        <div onclick="selectProject('${library.id}')" class="flex items-center gap-2 flex-1 min-w-0">
+          <i class="fas fa-layer-group text-purple-500"></i>
+          <span class="flex-1 truncate text-sm font-medium">${library.title}</span>
+          <span class="text-xs text-purple-400">${childProjects.length}話</span>
+        </div>
+        <div class="relative">
+          <button onclick="event.stopPropagation(); toggleLibraryMenu('${library.id}')" 
+            class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition p-1">
+            <i class="fas fa-ellipsis-v text-xs"></i>
+          </button>
+          <div id="library-menu-${library.id}" class="hidden absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+            <button onclick="event.stopPropagation(); openAddChildProjectModal('${library.id}')" 
+              class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg">
+              <i class="fas fa-plus text-green-500"></i>
+              新しい話を追加
+            </button>
+            <button onclick="event.stopPropagation(); editLibrarySettings('${library.id}')" 
+              class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+              <i class="fas fa-cog text-blue-500"></i>
+              共通設定を編集
+            </button>
+            <button onclick="event.stopPropagation(); renameProject('${library.id}', '${library.title.replace(/'/g, "\\'")}')" 
+              class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+              <i class="fas fa-edit text-indigo-500"></i>
+              名前を変更
+            </button>
+            <button onclick="event.stopPropagation(); deleteProject('${library.id}', '${library.title.replace(/'/g, "\\'")}')" 
+              class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-b-lg">
+              <i class="fas fa-trash"></i>
+              削除
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Child Projects (Expandable) -->
+      ${isExpanded ? `
+        <div class="border-t border-purple-200 dark:border-purple-700 bg-white/50 dark:bg-gray-800/50">
+          ${childProjects.length > 0 ? childProjects.map((child, index) => `
+            <div onclick="selectProject('${child.id}')" 
+              class="flex items-center gap-2 px-4 py-2 cursor-pointer transition text-sm
+                ${state.currentProject?.id === child.id ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}">
+              <span class="w-6 text-center text-xs text-gray-400">${index + 1}</span>
+              <i class="fas fa-file-alt text-gray-400"></i>
+              <span class="flex-1 truncate">${child.title}</span>
+              <button onclick="event.stopPropagation(); removeFromLibrary('${child.id}')" 
+                class="opacity-0 hover:opacity-100 text-gray-400 hover:text-red-500 transition p-1" title="シリーズから外す">
+                <i class="fas fa-times text-xs"></i>
+              </button>
+            </div>
+          `).join('') : `
+            <div class="px-4 py-3 text-sm text-gray-500 text-center">
+              <i class="fas fa-info-circle mr-1"></i>
+              まだ話がありません
+            </div>
+          `}
+          <button onclick="openAddChildProjectModal('${library.id}')" 
+            class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition">
+            <i class="fas fa-plus"></i>
+            新しい話を追加
+          </button>
+        </div>
+      ` : ''}
+    </div>
   `;
 }
 
@@ -3763,6 +3867,75 @@ function renderModals() {
         </div>
       </div>
     </div>
+    
+    <!-- New Library (Series) Modal -->
+    <div id="modal-newLibrary" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'newLibrary')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-lg m-4 animate-fade-in relative" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('newLibrary')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3 class="text-lg font-semibold mb-4">
+          <i class="fas fa-layer-group mr-2 text-purple-500"></i>新しいシリーズ（ライブラリ）を作成
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          シリーズを作成すると、複数の話（プロジェクト）を1つにまとめ、キャラクター設定や世界観を共有できます。
+        </p>
+        <form id="new-library-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">シリーズ名</label>
+            <input type="text" id="new-library-title" required placeholder="例: 異世界冒険譚シリーズ"
+              class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">シリーズの説明（任意）</label>
+            <textarea id="new-library-description" rows="2" placeholder="シリーズの概要を入力..."
+              class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">ジャンル（複数選択可）</label>
+            <div class="grid grid-cols-3 gap-1 max-h-32 overflow-y-auto p-2 border rounded-lg dark:border-gray-600 text-sm">
+              ${getGenreOptions().map(g => `
+                <label class="flex items-center gap-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">
+                  <input type="checkbox" name="new-library-genre" value="${g.value}" class="rounded">
+                  <span class="truncate text-xs">${g.label}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal('newLibrary')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+              ${t('common.cancel')}
+            </button>
+            <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+              <i class="fas fa-plus mr-1"></i>シリーズを作成
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Add Child Project to Library Modal -->
+    <div id="modal-addChildProject" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'addChildProject')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-lg m-4 animate-fade-in relative max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('addChildProject')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3 class="text-lg font-semibold mb-4">
+          <i class="fas fa-plus-circle mr-2 text-green-500"></i>新しい話を追加
+        </h3>
+        <div id="add-child-project-content"></div>
+      </div>
+    </div>
+    
+    <!-- Edit Library Settings Modal -->
+    <div id="modal-librarySettings" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'librarySettings')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-4xl m-4 animate-fade-in relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('librarySettings')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition z-10">
+          <i class="fas fa-times"></i>
+        </button>
+        <div id="library-settings-content"></div>
+      </div>
+    </div>
   `;
 }
 
@@ -3838,6 +4011,21 @@ function attachEventListeners() {
       const genre = genres.length > 0 ? genres.join(', ') : 'fantasy';
       createProject(title, genre);
       closeModal('newProject');
+    });
+  }
+  
+  // New library (series) form
+  const newLibraryForm = $('#new-library-form');
+  if (newLibraryForm) {
+    newLibraryForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = $('#new-library-title').value.trim();
+      const description = $('#new-library-description')?.value?.trim() || '';
+      const genreCheckboxes = document.querySelectorAll('input[name="new-library-genre"]:checked');
+      const genres = Array.from(genreCheckboxes).map(cb => cb.value);
+      const genre = genres.length > 0 ? genres.join(', ') : '';
+      createLibrary(title, description, genre);
+      closeModal('newLibrary');
     });
   }
   
@@ -4043,6 +4231,431 @@ window.deleteProject = async (projectId, projectTitle) => {
   } catch (e) {
     console.error('Delete project error:', e);
     alert('削除に失敗しました: ' + e.message);
+  }
+};
+
+// ============================================
+// Library (Series/Parent-Child Project) Functions
+// ============================================
+
+// Create a new library (parent project for series)
+window.createLibrary = async (title, description = '', genre = '') => {
+  try {
+    // Create a project with is_library flag
+    const res = await api.post('/projects', {
+      title,
+      genre,
+      is_library: true,
+      library_settings: {
+        description,
+        shared_characters: '',
+        shared_world_setting: '',
+        shared_terminology: ''
+      }
+    });
+    
+    state.projects.unshift(res.data.project);
+    state.currentProject = res.data.project;
+    
+    // Initialize expanded state
+    if (!state.expandedLibraries) state.expandedLibraries = {};
+    state.expandedLibraries[res.data.project.id] = true;
+    
+    render();
+    alert(`シリーズ「${title}」を作成しました`);
+  } catch (e) {
+    console.error('Create library error:', e);
+    alert('シリーズの作成に失敗しました: ' + e.message);
+  }
+};
+
+// Toggle library expand/collapse
+window.toggleLibraryExpand = (libraryId) => {
+  if (!state.expandedLibraries) state.expandedLibraries = {};
+  state.expandedLibraries[libraryId] = !state.expandedLibraries[libraryId];
+  render();
+};
+
+// Toggle library menu visibility
+window.toggleLibraryMenu = (libraryId) => {
+  // Close all other menus
+  document.querySelectorAll('[id^="library-menu-"]').forEach(menu => {
+    if (menu.id !== `library-menu-${libraryId}`) {
+      menu.classList.add('hidden');
+    }
+  });
+  document.querySelectorAll('[id^="project-menu-"]').forEach(menu => menu.classList.add('hidden'));
+  
+  const menu = $(`#library-menu-${libraryId}`);
+  if (menu) {
+    menu.classList.toggle('hidden');
+  }
+};
+
+// Open modal to add child project to library
+window.openAddChildProjectModal = (libraryId) => {
+  // Close any open menus
+  document.querySelectorAll('[id^="library-menu-"]').forEach(menu => menu.classList.add('hidden'));
+  
+  const library = state.projects.find(p => p.id === libraryId);
+  if (!library) return;
+  
+  // Get existing projects that could be added (not in any library and not libraries themselves)
+  const availableProjects = state.projects.filter(p => !p.library_id && !p.is_library && p.id !== libraryId);
+  
+  const content = `
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      「${library.title}」に新しい話を追加します。
+    </p>
+    
+    <!-- Create New -->
+    <div class="mb-6">
+      <h4 class="font-medium mb-3"><i class="fas fa-plus text-green-500 mr-2"></i>新しい話を作成</h4>
+      <form id="create-child-project-form" class="space-y-3">
+        <input type="hidden" id="child-project-library-id" value="${libraryId}">
+        <div>
+          <label class="block text-sm font-medium mb-1">タイトル</label>
+          <input type="text" id="child-project-title" required placeholder="例: 第1話 冒険の始まり"
+            class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="inherit-settings" checked class="rounded">
+          <label for="inherit-settings" class="text-sm">シリーズの共通設定を継承する</label>
+        </div>
+        <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+          <i class="fas fa-plus mr-1"></i>作成して追加
+        </button>
+      </form>
+    </div>
+    
+    ${availableProjects.length > 0 ? `
+      <hr class="border-gray-200 dark:border-gray-700 my-4">
+      
+      <!-- Add Existing -->
+      <div>
+        <h4 class="font-medium mb-3"><i class="fas fa-link text-blue-500 mr-2"></i>既存のプロジェクトを追加</h4>
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+          ${availableProjects.map(p => `
+            <div class="flex items-center gap-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer"
+              onclick="addExistingProjectToLibrary('${libraryId}', '${p.id}')">
+              <i class="fas fa-file-alt text-gray-400"></i>
+              <span class="flex-1 truncate">${p.title}</span>
+              <i class="fas fa-plus text-green-500"></i>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+  `;
+  
+  $('#add-child-project-content').innerHTML = content;
+  
+  // Attach form handler
+  setTimeout(() => {
+    const form = $('#create-child-project-form');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = $('#child-project-title').value.trim();
+        const libraryId = $('#child-project-library-id').value;
+        const inheritSettings = $('#inherit-settings').checked;
+        createChildProject(libraryId, title, inheritSettings);
+        closeModal('addChildProject');
+      });
+    }
+  }, 100);
+  
+  openModal('addChildProject');
+};
+
+// Create a child project within a library
+window.createChildProject = async (libraryId, title, inheritSettings = true) => {
+  try {
+    const library = state.projects.find(p => p.id === libraryId);
+    if (!library) throw new Error('ライブラリが見つかりません');
+    
+    // Create child project linked to library
+    const res = await api.post('/projects', {
+      title,
+      genre: library.genre || '',
+      library_id: libraryId,
+      inherit_settings: inheritSettings
+    });
+    
+    // If inheriting settings, copy shared settings from library
+    if (inheritSettings && library.library_settings) {
+      const settings = library.library_settings;
+      // Save shared settings to the new project's world settings
+      if (settings.shared_characters) {
+        await api.post(`/projects/${res.data.project.id}/world-settings`, {
+          category: 'characters',
+          title: 'キャラクター設定（シリーズ共通）',
+          content: settings.shared_characters
+        });
+      }
+      if (settings.shared_world_setting) {
+        await api.post(`/projects/${res.data.project.id}/world-settings`, {
+          category: 'world_building',
+          title: '世界観設定（シリーズ共通）',
+          content: settings.shared_world_setting
+        });
+      }
+      if (settings.shared_terminology) {
+        await api.post(`/projects/${res.data.project.id}/world-settings`, {
+          category: 'terminology',
+          title: '専門用語（シリーズ共通）',
+          content: settings.shared_terminology
+        });
+      }
+    }
+    
+    state.projects.unshift(res.data.project);
+    state.currentProject = res.data.project;
+    
+    // Ensure library is expanded
+    if (!state.expandedLibraries) state.expandedLibraries = {};
+    state.expandedLibraries[libraryId] = true;
+    
+    render();
+    alert(`「${title}」を作成し、シリーズに追加しました`);
+  } catch (e) {
+    console.error('Create child project error:', e);
+    alert('作成に失敗しました: ' + e.message);
+  }
+};
+
+// Add existing project to library
+window.addExistingProjectToLibrary = async (libraryId, projectId) => {
+  try {
+    await api.put(`/projects/${projectId}`, { library_id: libraryId });
+    
+    // Update local state
+    const project = state.projects.find(p => p.id === projectId);
+    if (project) {
+      project.library_id = libraryId;
+    }
+    
+    closeModal('addChildProject');
+    render();
+    alert('プロジェクトをシリーズに追加しました');
+  } catch (e) {
+    console.error('Add to library error:', e);
+    alert('追加に失敗しました: ' + e.message);
+  }
+};
+
+// Remove project from library
+window.removeFromLibrary = async (projectId) => {
+  const project = state.projects.find(p => p.id === projectId);
+  if (!project) return;
+  
+  if (!confirm(`「${project.title}」をシリーズから外しますか？\n\nプロジェクト自体は削除されません。`)) {
+    return;
+  }
+  
+  try {
+    await api.put(`/projects/${projectId}`, { library_id: null });
+    
+    // Update local state
+    project.library_id = null;
+    
+    render();
+    alert('シリーズから外しました');
+  } catch (e) {
+    console.error('Remove from library error:', e);
+    alert('操作に失敗しました: ' + e.message);
+  }
+};
+
+// Edit library shared settings
+window.editLibrarySettings = async (libraryId) => {
+  // Close menu
+  document.querySelectorAll('[id^="library-menu-"]').forEach(menu => menu.classList.add('hidden'));
+  
+  const library = state.projects.find(p => p.id === libraryId);
+  if (!library) return;
+  
+  const settings = library.library_settings || {};
+  const childProjects = state.projects.filter(p => p.library_id === libraryId);
+  
+  const content = `
+    <h3 class="text-lg font-semibold mb-4">
+      <i class="fas fa-layer-group mr-2 text-purple-500"></i>
+      「${library.title}」の共通設定
+    </h3>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      ここで設定した内容は、このシリーズに属するすべての話で共有されます。
+    </p>
+    
+    <form id="library-settings-form" class="space-y-4">
+      <input type="hidden" id="edit-library-id" value="${libraryId}">
+      
+      <!-- Series Description -->
+      <div>
+        <label class="block text-sm font-medium mb-1">
+          <i class="fas fa-info-circle mr-1 text-blue-500"></i>シリーズの説明
+        </label>
+        <textarea id="library-description" rows="2" 
+          class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+          placeholder="シリーズの概要...">${settings.description || ''}</textarea>
+      </div>
+      
+      <!-- Shared Characters -->
+      <div>
+        <label class="block text-sm font-medium mb-1">
+          <i class="fas fa-users mr-1 text-green-500"></i>共通キャラクター設定
+        </label>
+        <textarea id="library-shared-characters" rows="6" 
+          class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+          placeholder="シリーズ全体で登場するキャラクターの設定を記述...">${settings.shared_characters || ''}</textarea>
+      </div>
+      
+      <!-- Shared World Setting -->
+      <div>
+        <label class="block text-sm font-medium mb-1">
+          <i class="fas fa-globe mr-1 text-purple-500"></i>共通世界観設定
+        </label>
+        <textarea id="library-shared-world" rows="6" 
+          class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+          placeholder="シリーズ全体の世界観、舞台設定を記述...">${settings.shared_world_setting || ''}</textarea>
+      </div>
+      
+      <!-- Shared Terminology -->
+      <div>
+        <label class="block text-sm font-medium mb-1">
+          <i class="fas fa-book mr-1 text-orange-500"></i>共通専門用語集
+        </label>
+        <textarea id="library-shared-terminology" rows="4" 
+          class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+          placeholder="シリーズ固有の用語、ルールなどを記述...">${settings.shared_terminology || ''}</textarea>
+      </div>
+      
+      <!-- Child Projects List -->
+      ${childProjects.length > 0 ? `
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <h4 class="font-medium mb-2">
+            <i class="fas fa-list mr-1 text-indigo-500"></i>このシリーズの話 (${childProjects.length}話)
+          </h4>
+          <div class="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+            ${childProjects.map((p, i) => `
+              <div class="flex items-center gap-2 p-2 bg-gray-100 dark:bg-gray-700 rounded text-sm">
+                <span class="text-gray-400">${i + 1}.</span>
+                <span class="truncate">${p.title}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+      
+      <!-- Sync Settings Button -->
+      ${childProjects.length > 0 ? `
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
+          <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-2">
+            <i class="fas fa-sync mr-1"></i>
+            保存後、共通設定を各話に反映しますか？
+          </p>
+          <label class="flex items-center gap-2">
+            <input type="checkbox" id="sync-to-children" class="rounded" checked>
+            <span class="text-sm">各話の設定を更新する</span>
+          </label>
+        </div>
+      ` : ''}
+      
+      <div class="flex justify-end gap-2 pt-4">
+        <button type="button" onclick="closeModal('librarySettings')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+          キャンセル
+        </button>
+        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+          <i class="fas fa-save mr-1"></i>保存
+        </button>
+      </div>
+    </form>
+  `;
+  
+  $('#library-settings-content').innerHTML = content;
+  
+  // Attach form handler
+  setTimeout(() => {
+    const form = $('#library-settings-form');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await saveLibrarySettings();
+      });
+    }
+  }, 100);
+  
+  openModal('librarySettings');
+};
+
+// Save library settings
+window.saveLibrarySettings = async () => {
+  const libraryId = $('#edit-library-id').value;
+  const description = $('#library-description')?.value?.trim() || '';
+  const sharedCharacters = $('#library-shared-characters')?.value || '';
+  const sharedWorld = $('#library-shared-world')?.value || '';
+  const sharedTerminology = $('#library-shared-terminology')?.value || '';
+  const syncToChildren = $('#sync-to-children')?.checked || false;
+  
+  try {
+    // Update library settings
+    await api.put(`/projects/${libraryId}`, {
+      library_settings: {
+        description,
+        shared_characters: sharedCharacters,
+        shared_world_setting: sharedWorld,
+        shared_terminology: sharedTerminology
+      }
+    });
+    
+    // Update local state
+    const library = state.projects.find(p => p.id === libraryId);
+    if (library) {
+      library.library_settings = {
+        description,
+        shared_characters: sharedCharacters,
+        shared_world_setting: sharedWorld,
+        shared_terminology: sharedTerminology
+      };
+    }
+    
+    // Sync to child projects if requested
+    if (syncToChildren) {
+      const childProjects = state.projects.filter(p => p.library_id === libraryId);
+      for (const child of childProjects) {
+        // Update world settings for each child
+        if (sharedCharacters) {
+          await api.post(`/projects/${child.id}/world-settings`, {
+            category: 'characters',
+            title: 'キャラクター設定（シリーズ共通）',
+            content: sharedCharacters
+          });
+        }
+        if (sharedWorld) {
+          await api.post(`/projects/${child.id}/world-settings`, {
+            category: 'world_building',
+            title: '世界観設定（シリーズ共通）',
+            content: sharedWorld
+          });
+        }
+        if (sharedTerminology) {
+          await api.post(`/projects/${child.id}/world-settings`, {
+            category: 'terminology',
+            title: '専門用語（シリーズ共通）',
+            content: sharedTerminology
+          });
+        }
+      }
+      alert(`共通設定を保存し、${childProjects.length}話に反映しました`);
+    } else {
+      alert('共通設定を保存しました');
+    }
+    
+    closeModal('librarySettings');
+    render();
+  } catch (e) {
+    console.error('Save library settings error:', e);
+    alert('保存に失敗しました: ' + e.message);
   }
 };
 
