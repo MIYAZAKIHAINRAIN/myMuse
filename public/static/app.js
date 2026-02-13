@@ -35,6 +35,7 @@ const state = {
   ideasChatMessages: [], // Chat messages for ideas AI
   showStoryOutline: true, // Show/hide story outline panel
   showQuickIdeas: false, // Show/hide quick ideas panel
+  showIdeasOutline: false, // Show/hide ideas document outline
   analysisChatMessages: [], // Chat messages for analysis AI
   analysisPersona: 'neutral', // Current analysis persona
   analysisChartsOpen: true, // Show/hide analysis charts
@@ -1476,7 +1477,7 @@ function renderIdeasTab() {
             <div class="flex items-center justify-between mb-3">
               <h3 class="font-semibold flex items-center gap-2">
                 <i class="fas fa-list-alt text-purple-500"></i>
-                物語構成アウトライン
+                物語の構成
               </h3>
               <button onclick="toggleStoryOutline()" class="text-gray-400 hover:text-gray-600" title="アウトラインを非表示">
                 <i class="fas fa-chevron-left"></i>
@@ -1586,11 +1587,52 @@ function renderIdeasTab() {
       <div class="flex-1 flex flex-col">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm flex-1 flex flex-col overflow-hidden">
           <!-- Document Header/Toolbar -->
-          <div class="flex items-center gap-4 p-3 border-b dark:border-gray-700">
+          <div class="flex flex-wrap items-center gap-2 p-3 border-b dark:border-gray-700">
             <h3 class="font-semibold flex items-center gap-2">
               <i class="fas fa-file-alt text-indigo-500"></i>
               ネタ・プロットメモ
             </h3>
+            
+            <!-- Style Selector -->
+            <div class="relative ml-2">
+              <button onclick="toggleIdeasStyleMenu()" id="ideas-style-menu-btn" 
+                class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2">
+                <i class="fas fa-paragraph text-indigo-500"></i>
+                <span id="ideas-current-style">標準</span>
+                <i class="fas fa-chevron-down text-xs"></i>
+              </button>
+              <div id="ideas-style-menu" class="hidden absolute left-0 top-full mt-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg py-1 z-20 w-48 border border-gray-200 dark:border-gray-700">
+                <button onclick="applyIdeasStyle('normal')" class="block w-full px-4 py-2 text-sm text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+                  <span class="w-6 inline-block text-center text-gray-400"><i class="fas fa-font"></i></span>
+                  標準テキスト
+                </button>
+                <button onclick="applyIdeasStyle('title')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+                  <span class="w-6 inline-block h-5 text-xs font-bold text-indigo-600 bg-indigo-100 rounded text-center">H</span>
+                  <span class="text-lg font-bold ml-2">タイトル</span>
+                </button>
+                <button onclick="applyIdeasStyle('h1')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+                  <span class="w-6 inline-block h-5 text-xs font-bold text-indigo-500 bg-indigo-50 rounded text-center">H1</span>
+                  <span class="text-base font-semibold ml-2">見出し 1</span>
+                </button>
+                <button onclick="applyIdeasStyle('h2')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+                  <span class="w-6 inline-block h-5 text-xs font-bold text-indigo-400 bg-indigo-50/50 rounded text-center">H2</span>
+                  <span class="text-sm font-medium ml-2">見出し 2</span>
+                </button>
+                <button onclick="applyIdeasStyle('h3')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+                  <span class="w-6 inline-block h-5 text-xs font-bold text-gray-500 bg-gray-100 rounded text-center">H3</span>
+                  <span class="text-sm ml-2">見出し 3</span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Outline Toggle -->
+            <button onclick="toggleIdeasOutline()" 
+              class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" 
+              title="アウトライン表示">
+              <i class="fas fa-list-ul mr-1"></i>
+              アウトライン
+            </button>
+            
             <div class="flex-1"></div>
             <span class="text-xs text-gray-500" id="ideas-doc-chars">
               ${(state.ideasDocument || '').length} 文字
@@ -1600,8 +1642,20 @@ function renderIdeasTab() {
             </button>
           </div>
           
-          <!-- Document Editor -->
-          <div class="flex-1 relative">
+          <!-- Document Area with Outline -->
+          <div class="flex-1 flex overflow-hidden">
+            <!-- Ideas Outline Panel -->
+            <div id="ideas-outline-panel" class="${state.showIdeasOutline ? '' : 'hidden'} w-56 border-r border-gray-200 dark:border-gray-700 overflow-y-auto p-2 bg-gray-50 dark:bg-gray-900/50">
+              <h4 class="text-xs font-semibold text-gray-500 mb-2 flex items-center gap-2">
+                <i class="fas fa-list-ul"></i>アウトライン
+              </h4>
+              <div id="ideas-outline-content" class="space-y-1 text-sm">
+                ${renderIdeasOutline()}
+              </div>
+            </div>
+            
+            <!-- Document Editor -->
+            <div class="flex-1 relative">
             <textarea id="ideas-document" 
               class="w-full h-full p-4 text-sm resize-none focus:outline-none dark:bg-gray-800 dark:text-gray-100"
               placeholder="ここにネタやプロットのアイデアを自由に書き込んでください...
@@ -1610,11 +1664,21 @@ function renderIdeasTab() {
 ・右側のAIチャットで相談しながらアイデアを膨らませましょう
 ・左のアウトラインに設定を書くと、AIがより良い提案をします
 ・プロット・ライティング・分析タブでもこの設定が反映されます"
-              oninput="updateIdeasDocumentCount(this.value)">${state.ideasDocument || ''}</textarea>
+              oninput="updateIdeasDocumentCount(this.value); updateIdeasOutline();">${state.ideasDocument || ''}</textarea>
             <button onclick="expandTextarea('ideas-document', 'ネタ・プロットメモ')" 
-              class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+              class="absolute bottom-12 right-3 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
               title="拡大表示">
               <i class="fas fa-expand"></i>
+            </button>
+            </div>
+          </div>
+          
+          <!-- 採用ボタン -->
+          <div class="p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+            <button onclick="adoptIdeasDocument()" 
+              class="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 text-sm flex items-center justify-center gap-2">
+              <i class="fas fa-check-circle"></i>
+              このメモを「採用したアイディア」に追加
             </button>
           </div>
         </div>
@@ -4883,6 +4947,20 @@ async function sendAnalysisChatMessage(message) {
       persona: persona
     });
     
+    // 初回チャット時にチャートも生成（まだ分析結果がない場合）
+    if (!state.lastAnalysisResult && state.currentWriting?.content) {
+      try {
+        const analysisRes = await api.post('/ai/analyze', { content: state.currentWriting.content });
+        if (analysisRes.data.analysis) {
+          state.lastAnalysisResult = analysisRes.data.analysis;
+          state.analysisChartsOpen = true;
+          // チャート描画は後で行う
+        }
+      } catch (e) {
+        console.error('Auto analysis error:', e);
+      }
+    }
+    
   } catch (error) {
     console.error('Analysis chat error:', error);
     state.analysisChatMessages.push({
@@ -4897,6 +4975,13 @@ async function sendAnalysisChatMessage(message) {
     // Scroll to bottom
     const chatContainer = document.getElementById('analysis-chat-messages');
     if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+    
+    // チャートを描画（分析結果がある場合）
+    if (state.lastAnalysisResult) {
+      setTimeout(() => {
+        renderAnalysisResults(state.lastAnalysisResult);
+      }, 200);
+    }
   }
 }
 
@@ -4996,6 +5081,155 @@ window.toggleQuickIdeas = () => {
   render();
 };
 
+window.toggleIdeasOutline = () => {
+  state.showIdeasOutline = !state.showIdeasOutline;
+  render();
+};
+
+window.toggleIdeasStyleMenu = () => {
+  const menu = document.getElementById('ideas-style-menu');
+  if (menu) {
+    menu.classList.toggle('hidden');
+    if (!menu.classList.contains('hidden')) {
+      // Close when clicking outside
+      setTimeout(() => {
+        document.addEventListener('click', closeIdeasStyleMenuOnClickOutside, { once: true });
+      }, 10);
+    }
+  }
+};
+
+function closeIdeasStyleMenuOnClickOutside(e) {
+  const menu = document.getElementById('ideas-style-menu');
+  const btn = document.getElementById('ideas-style-menu-btn');
+  if (menu && !menu.contains(e.target) && btn && !btn.contains(e.target)) {
+    menu.classList.add('hidden');
+  }
+}
+
+window.applyIdeasStyle = (style) => {
+  const textarea = document.getElementById('ideas-document');
+  if (!textarea) return;
+  
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const selectedText = textarea.value.substring(start, end);
+  
+  if (!selectedText.trim()) {
+    alert('スタイルを適用するテキストを選択してください');
+    return;
+  }
+  
+  let prefix = '';
+  switch (style) {
+    case 'title': prefix = '# '; break;
+    case 'h1': prefix = '## '; break;
+    case 'h2': prefix = '### '; break;
+    case 'h3': prefix = '#### '; break;
+    default: prefix = ''; break;
+  }
+  
+  // Find the start of the line
+  let lineStart = start;
+  while (lineStart > 0 && textarea.value[lineStart - 1] !== '\n') {
+    lineStart--;
+  }
+  
+  // Check if line already has a heading prefix
+  const currentLine = textarea.value.substring(lineStart, end);
+  const headingMatch = currentLine.match(/^(#{1,4}\s*)/);
+  
+  let newText;
+  if (headingMatch) {
+    // Replace existing prefix
+    newText = textarea.value.substring(0, lineStart) + prefix + currentLine.substring(headingMatch[1].length) + textarea.value.substring(end);
+  } else {
+    // Add prefix at line start
+    newText = textarea.value.substring(0, lineStart) + prefix + textarea.value.substring(lineStart);
+  }
+  
+  textarea.value = newText;
+  state.ideasDocument = newText;
+  
+  // Update style label
+  const styleLabels = { normal: '標準', title: 'タイトル', h1: '見出し1', h2: '見出し2', h3: '見出し3' };
+  const label = document.getElementById('ideas-current-style');
+  if (label) label.textContent = styleLabels[style] || '標準';
+  
+  // Close menu
+  const menu = document.getElementById('ideas-style-menu');
+  if (menu) menu.classList.add('hidden');
+  
+  // Update outline
+  updateIdeasOutline();
+};
+
+function renderIdeasOutline() {
+  const content = state.ideasDocument || '';
+  const lines = content.split('\n');
+  const headings = [];
+  
+  lines.forEach((line, idx) => {
+    const match = line.match(/^(#{1,4})\s+(.+)/);
+    if (match) {
+      const level = match[1].length;
+      const text = match[2].trim();
+      headings.push({ level, text, line: idx });
+    }
+  });
+  
+  if (headings.length === 0) {
+    return `
+      <p class="text-xs text-gray-500 p-2">
+        見出しがありません<br>
+        <span class="text-gray-400 mt-1 block">
+          # タイトル<br>
+          ## 見出し1<br>
+          ### 見出し2
+        </span>
+      </p>
+    `;
+  }
+  
+  return headings.map(h => {
+    const indent = (h.level - 1) * 12;
+    const fontSize = h.level === 1 ? 'text-sm font-bold' : h.level === 2 ? 'text-sm font-medium' : 'text-xs';
+    return `
+      <div onclick="jumpToIdeasLine(${h.line})" 
+        class="cursor-pointer p-1 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/30 ${fontSize} truncate"
+        style="padding-left: ${indent}px;"
+        title="${h.text}">
+        ${h.text}
+      </div>
+    `;
+  }).join('');
+}
+
+window.updateIdeasOutline = () => {
+  const container = document.getElementById('ideas-outline-content');
+  if (container) {
+    container.innerHTML = renderIdeasOutline();
+  }
+};
+
+window.jumpToIdeasLine = (lineNum) => {
+  const textarea = document.getElementById('ideas-document');
+  if (!textarea) return;
+  
+  const lines = textarea.value.split('\n');
+  let pos = 0;
+  for (let i = 0; i < lineNum && i < lines.length; i++) {
+    pos += lines[i].length + 1;
+  }
+  
+  textarea.focus();
+  textarea.setSelectionRange(pos, pos);
+  
+  // Scroll to position
+  const lineHeight = 20;
+  textarea.scrollTop = lineNum * lineHeight - textarea.clientHeight / 2;
+};
+
 window.updateStoryOutline = (field, value) => {
   if (!state.storyOutline) {
     state.storyOutline = { characters: '', terminology: '', worldSetting: '', storyGoal: '', episodes: '' };
@@ -5004,8 +5238,12 @@ window.updateStoryOutline = (field, value) => {
 };
 
 window.saveStoryOutline = async () => {
+  // プロジェクトがない場合は新規作成
   if (!state.currentProject) {
-    alert('プロジェクトを選択してください');
+    const createNew = confirm('プロジェクトがありません。新規プロジェクトを作成しますか？');
+    if (createNew) {
+      await createNewProjectAndSave('outline');
+    }
     return;
   }
   
@@ -5039,6 +5277,53 @@ window.saveStoryOutline = async () => {
   }
 };
 
+// 新規プロジェクト作成して保存
+async function createNewProjectAndSave(saveType) {
+  const projectName = prompt('新規プロジェクト名を入力してください:', '新しいプロジェクト');
+  if (!projectName) return;
+  
+  try {
+    // Ensure user exists
+    if (!state.user) {
+      // Create anonymous user or prompt login
+      const anonRes = await api.post('/auth/signup', {
+        email: `anon_${Date.now()}@temp.local`,
+        password: 'temp_password_' + Math.random(),
+        name: 'ゲストユーザー'
+      });
+      state.user = anonRes.data.user;
+      state.sessionId = anonRes.data.sessionId;
+      localStorage.setItem('sessionId', state.sessionId);
+    }
+    
+    // Create project
+    const res = await api.post('/projects', {
+      user_id: state.user.id,
+      title: projectName,
+      genre: ''
+    });
+    
+    state.currentProject = res.data.project;
+    state.projects.push(res.data.project);
+    
+    alert(`プロジェクト「${projectName}」を作成しました。保存を続行します...`);
+    
+    // Now save based on type
+    if (saveType === 'outline') {
+      await window.saveStoryOutline();
+    } else if (saveType === 'ideas') {
+      await window.saveIdeasDocument();
+    } else if (saveType === 'writing') {
+      await manualSave();
+    }
+    
+    render();
+  } catch (e) {
+    console.error('Create project error:', e);
+    alert('プロジェクト作成に失敗しました: ' + e.message);
+  }
+}
+
 window.updateProjectGenre = async () => {
   if (!state.currentProject) return;
   
@@ -5067,10 +5352,18 @@ window.updateIdeasDocumentCount = (value) => {
 };
 
 window.saveIdeasDocument = async () => {
+  // プロジェクトがない場合は新規作成
   if (!state.currentProject) {
-    alert('プロジェクトを選択してください');
+    const createNew = confirm('プロジェクトがありません。新規プロジェクトを作成しますか？');
+    if (createNew) {
+      await createNewProjectAndSave('ideas');
+    }
     return;
   }
+  
+  // 最新の内容を取得
+  const currentContent = document.getElementById('ideas-document')?.value || state.ideasDocument || '';
+  state.ideasDocument = currentContent;
   
   try {
     await fetch(`/api/projects/${state.currentProject.id}/world-settings`, {
@@ -5079,7 +5372,7 @@ window.saveIdeasDocument = async () => {
       body: JSON.stringify({
         category: 'ideas_document',
         title: 'ネタ・プロットメモ',
-        content: state.ideasDocument
+        content: currentContent
       })
     });
     
@@ -5088,6 +5381,25 @@ window.saveIdeasDocument = async () => {
     console.error('Save ideas document error:', e);
     alert('保存に失敗しました');
   }
+};
+
+window.adoptIdeasDocument = () => {
+  const ideasDocument = document.getElementById('ideas-document')?.value || state.ideasDocument || '';
+  
+  if (!ideasDocument.trim()) {
+    alert('採用するメモの内容がありません');
+    return;
+  }
+  
+  // 既存の採用アイディアに追加
+  const currentAdopted = state.adoptedIdeasText || '';
+  const separator = currentAdopted ? '\n\n---\n\n' : '';
+  const timestamp = new Date().toLocaleString('ja-JP');
+  
+  state.adoptedIdeasText = currentAdopted + separator + `【${timestamp} に追加】\n${ideasDocument}`;
+  
+  alert('ネタ・プロットメモを「採用したアイディア」に追加しました！\nプロットタブで確認できます。');
+  render();
 };
 
 window.sendIdeasChat = async () => {
