@@ -688,7 +688,7 @@ function updateWordCount() {
 let aiAbortController = null;
 
 async function callAI(action, content, options = {}) {
-  if (!state.currentProject) return null;
+  // プロジェクトなしでもAI機能は使用可能
   
   // Create new abort controller for this request
   aiAbortController = new AbortController();
@@ -699,7 +699,7 @@ async function callAI(action, content, options = {}) {
     const res = await api.post('/ai/generate', {
       action,
       content,
-      projectId: state.currentProject.id,
+      projectId: state.currentProject?.id || null,
       userId: state.user?.id,
       currentWriting: state.currentWriting?.content,
       options,
@@ -772,12 +772,6 @@ async function analyzeWriting() {
 async function sendChatMessage(content, tabContext = 'consultation') {
   console.log('sendChatMessage called:', { content, tabContext, currentProject: state.currentProject });
   
-  if (!state.currentProject) {
-    console.error('No current project selected');
-    alert('プロジェクトを選択してください');
-    return;
-  }
-  
   if (!content.trim()) {
     console.error('Empty message');
     return;
@@ -792,13 +786,15 @@ async function sendChatMessage(content, tabContext = 'consultation') {
   renderChat();
   
   try {
-    // Save user message
-    await api.post(`/projects/${state.currentProject.id}/chat`, {
-      thread_id: threadId,
-      role: 'user',
-      content,
-      tab_context: tabContext,
-    });
+    // Save user message (only if project exists)
+    if (state.currentProject) {
+      await api.post(`/projects/${state.currentProject.id}/chat`, {
+        thread_id: threadId,
+        role: 'user',
+        content,
+        tab_context: tabContext,
+      });
+    }
     
     console.log('Calling AI...');
     // Get AI response
@@ -809,13 +805,15 @@ async function sendChatMessage(content, tabContext = 'consultation') {
       const aiMsg = { id: crypto.randomUUID(), role: 'assistant', content: response, created_at: new Date().toISOString() };
       state.chatMessages.push(aiMsg);
       
-      // Save AI message
-      await api.post(`/projects/${state.currentProject.id}/chat`, {
-        thread_id: threadId,
-        role: 'assistant',
-        content: response,
-        tab_context: tabContext,
-      });
+      // Save AI message (only if project exists)
+      if (state.currentProject) {
+        await api.post(`/projects/${state.currentProject.id}/chat`, {
+          thread_id: threadId,
+          role: 'assistant',
+          content: response,
+          tab_context: tabContext,
+        });
+      }
       
       // Track AI consultation for achievements
       if (typeof trackActivity === 'function') {
@@ -924,10 +922,12 @@ function exportAsDocx(content, title) {
 }
 
 function exportAsPdf(content, title) {
+  // 縦書き設定を取得
+  const isVertical = state.currentWriting?.writing_direction === 'vertical';
+  
   // For PDF, we'll use print functionality as a workaround
-  // In production, use a library like jsPDF or server-side generation
   const printWindow = window.open('', '_blank');
-  const htmlContent = convertToHtml(content, title, true);
+  const htmlContent = convertToHtml(content, title, true, isVertical);
   printWindow.document.write(htmlContent);
   printWindow.document.close();
   printWindow.onload = function() {
@@ -956,7 +956,7 @@ function exportAsEpub(content, title) {
 }
 
 // Helper function to convert content to styled HTML
-function convertToHtml(content, title, forPrint = false) {
+function convertToHtml(content, title, forPrint = false, isVertical = false) {
   const lines = content.split('\n');
   let bodyHtml = '';
   
@@ -980,10 +980,27 @@ function convertToHtml(content, title, forPrint = false) {
     }
   });
   
+  // 縦書きスタイル
+  const verticalStyles = isVertical ? `
+    body {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      height: 100vh;
+      overflow-x: auto;
+    }
+    /* 英数字を正立表示 */
+    .upright {
+      text-combine-upright: all;
+    }
+  ` : '';
+  
   const printStyles = forPrint ? `
     @media print {
       body { margin: 2cm; }
-      @page { margin: 2cm; }
+      @page { 
+        margin: 2cm;
+        ${isVertical ? 'size: A4 landscape;' : ''} 
+      }
     }
   ` : '';
   
@@ -996,12 +1013,13 @@ function convertToHtml(content, title, forPrint = false) {
   <style>
     body {
       font-family: 'Noto Serif JP', 'Yu Mincho', serif;
-      max-width: 800px;
+      ${isVertical ? '' : 'max-width: 800px;'}
       margin: 0 auto;
       padding: 2em;
       line-height: 1.8;
       color: #333;
     }
+    ${verticalStyles}
     ${printStyles}
   </style>
 </head>
@@ -2398,7 +2416,7 @@ function renderWritingTab() {
         <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden relative">
           <textarea id="editor" 
             class="w-full h-full p-6 resize-none focus:outline-none dark:bg-gray-800 ${isVertical ? 'writing-vertical' : ''}"
-            style="font-family: '${writing?.font_family || 'Noto Sans JP'}', sans-serif; font-size: 16px; line-height: 2;"
+            style="font-family: '${writing?.font_family || 'Noto Sans JP'}', sans-serif; font-size: 16px; line-height: 2; ${isVertical ? 'writing-mode: vertical-rl; text-orientation: mixed; overflow-x: auto; overflow-y: hidden;' : ''}"
             placeholder="ここに物語を紡いでください...
 
 【見出しの書き方】
@@ -4164,8 +4182,12 @@ window.updateAdoptedIdeasCount = (value) => {
 };
 
 window.saveAdoptedIdeasText = async () => {
+  // プロジェクトがない場合は新規作成
   if (!state.currentProject) {
-    alert('プロジェクトを選択してください');
+    const createNew = confirm('プロジェクトがありません。新規プロジェクトを作成しますか？');
+    if (createNew) {
+      await createNewProjectAndSave('adopted');
+    }
     return;
   }
   
@@ -5325,10 +5347,14 @@ async function createNewProjectAndSave(saveType) {
 }
 
 window.updateProjectGenre = async () => {
-  if (!state.currentProject) return;
-  
   const checkboxes = document.querySelectorAll('input[name="project-genre"]:checked');
   const genres = Array.from(checkboxes).map(cb => cb.value).join(',');
+  
+  // プロジェクトがない場合はローカルstateのみ更新
+  if (!state.currentProject) {
+    state.tempGenres = genres;
+    return;
+  }
   
   try {
     await fetch(`/api/projects/${state.currentProject.id}`, {

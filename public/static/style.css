@@ -1,1 +1,125 @@
+/* myMuse - Writer Support Platform Styles */
+
+/* Base fonts */
 h1 { font-family: Arial, Helvetica, sans-serif; }
+
+/* Vertical writing mode */
+.writing-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  /* 英数字を正立表示（90度回転しない） */
+  -webkit-text-orientation: mixed;
+}
+
+/* 縦書きモードでの英数字の扱い */
+.writing-vertical {
+  /* 半角英数字を横倒しにせず、縦中横または正立表示 */
+  text-combine-upright: none;
+}
+
+/* 縦書きでの2桁数字は縦中横 */
+.writing-vertical .tcy,
+.writing-vertical [data-tcy] {
+  text-combine-upright: all;
+  -webkit-text-combine: horizontal;
+}
+
+/* 1文字の英数字は正立 */
+.writing-vertical span.upright {
+  text-orientation: upright;
+}
+
+/* 縦書きエディタのスタイル調整 */
+textarea.writing-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  overflow-y: hidden;
+  overflow-x: auto;
+  /* 行の間隔を調整 */
+  letter-spacing: 0.05em;
+}
+
+/* 縦書きプレビューのスタイル */
+.vertical-preview {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* 印刷時の縦書きスタイル */
+@media print {
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    height: auto;
+    overflow: visible;
+  }
+  
+  @page {
+    size: A4 landscape;
+    margin: 2cm;
+  }
+}
+
+/* Zen Mode overlay */
+.zen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 9998;
+}
+
+/* Modal expand animation */
+.modal-expand-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.modal-expand-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms, transform 200ms;
+}
+
+/* Analysis charts */
+.chart-container {
+  position: relative;
+  height: 300px;
+}
+
+/* Custom scrollbar for vertical writing */
+.writing-vertical::-webkit-scrollbar {
+  height: 8px;
+}
+
+.writing-vertical::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.writing-vertical::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.writing-vertical::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Dark mode scrollbar */
+.dark .writing-vertical::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark .writing-vertical::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+.dark .writing-vertical::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
