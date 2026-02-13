@@ -1657,6 +1657,19 @@ function renderSettingsMaterialsTab() {
     { value: 'biography', label: t('genre.biography') },
   ];
   
+  // Check if current project is a library (series)
+  const isLibrary = state.currentProject?.is_library;
+  // Check if current project belongs to a library
+  const parentLibrary = state.currentProject?.library_id 
+    ? state.projects.find(p => p.id === state.currentProject.library_id)
+    : null;
+  
+  // For library: use library_settings
+  // For child project: show parent's shared settings as reference
+  // For standalone: use storyOutline
+  const librarySettings = isLibrary ? (state.currentProject?.library_settings || {}) : {};
+  const parentSettings = parentLibrary?.library_settings || {};
+  
   const storyOutline = state.storyOutline || {
     characters: '',
     terminology: '',
@@ -1667,6 +1680,369 @@ function renderSettingsMaterialsTab() {
   
   const projectGenres = state.currentProject?.genre?.split(',') || state.tempGenres?.split(',') || [];
   
+  // If this is a library, render library settings UI
+  if (isLibrary) {
+    return renderLibrarySettingsTab(allGenres, projectGenres, librarySettings);
+  }
+  
+  // If this project belongs to a library, show parent reference + local settings
+  if (parentLibrary) {
+    return renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, parentLibrary, parentSettings);
+  }
+  
+  // Standalone project - original UI
+  return renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline);
+}
+
+// Render settings tab for a Library (Series)
+function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
+  const childProjects = state.projects.filter(p => p.library_id === state.currentProject?.id);
+  
+  return `
+    <div class="h-full flex flex-col gap-4 overflow-y-auto">
+      <!-- Library Header Banner -->
+      <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-4 text-white shadow-lg">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+            <i class="fas fa-layer-group text-2xl"></i>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-xl font-bold">${state.currentProject?.title || 'シリーズ'}</h2>
+            <p class="text-purple-200 text-sm">
+              <i class="fas fa-book-open mr-1"></i>${childProjects.length}話のシリーズ共通設定
+            </p>
+          </div>
+          <div class="text-right">
+            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">
+              <i class="fas fa-crown mr-1"></i>親プロジェクト
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex gap-6 flex-1">
+        <!-- Left Column -->
+        <div class="w-1/3 flex flex-col gap-4">
+          <!-- Genre Settings -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-600">
+              <i class="fas fa-tags"></i>
+              シリーズのジャンル
+            </h3>
+            <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-3 border rounded-lg dark:border-gray-600 bg-purple-50 dark:bg-purple-900/20">
+              ${allGenres.map(g => `
+                <label class="flex items-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-gray-800 p-2 rounded-lg transition">
+                  <input type="checkbox" name="project-genre" value="${g.value}" 
+                    ${projectGenres.includes(g.value) ? 'checked' : ''}
+                    onchange="updateProjectGenre()" class="rounded text-purple-600 focus:ring-purple-500">
+                  <span class="text-sm">${g.label}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+          
+          <!-- Series Description -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-600">
+              <i class="fas fa-info-circle"></i>
+              シリーズの説明
+            </h3>
+            <textarea id="library-desc" rows="4" 
+              placeholder="このシリーズの概要、テーマ、対象読者など..."
+              class="w-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
+              oninput="updateLibrarySettings('description', this.value)">${librarySettings.description || ''}</textarea>
+          </div>
+          
+          <!-- Child Projects List -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-300">
+              <i class="fas fa-list-ol"></i>
+              このシリーズの話 (${childProjects.length})
+            </h3>
+            <div class="space-y-2 max-h-40 overflow-y-auto">
+              ${childProjects.length > 0 ? childProjects.map((p, i) => `
+                <div onclick="selectProject('${p.id}')" class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer text-sm">
+                  <span class="w-6 h-6 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full flex items-center justify-center text-xs font-bold">${i + 1}</span>
+                  <span class="flex-1 truncate">${p.title}</span>
+                  <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                </div>
+              `).join('') : `
+                <p class="text-sm text-gray-500 text-center py-4">
+                  <i class="fas fa-info-circle mr-1"></i>まだ話がありません
+                </p>
+              `}
+            </div>
+            <button onclick="openAddChildProjectModal('${state.currentProject?.id}')" 
+              class="w-full mt-3 px-4 py-2 border-2 border-dashed border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition text-sm">
+              <i class="fas fa-plus mr-1"></i>新しい話を追加
+            </button>
+          </div>
+        </div>
+        
+        <!-- Middle Column: Shared Characters -->
+        <div class="w-1/3 flex flex-col gap-4">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1 border-2 border-purple-200 dark:border-purple-800">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
+              <i class="fas fa-users"></i>
+              共通キャラクター設定
+              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">シリーズ共通</span>
+            </h3>
+            <p class="text-sm text-gray-500 mb-3">シリーズ全体で登場するキャラクターの設定</p>
+            <div class="relative h-[calc(100%-100px)]">
+              <textarea id="library-characters" 
+                placeholder="【主人公】&#10;名前: &#10;年齢: &#10;性格: &#10;&#10;【メインキャラクター】&#10;..."
+                class="w-full h-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
+                oninput="updateLibrarySettings('shared_characters', this.value)">${librarySettings.shared_characters || ''}</textarea>
+              <button onclick="expandTextarea('library-characters', '共通キャラクター設定')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+                <i class="fas fa-expand text-xs"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Shared Terminology -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-green-500">
+              <i class="fas fa-book"></i>
+              共通専門用語
+              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">シリーズ共通</span>
+            </h3>
+            <div class="relative">
+              <textarea id="library-terminology" rows="6"
+                placeholder="【魔法体系】&#10;・〇〇: 説明&#10;&#10;【組織】&#10;・△△: 説明"
+                class="w-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
+                oninput="updateLibrarySettings('shared_terminology', this.value)">${librarySettings.shared_terminology || ''}</textarea>
+              <button onclick="expandTextarea('library-terminology', '共通専門用語')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+                <i class="fas fa-expand text-xs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Column: World Setting & Save -->
+        <div class="w-1/3 flex flex-col gap-4">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1 border-2 border-purple-200 dark:border-purple-800">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
+              <i class="fas fa-globe"></i>
+              共通世界観設定
+              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">シリーズ共通</span>
+            </h3>
+            <p class="text-sm text-gray-500 mb-3">シリーズ全体の舞台・世界観</p>
+            <div class="relative h-[calc(100%-100px)]">
+              <textarea id="library-world"
+                placeholder="【舞台】&#10;・時代: &#10;・場所: &#10;&#10;【世界のルール】&#10;..."
+                class="w-full h-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
+                oninput="updateLibrarySettings('shared_world_setting', this.value)">${librarySettings.shared_world_setting || ''}</textarea>
+              <button onclick="expandTextarea('library-world', '共通世界観設定')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+                <i class="fas fa-expand text-xs"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Sync Options & Save -->
+          <div class="bg-purple-50 dark:bg-purple-900/30 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-800">
+            <label class="flex items-center gap-2 mb-3 cursor-pointer">
+              <input type="checkbox" id="sync-settings-to-children" class="rounded text-purple-600" checked>
+              <span class="text-sm font-medium">保存時に各話へ自動反映</span>
+            </label>
+            <p class="text-xs text-gray-500 mb-3">チェックすると、共通設定が全ての話に反映されます</p>
+          </div>
+          
+          <button onclick="saveLibrarySettingsFromTab()" 
+            class="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 shadow-lg font-medium flex items-center justify-center gap-2">
+            <i class="fas fa-save"></i>
+            シリーズ設定を保存
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Render settings tab for a Child Project (belongs to a library)
+function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, parentLibrary, parentSettings) {
+  return `
+    <div class="h-full flex flex-col gap-4 overflow-y-auto">
+      <!-- Parent Library Reference Banner -->
+      <div class="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl p-4 text-white shadow-lg">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+            <i class="fas fa-file-alt text-xl"></i>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-lg font-bold">${state.currentProject?.title || 'プロジェクト'}</h2>
+            <p class="text-indigo-200 text-sm">
+              <i class="fas fa-link mr-1"></i>「${parentLibrary.title}」シリーズの一部
+            </p>
+          </div>
+          <button onclick="selectProject('${parentLibrary.id}')" 
+            class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm transition flex items-center gap-1">
+            <i class="fas fa-layer-group"></i>
+            シリーズ設定を編集
+          </button>
+        </div>
+      </div>
+      
+      <!-- Parent Shared Settings Reference (Collapsed by default) -->
+      <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl border-2 border-purple-200 dark:border-purple-800">
+        <button onclick="toggleParentSettingsPreview()" class="w-full p-4 flex items-center justify-between text-left">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-layer-group text-purple-500"></i>
+            <span class="font-medium text-purple-700 dark:text-purple-300">シリーズ共通設定を参照</span>
+            <span class="text-xs px-2 py-0.5 bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-full">読み取り専用</span>
+          </div>
+          <i id="parent-settings-chevron" class="fas fa-chevron-down text-purple-500 transition-transform"></i>
+        </button>
+        <div id="parent-settings-preview" class="hidden px-4 pb-4">
+          <div class="grid grid-cols-3 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
+              <h4 class="text-sm font-medium text-blue-500 mb-2"><i class="fas fa-users mr-1"></i>共通キャラクター</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_characters || '（未設定）'}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
+              <h4 class="text-sm font-medium text-yellow-500 mb-2"><i class="fas fa-globe mr-1"></i>共通世界観</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_world_setting || '（未設定）'}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
+              <h4 class="text-sm font-medium text-green-500 mb-2"><i class="fas fa-book mr-1"></i>共通専門用語</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_terminology || '（未設定）'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- This Episode's Settings -->
+      <div class="flex gap-6 flex-1">
+        <!-- Left Column -->
+        <div class="w-1/3 flex flex-col gap-4">
+          <!-- Genre (inherited from series) -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-indigo-600">
+              <i class="fas fa-tags"></i>
+              ジャンル
+              <span class="text-xs px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 rounded-full">シリーズから継承</span>
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              ${projectGenres.length > 0 ? projectGenres.map(g => `
+                <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 rounded-full text-sm">${g}</span>
+              `).join('') : '<span class="text-gray-500 text-sm">未設定</span>'}
+            </div>
+          </div>
+          
+          <!-- Episode Goal -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-red-500">
+              <i class="fas fa-bullseye"></i>
+              この話の目標
+            </h3>
+            <p class="text-sm text-gray-500 mb-3">この話で達成したいこと、見せ場など</p>
+            <div class="relative h-[calc(100%-80px)]">
+              <textarea id="settings-storyGoal" 
+                placeholder="この話のクライマックス、伏線、読者に伝えたいこと..."
+                class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal}</textarea>
+              <button onclick="expandTextarea('settings-storyGoal', 'この話の目標')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+                <i class="fas fa-expand text-xs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Middle Column -->
+        <div class="w-1/3 flex flex-col gap-4">
+          <!-- Episode-specific Characters -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
+              <i class="fas fa-user-plus"></i>
+              この話の登場人物
+            </h3>
+            <p class="text-sm text-gray-500 mb-3">この話で新登場するキャラクターや、話固有の設定</p>
+            <div class="relative h-[calc(100%-80px)]">
+              <textarea id="settings-characters" 
+                placeholder="【この話で初登場】&#10;・〇〇: 役割、特徴&#10;&#10;【この話での変化】&#10;..."
+                class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters}</textarea>
+              <button onclick="expandTextarea('settings-characters', 'この話の登場人物')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+                <i class="fas fa-expand text-xs"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Episode Terminology -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-green-500">
+              <i class="fas fa-book"></i>
+              この話の専門用語
+            </h3>
+            <div class="relative">
+              <textarea id="settings-terminology" rows="5"
+                placeholder="この話で新たに登場する用語、概念..."
+                class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology}</textarea>
+              <button onclick="expandTextarea('settings-terminology', 'この話の専門用語')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+                <i class="fas fa-expand text-xs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="w-1/3 flex flex-col gap-4">
+          <!-- Episode World/Scene -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
+              <i class="fas fa-map-marker-alt"></i>
+              この話の舞台
+            </h3>
+            <p class="text-sm text-gray-500 mb-3">この話の具体的な場所、シーン設定</p>
+            <div class="relative">
+              <textarea id="settings-worldSetting" rows="5"
+                placeholder="【主な舞台】&#10;・〇〇城: 説明&#10;&#10;【シーン】&#10;..."
+                class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting}</textarea>
+              <button onclick="expandTextarea('settings-worldSetting', 'この話の舞台')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+                <i class="fas fa-expand text-xs"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Episode Outline -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-500">
+              <i class="fas fa-list"></i>
+              この話の構成
+            </h3>
+            <div class="relative h-[calc(100%-60px)]">
+              <textarea id="settings-episodes"
+                placeholder="【起】&#10;・シーン1: &#10;&#10;【承】&#10;・シーン2: &#10;&#10;【転】&#10;..."
+                class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes}</textarea>
+              <button onclick="expandTextarea('settings-episodes', 'この話の構成')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+                <i class="fas fa-expand text-xs"></i>
+              </button>
+            </div>
+          </div>
+          
+          <button onclick="saveStoryOutline()" 
+            class="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
+            <i class="fas fa-save"></i>
+            この話の設定を保存
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Render settings tab for a Standalone Project (not in a library)
+function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
   return `
     <div class="h-full flex gap-6">
       <!-- Left Column: Basic Settings -->
@@ -6048,6 +6424,94 @@ window.saveStoryOutline = async () => {
   } catch (e) {
     console.error('Save outline error:', e);
     alert('保存に失敗しました');
+  }
+};
+
+// ============================================
+// Library Settings Functions (for Settings Tab)
+// ============================================
+
+// Update library settings in memory (called on input)
+window.updateLibrarySettings = (field, value) => {
+  if (!state.currentProject?.is_library) return;
+  
+  if (!state.currentProject.library_settings) {
+    state.currentProject.library_settings = {
+      description: '',
+      shared_characters: '',
+      shared_world_setting: '',
+      shared_terminology: ''
+    };
+  }
+  state.currentProject.library_settings[field] = value;
+};
+
+// Save library settings from the Settings tab
+window.saveLibrarySettingsFromTab = async () => {
+  if (!state.currentProject?.is_library) {
+    alert('シリーズが選択されていません');
+    return;
+  }
+  
+  const libraryId = state.currentProject.id;
+  const settings = state.currentProject.library_settings || {};
+  const syncToChildren = document.getElementById('sync-settings-to-children')?.checked || false;
+  
+  try {
+    // Update library settings via API
+    await api.put(`/projects/${libraryId}`, {
+      library_settings: settings
+    });
+    
+    // Sync to child projects if requested
+    if (syncToChildren) {
+      const childProjects = state.projects.filter(p => p.library_id === libraryId);
+      
+      for (const child of childProjects) {
+        // Update world settings for each child
+        if (settings.shared_characters) {
+          await api.post(`/projects/${child.id}/world-settings`, {
+            category: 'characters_shared',
+            title: 'キャラクター設定（シリーズ共通）',
+            content: settings.shared_characters
+          });
+        }
+        if (settings.shared_world_setting) {
+          await api.post(`/projects/${child.id}/world-settings`, {
+            category: 'world_shared',
+            title: '世界観設定（シリーズ共通）',
+            content: settings.shared_world_setting
+          });
+        }
+        if (settings.shared_terminology) {
+          await api.post(`/projects/${child.id}/world-settings`, {
+            category: 'terminology_shared',
+            title: '専門用語（シリーズ共通）',
+            content: settings.shared_terminology
+          });
+        }
+      }
+      
+      alert(`シリーズ設定を保存し、${childProjects.length}話に反映しました`);
+    } else {
+      alert('シリーズ設定を保存しました');
+    }
+    
+    render();
+  } catch (e) {
+    console.error('Save library settings error:', e);
+    alert('保存に失敗しました: ' + e.message);
+  }
+};
+
+// Toggle parent settings preview panel for child projects
+window.toggleParentSettingsPreview = () => {
+  const preview = document.getElementById('parent-settings-preview');
+  const chevron = document.getElementById('parent-settings-chevron');
+  
+  if (preview && chevron) {
+    preview.classList.toggle('hidden');
+    chevron.classList.toggle('rotate-180');
   }
 };
 
