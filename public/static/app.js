@@ -507,7 +507,23 @@ async function login(email, password) {
     }
     render();
   } catch (e) {
-    alert(t('common.error'));
+    console.error('Login error:', e);
+    // Check if the error is "user not found" type
+    if (e.response?.status === 401) {
+      const errorMsg = e.response?.data?.error || 'ログインに失敗しました';
+      // Ask if they want to create an account
+      if (confirm(`${errorMsg}\n\nアカウントをお持ちでない場合は、「新規登録」タブから作成してください。\n\n新規登録画面に移動しますか？`)) {
+        state.authMode = 'signup';
+        render();
+        // Pre-fill the email
+        setTimeout(() => {
+          const emailInput = document.getElementById('signup-email');
+          if (emailInput) emailInput.value = email;
+        }, 100);
+      }
+    } else {
+      alert(e.response?.data?.error || t('common.error'));
+    }
   }
 }
 
@@ -539,6 +555,37 @@ async function logout() {
   localStorage.removeItem('sessionId');
   render();
 }
+
+// Guest login - creates a temporary account for trying the app
+async function guestLogin() {
+  try {
+    // Generate random guest credentials
+    const guestId = Math.random().toString(36).substring(2, 10);
+    const guestEmail = `guest_${guestId}@mymuse.temp`;
+    const guestName = `ゲストユーザー`;
+    const guestPassword = Math.random().toString(36).substring(2, 15);
+    
+    // Create guest account
+    const res = await api.post('/auth/signup', { 
+      name: guestName, 
+      email: guestEmail, 
+      password: guestPassword 
+    });
+    
+    state.user = res.data.user;
+    state.sessionId = res.data.sessionId;
+    localStorage.setItem('sessionId', state.sessionId);
+    
+    await loadProjects();
+    render();
+    
+    alert('ゲストとしてログインしました！\n\nすべての機能をお試しいただけます。\n※ゲストデータは一定期間後に削除される場合があります。');
+  } catch (e) {
+    console.error('Guest login error:', e);
+    alert('ゲストログインに失敗しました。もう一度お試しください。');
+  }
+}
+window.guestLogin = guestLogin;
 
 async function checkSession() {
   if (!state.sessionId) return;
@@ -1276,6 +1323,20 @@ function renderLoginPage() {
             <i class="fas fa-sign-in-alt mr-2"></i>${t('auth.login')}
           </button>
         </form>
+        
+        <div class="relative my-4">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-white dark:bg-gray-800 text-gray-500">または</span>
+          </div>
+        </div>
+        
+        <button onclick="guestLogin()" type="button"
+          class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 rounded-lg font-medium hover:opacity-90 transition">
+          <i class="fas fa-user-secret mr-2"></i>ゲストとして試す
+        </button>
         `}
         
         <p class="mt-6 text-center text-sm text-gray-500">
