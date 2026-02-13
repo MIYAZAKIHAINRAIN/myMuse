@@ -43,6 +43,7 @@ const state = {
   lastAnalysisResult: null, // Last analysis result for chart re-rendering
   adoptedIdeasText: '', // Word processor text for adopted ideas
   showAdoptedIdeasPreview: false, // Show/hide adopted ideas preview
+  verticalTextMode: localStorage.getItem('verticalTextMode') || 'mixed', // 'mixed' (英語横倒し) or 'upright' (英語正立)
   searchResults: [],
   trash: [],
   isLoading: false,
@@ -926,10 +927,11 @@ function exportAsDocx(content, title) {
 function exportAsPdf(content, title) {
   // 縦書き設定を取得
   const isVertical = state.currentWriting?.writing_direction === 'vertical';
+  const textMode = state.verticalTextMode || 'mixed';
   
   // For PDF, we'll use print functionality as a workaround
   const printWindow = window.open('', '_blank');
-  const htmlContent = convertToHtml(content, title, true, isVertical);
+  const htmlContent = convertToHtml(content, title, true, isVertical, textMode);
   printWindow.document.write(htmlContent);
   printWindow.document.close();
   printWindow.onload = function() {
@@ -958,7 +960,7 @@ function exportAsEpub(content, title) {
 }
 
 // Helper function to convert content to styled HTML
-function convertToHtml(content, title, forPrint = false, isVertical = false) {
+function convertToHtml(content, title, forPrint = false, isVertical = false, textMode = 'mixed') {
   const lines = content.split('\n');
   let bodyHtml = '';
   
@@ -982,17 +984,26 @@ function convertToHtml(content, title, forPrint = false, isVertical = false) {
     }
   });
   
+  // text-orientation の値を決定
+  // mixed: 英数字は横倒し（伝統的な日本語組版）
+  // upright: 全文字を正立
+  const textOrientation = textMode === 'upright' ? 'upright' : 'mixed';
+  
   // 縦書きスタイル
   const verticalStyles = isVertical ? `
     body {
       writing-mode: vertical-rl;
-      text-orientation: mixed;
+      -webkit-writing-mode: vertical-rl;
+      text-orientation: ${textOrientation};
+      -webkit-text-orientation: ${textOrientation};
       height: 100vh;
       overflow-x: auto;
+      overflow-y: hidden;
     }
-    /* 英数字を正立表示 */
-    .upright {
+    /* 縦中横（2桁数字用） */
+    .tcy {
       text-combine-upright: all;
+      -webkit-text-combine: horizontal;
     }
   ` : '';
   
@@ -2325,6 +2336,13 @@ function renderWritingTab() {
           ${isVertical ? t('writing.horizontal') : t('writing.vertical')}
         </button>
         
+        ${isVertical ? `
+        <button onclick="toggleVerticalTextMode()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="英数字の表示方法を切り替え">
+          <i class="fas fa-font mr-1"></i>
+          ${state.verticalTextMode === 'upright' ? '英数字:正立' : '英数字:横倒し'}
+        </button>
+        ` : ''}
+        
         <select id="font-select" onchange="changeFont(this.value)" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded">
           <option value="Noto Sans JP">Noto Sans JP</option>
           <option value="Noto Serif JP">Noto Serif JP</option>
@@ -2456,8 +2474,8 @@ function renderWritingTab() {
         <!-- Editor -->
         <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden relative">
           <textarea id="editor" 
-            class="w-full h-full p-6 resize-none focus:outline-none dark:bg-gray-800 ${isVertical ? 'writing-vertical' : ''}"
-            style="font-family: '${writing?.font_family || 'Noto Sans JP'}', sans-serif; font-size: 16px; line-height: 2; ${isVertical ? 'writing-mode: vertical-rl; text-orientation: mixed; overflow-x: auto; overflow-y: hidden;' : ''}"
+            class="w-full h-full p-6 resize-none focus:outline-none dark:bg-gray-800 ${isVertical ? (state.verticalTextMode === 'upright' ? 'writing-vertical-upright' : 'writing-vertical') : ''}"
+            style="font-family: '${writing?.font_family || 'Noto Sans JP'}', sans-serif; font-size: 16px; line-height: 2; ${isVertical ? `writing-mode: vertical-rl; text-orientation: ${state.verticalTextMode === 'upright' ? 'upright' : 'mixed'}; overflow-x: auto; overflow-y: hidden;` : ''}"
             placeholder="ここに物語を紡いでください...
 
 【見出しの書き方】
@@ -4468,6 +4486,15 @@ window.toggleWritingDirection = async () => {
   // autoSaveを呼び出して設定を保存（1秒後にサーバーに保存される）
   autoSave(state.currentWriting.content || '');
   
+  render();
+};
+
+window.toggleVerticalTextMode = () => {
+  // 縦書き時の英数字表示モードを切り替え
+  // 'mixed': 英数字は横倒し（伝統的な日本語組版）
+  // 'upright': 英数字も正立表示（読みやすいが長い英単語は縦に並ぶ）
+  state.verticalTextMode = state.verticalTextMode === 'upright' ? 'mixed' : 'upright';
+  localStorage.setItem('verticalTextMode', state.verticalTextMode);
   render();
 };
 

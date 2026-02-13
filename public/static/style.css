@@ -3,46 +3,97 @@
 /* Base fonts */
 h1 { font-family: Arial, Helvetica, sans-serif; }
 
-/* Vertical writing mode */
+/* ============================================
+   縦書き（Vertical Writing）スタイル
+   
+   日本語縦書きの慣例:
+   - 日本語文字: 正立（そのまま）
+   - 英字: 横倒し（90度回転）が伝統的
+   - 数字1桁: 正立
+   - 数字2桁: 縦中横（横に並べる）
+   
+   ※ textareaでは文字単位の制御ができないため、
+   text-orientation で全体の方針を決める
+   ============================================ */
+
+/* 縦書きモード - 基本設定 */
 .writing-vertical {
   writing-mode: vertical-rl;
+  -webkit-writing-mode: vertical-rl;
+  -ms-writing-mode: tb-rl;
+  
+  /* 
+   * text-orientation の選択肢:
+   * - mixed: 英数字は横倒し（伝統的な日本語組版）
+   * - upright: 全文字を正立（読みやすいが英単語が縦に並ぶ）
+   * - sideways: 全文字を横倒し
+   * 
+   * 日本の出版物では mixed が標準的
+   */
   text-orientation: mixed;
-  /* 英数字を正立表示（90度回転しない） */
   -webkit-text-orientation: mixed;
 }
 
-/* 縦書きモードでの英数字の扱い */
-.writing-vertical {
-  /* 半角英数字を横倒しにせず、縦中横または正立表示 */
-  text-combine-upright: none;
-}
-
-/* 縦書きでの2桁数字は縦中横 */
-.writing-vertical .tcy,
-.writing-vertical [data-tcy] {
-  text-combine-upright: all;
-  -webkit-text-combine: horizontal;
-}
-
-/* 1文字の英数字は正立 */
-.writing-vertical span.upright {
-  text-orientation: upright;
-}
-
-/* 縦書きエディタのスタイル調整 */
+/* 縦書きエディタ（textarea）専用 */
 textarea.writing-vertical {
   writing-mode: vertical-rl;
+  -webkit-writing-mode: vertical-rl;
   text-orientation: mixed;
+  -webkit-text-orientation: mixed;
+  
+  /* スクロール方向を調整（縦書きは横スクロール） */
   overflow-y: hidden;
   overflow-x: auto;
-  /* 行の間隔を調整 */
+  
+  /* 行間・字間の調整 */
+  line-height: 1.8;
+  letter-spacing: 0.05em;
+  
+  /* フォント設定（縦書き対応フォント推奨） */
+  font-feature-settings: "vrt2" 1; /* 縦書き用字形 */
+}
+
+/* 
+ * 英数字を正立表示したい場合の代替クラス
+ * （全ての文字が正立するため、長い英単語は縦に並ぶ）
+ */
+.writing-vertical-upright {
+  writing-mode: vertical-rl;
+  -webkit-writing-mode: vertical-rl;
+  text-orientation: upright;
+  -webkit-text-orientation: upright;
+}
+
+textarea.writing-vertical-upright {
+  writing-mode: vertical-rl;
+  -webkit-writing-mode: vertical-rl;
+  text-orientation: upright;
+  -webkit-text-orientation: upright;
+  overflow-y: hidden;
+  overflow-x: auto;
+  line-height: 1.8;
   letter-spacing: 0.05em;
 }
 
-/* 縦書きプレビューのスタイル */
+/* 縦中横（Tate-Chu-Yoko）- 2桁数字など用 */
+.tcy, [data-tcy], .text-combine {
+  text-combine-upright: all;
+  -webkit-text-combine: horizontal;
+  -ms-text-combine-horizontal: all;
+}
+
+/* 1文字を正立表示 */
+.upright {
+  text-orientation: upright;
+  -webkit-text-orientation: upright;
+}
+
+/* 縦書きプレビュー用 */
 .vertical-preview {
   writing-mode: vertical-rl;
+  -webkit-writing-mode: vertical-rl;
   text-orientation: mixed;
+  -webkit-text-orientation: mixed;
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
@@ -50,9 +101,9 @@ textarea.writing-vertical {
 
 /* 印刷時の縦書きスタイル */
 @media print {
-  .writing-vertical {
+  .writing-vertical,
+  .writing-vertical-upright {
     writing-mode: vertical-rl;
-    text-orientation: mixed;
     height: auto;
     overflow: visible;
   }
@@ -62,6 +113,10 @@ textarea.writing-vertical {
     margin: 2cm;
   }
 }
+
+/* ============================================
+   その他のスタイル
+   ============================================ */
 
 /* Zen Mode overlay */
 .zen-overlay {
@@ -93,33 +148,40 @@ textarea.writing-vertical {
 }
 
 /* Custom scrollbar for vertical writing */
-.writing-vertical::-webkit-scrollbar {
+.writing-vertical::-webkit-scrollbar,
+.writing-vertical-upright::-webkit-scrollbar {
   height: 8px;
 }
 
-.writing-vertical::-webkit-scrollbar-track {
+.writing-vertical::-webkit-scrollbar-track,
+.writing-vertical-upright::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 4px;
 }
 
-.writing-vertical::-webkit-scrollbar-thumb {
+.writing-vertical::-webkit-scrollbar-thumb,
+.writing-vertical-upright::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 4px;
 }
 
-.writing-vertical::-webkit-scrollbar-thumb:hover {
+.writing-vertical::-webkit-scrollbar-thumb:hover,
+.writing-vertical-upright::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
 
 /* Dark mode scrollbar */
-.dark .writing-vertical::-webkit-scrollbar-track {
+.dark .writing-vertical::-webkit-scrollbar-track,
+.dark .writing-vertical-upright::-webkit-scrollbar-track {
   background: #374151;
 }
 
-.dark .writing-vertical::-webkit-scrollbar-thumb {
+.dark .writing-vertical::-webkit-scrollbar-thumb,
+.dark .writing-vertical-upright::-webkit-scrollbar-thumb {
   background: #6b7280;
 }
 
-.dark .writing-vertical::-webkit-scrollbar-thumb:hover {
+.dark .writing-vertical::-webkit-scrollbar-thumb:hover,
+.dark .writing-vertical-upright::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
