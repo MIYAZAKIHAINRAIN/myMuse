@@ -92,7 +92,7 @@ const i18n = {
     'common.save': '保存', 'common.cancel': 'キャンセル', 'common.delete': '削除',
     'common.restore': '復元', 'common.adopt': '採用', 'common.loading': '読み込み中...', 'common.error': 'エラーが発生しました',
     'common.generate': '生成', 'common.close': '閉じる', 'common.apply': '適用する',
-    'plot.kishotenketsu': '起承転結', 'plot.threeAct': '三幕構成', 'plot.blakeSnyder': 'ブレイク・スナイダー',
+    'plot.kishotenketsu': '起承転結', 'plot.threeAct': '三幕構成', 'plot.blakeSnyder': 'ブレイク・スナイダー', 'plot.herosJourney': '英雄の旅',
     'plot.ki': '起', 'plot.sho': '承', 'plot.ten': '転', 'plot.ketsu': '結',
     'plot.act1': '第一幕', 'plot.act2': '第二幕', 'plot.act3': '第三幕',
     'genre.literary': '純文学', 'genre.contemporary': '現代文学', 'genre.fantasy': 'ファンタジー',
@@ -103,6 +103,9 @@ const i18n = {
     'genre.selfhelp': '自己啓発書', 'genre.philosophy': '哲学書', 'genre.sociology': '社会学・文化論',
     'genre.historyNF': '歴史書', 'genre.science': '科学解説書', 'genre.journalism': 'ジャーナリズム',
     'genre.biography': '伝記・自伝',
+    'genre.litrpg': 'LitRPG', 'genre.progression': 'Progression Fantasy', 'genre.cozyMystery': 'コージーミステリー',
+    'genre.urbanFantasy': 'アーバンファンタジー', 'genre.xianxia': '仙侠', 'genre.wuxia': '武侠',
+    'genre.isekai': '異世界', 'genre.gamelit': 'GameLit', 'genre.cultivation': '修真',
     'idea.generate': 'アイデアを生成', 'idea.count': '生成数', 'idea.keywords': 'キーワード', 'idea.genre': 'ジャンル',
     'chat.placeholder': '相談したいことを入力...', 'chat.empty': 'AIに相談してみましょう', 'chat.hint': 'プロット、キャラクター、文章の悩みなど何でも相談できます',
   },
@@ -137,16 +140,20 @@ const i18n = {
     'common.save': 'Save', 'common.cancel': 'Cancel', 'common.delete': 'Delete',
     'common.restore': 'Restore', 'common.adopt': 'Adopt', 'common.loading': 'Loading...', 'common.error': 'An error occurred',
     'common.generate': 'Generate', 'common.close': 'Close', 'common.apply': 'Apply',
-    'plot.kishotenketsu': 'Ki-Sho-Ten-Ketsu', 'plot.threeAct': 'Three Act', 'plot.blakeSnyder': 'Blake Snyder',
+    'plot.kishotenketsu': 'Ki-Sho-Ten-Ketsu', 'plot.threeAct': 'Three Act', 'plot.blakeSnyder': 'Save the Cat!', 'plot.herosJourney': "Hero's Journey",
     'plot.ki': 'Setup', 'plot.sho': 'Development', 'plot.ten': 'Twist', 'plot.ketsu': 'Conclusion',
     'plot.act1': 'Act 1', 'plot.act2': 'Act 2', 'plot.act3': 'Act 3',
     'genre.literary': 'Literary Fiction', 'genre.contemporary': 'Contemporary', 'genre.fantasy': 'Fantasy',
-    'genre.scifi': 'Sci-Fi', 'genre.mystery': 'Mystery', 'genre.suspense': 'Suspense',
+    'genre.scifi': 'Sci-Fi', 'genre.mystery': 'Mystery', 'genre.suspense': 'Thriller',
     'genre.horror': 'Horror', 'genre.romance': 'Romance', 'genre.historical': 'Historical',
-    'genre.adventure': 'Adventure/Action', 'genre.lightnovel': 'Light Novel', 'genre.children': 'Children\'s',
+    'genre.adventure': 'Adventure/Action', 'genre.lightnovel': 'Light Novel', 'genre.children': "Children's",
     'genre.essay': 'Essay', 'genre.critique': 'Critique', 'genre.business': 'Business',
     'genre.selfhelp': 'Self-Help', 'genre.philosophy': 'Philosophy', 'genre.sociology': 'Sociology',
     'genre.historyNF': 'History (NF)', 'genre.science': 'Science', 'genre.journalism': 'Journalism',
+    'genre.biography': 'Biography/Memoir',
+    'genre.litrpg': 'LitRPG', 'genre.progression': 'Progression Fantasy', 'genre.cozyMystery': 'Cozy Mystery',
+    'genre.urbanFantasy': 'Urban Fantasy', 'genre.xianxia': 'Xianxia', 'genre.wuxia': 'Wuxia',
+    'genre.isekai': 'Isekai', 'genre.gamelit': 'GameLit', 'genre.cultivation': 'Cultivation',
     'genre.biography': 'Biography',
     'idea.generate': 'Generate Ideas', 'idea.count': 'Count', 'idea.keywords': 'Keywords', 'idea.genre': 'Genre',
     'chat.placeholder': 'Ask your writing assistant...', 'chat.empty': 'Chat with AI', 'chat.hint': 'Ask about plot, characters, writing style, and more',
@@ -171,6 +178,12 @@ const i18n = {
     'auth.login': '登录', 'auth.signup': '注册', 'auth.email': '邮箱', 'auth.password': '密码', 'auth.name': '姓名',
     'common.save': '保存', 'common.cancel': '取消', 'common.delete': '删除', 'common.restore': '恢复',
     'common.loading': '加载中...', 'common.error': '发生错误', 'common.generate': '生成', 'common.close': '关闭',
+    'plot.kishotenketsu': '起承转合', 'plot.threeAct': '三幕结构', 'plot.blakeSnyder': '救猫咪', 'plot.herosJourney': '英雄之旅',
+    'plot.ki': '起', 'plot.sho': '承', 'plot.ten': '转', 'plot.ketsu': '合',
+    'plot.act1': '第一幕', 'plot.act2': '第二幕', 'plot.act3': '第三幕',
+    'genre.fantasy': '奇幻', 'genre.scifi': '科幻', 'genre.mystery': '推理', 'genre.romance': '言情',
+    'genre.xianxia': '仙侠', 'genre.wuxia': '武侠', 'genre.cultivation': '修真', 'genre.isekai': '异世界',
+    'genre.litrpg': 'LitRPG', 'genre.progression': '成长流', 'genre.urbanFantasy': '都市奇幻',
     'chat.placeholder': '输入您的问题...', 'chat.empty': '与AI对话', 'chat.hint': '询问情节、人物、写作风格等',
   },
   ko: {
@@ -388,9 +401,31 @@ function formatDate(date) {
   return new Date(date).toLocaleDateString(state.language === 'ja' ? 'ja-JP' : 'en-US');
 }
 
+// Count words/characters based on language
+// Japanese/Chinese: count characters (excluding whitespace)
+// English/Others: count words
 function countWords(text) {
   if (!text) return 0;
-  return text.replace(/\s/g, '').length;
+  
+  const lang = state.language || 'ja';
+  
+  // Japanese, Chinese, Korean - count characters
+  if (['ja', 'zh', 'ko'].includes(lang)) {
+    return text.replace(/\s/g, '').length;
+  }
+  
+  // English and other languages - count words
+  const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+  return words.length;
+}
+
+// Get the appropriate count label based on language
+function getCountLabel() {
+  const lang = state.language || 'ja';
+  if (['ja', 'zh', 'ko'].includes(lang)) {
+    return lang === 'zh' ? '字' : '文字';
+  }
+  return 'words';
 }
 
 // Genre options helper
@@ -726,7 +761,7 @@ window.manualSave = async () => {
 function updateWordCount() {
   const el = $('#word-count');
   if (el && state.currentWriting) {
-    el.textContent = `${state.currentWriting.word_count || 0} 文字`;
+    el.textContent = `${state.currentWriting.word_count || 0} ${getCountLabel()}`;
   }
 }
 
@@ -1620,6 +1655,7 @@ function renderTabContent() {
 // ============================================
 function renderSettingsMaterialsTab() {
   const allGenres = [
+    // Fiction - Traditional
     { value: 'literary', label: t('genre.literary') },
     { value: 'contemporary', label: t('genre.contemporary') },
     { value: 'fantasy', label: t('genre.fantasy') },
@@ -1632,6 +1668,18 @@ function renderSettingsMaterialsTab() {
     { value: 'adventure', label: t('genre.adventure') },
     { value: 'lightnovel', label: t('genre.lightnovel') },
     { value: 'children', label: t('genre.children') },
+    // Web Novel / Modern Genres
+    { value: 'litrpg', label: t('genre.litrpg') },
+    { value: 'progression', label: t('genre.progression') },
+    { value: 'gamelit', label: t('genre.gamelit') },
+    { value: 'isekai', label: t('genre.isekai') },
+    { value: 'urbanFantasy', label: t('genre.urbanFantasy') },
+    { value: 'cozyMystery', label: t('genre.cozyMystery') },
+    // Asian Web Novel
+    { value: 'xianxia', label: t('genre.xianxia') },
+    { value: 'wuxia', label: t('genre.wuxia') },
+    { value: 'cultivation', label: t('genre.cultivation') },
+    // Non-Fiction
     { value: 'essay', label: t('genre.essay') },
     { value: 'critique', label: t('genre.critique') },
     { value: 'business', label: t('genre.business') },
@@ -2883,23 +2931,37 @@ function renderWritingTab() {
       
       <!-- Toolbar -->
       <div class="flex flex-wrap items-center gap-2 mb-4 bg-white dark:bg-gray-800 rounded-lg p-2 shadow-sm">
-        <button onclick="toggleWritingDirection()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
-          <i class="fas ${isVertical ? 'fa-grip-lines' : 'fa-grip-lines-vertical'} mr-1"></i>
-          ${isVertical ? t('writing.horizontal') : t('writing.vertical')}
+        ${['ja', 'zh', 'ko'].includes(state.language) ? `
+        <button onclick="toggleWritingDirection()" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="${isVertical ? '横書きに切替' : '縦書きに切替'}">
+          <i class="fas ${isVertical ? 'fa-grip-lines' : 'fa-grip-lines-vertical'}"></i>
         </button>
+        ` : ''}
         
         ${isVertical ? `
-        <button onclick="toggleVerticalTextMode()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="英数字の表示方法を切り替え">
+        <button onclick="toggleVerticalTextMode()" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="英数字の表示方法を切り替え">
           <i class="fas fa-font mr-1"></i>
-          ${state.verticalTextMode === 'upright' ? '英数字:正立' : '英数字:横倒し'}
+          ${state.verticalTextMode === 'upright' ? '正立' : '横倒し'}
         </button>
         ` : ''}
         
         <select id="font-select" onchange="changeFont(this.value)" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded">
-          <option value="Noto Sans JP">Noto Sans JP</option>
-          <option value="Noto Serif JP">Noto Serif JP</option>
-          <option value="Shippori Mincho">しっぽり明朝</option>
-          <option value="BIZ UDMincho">BIZ UD明朝</option>
+          <optgroup label="日本語フォント">
+            <option value="Noto Sans JP">Noto Sans JP</option>
+            <option value="Noto Serif JP">Noto Serif JP</option>
+            <option value="Shippori Mincho">しっぽり明朝</option>
+            <option value="BIZ UDMincho">BIZ UD明朝</option>
+          </optgroup>
+          <optgroup label="英語フォント">
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Arial">Arial</option>
+            <option value="Merriweather">Merriweather</option>
+            <option value="Roboto">Roboto</option>
+          </optgroup>
+          <optgroup label="中国語フォント">
+            <option value="Noto Sans SC">Noto Sans SC (简体)</option>
+            <option value="Noto Serif SC">Noto Serif SC (简体)</option>
+          </optgroup>
         </select>
         
         <!-- Text Style Selector (Google Docs style) -->
@@ -2951,7 +3013,7 @@ function renderWritingTab() {
           <span class="hidden sm:inline">${t('common.save')}</span>
         </button>
         
-        <span id="word-count" class="text-sm text-gray-500">${writing?.word_count || 0} 文字</span>
+        <span id="word-count" class="text-sm text-gray-500">${writing?.word_count || 0} ${getCountLabel()}</span>
         
         <button onclick="readAloud()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
           <i class="fas fa-volume-up mr-1"></i>${t('writing.readAloud')}
@@ -5464,6 +5526,12 @@ window.savePlot = async () => {
       act2: $('#plot-act2')?.value || '',
       act3: $('#plot-act3')?.value || '',
     };
+  } else if (template === 'blake_snyder') {
+    const fields = ['opening', 'theme', 'setup', 'catalyst', 'debate', 'break_into_two', 'b_story', 'fun_and_games', 'midpoint', 'bad_guys', 'all_is_lost', 'dark_night', 'break_into_three', 'finale', 'final_image'];
+    fields.forEach(f => structure[f] = $(`#plot-${f}`)?.value || '');
+  } else if (template === 'heros_journey') {
+    const fields = ['ordinary_world', 'call_to_adventure', 'refusal_of_call', 'meeting_mentor', 'crossing_threshold', 'tests_allies_enemies', 'approach', 'ordeal', 'reward', 'road_back', 'resurrection', 'return_with_elixir'];
+    fields.forEach(f => structure[f] = $(`#plot-${f}`)?.value || '');
   }
   
   await api.put(`/plots/${state.plot.id}`, {
@@ -5523,13 +5591,31 @@ JSON形式で出力してください:
 【ミッドポイント】偽りの勝利または敗北
 【迫り来る悪い奴ら】問題が深刻化
 【すべてを失って】最悪の瞬間
-【心の暗闇】最低点
+【心の暗闘】最低点
 【第二ターニングポイント】解決策の発見
 【フィナーレ】最終対決と解決
 【ファイナルイメージ】変化した主人公
 
 JSON形式で出力してください:
 {"opening": "内容", "theme": "内容", "setup": "内容", "catalyst": "内容", "debate": "内容", "break_into_two": "内容", "b_story": "内容", "fun_and_games": "内容", "midpoint": "内容", "bad_guys": "内容", "all_is_lost": "内容", "dark_night": "内容", "break_into_three": "内容", "finale": "内容", "final_image": "内容"}`;
+  } else if (template === 'heros_journey') {
+    templatePrompt = `以下のアイディアを元に、「英雄の旅（Hero's Journey）」形式のプロット構成を生成してください。
+
+【日常世界】主人公の普通の生活
+【冒険への誘い】変化のきっかけ
+【冒険の拒絶】最初の躊躇
+【賢者との出会い】メンターの登場
+【第一関門突破】非日常世界への突入
+【試練・仲間・敵】冒険の中での成長
+【最深部への接近】最大の試練への準備
+【最大の試練】クライマックスの戦い
+【報酬】勝利の果実
+【帰路】元の世界への帰還
+【復活】最終的な変容
+【宝を持っての帰還】成長した姿での帰還
+
+JSON形式で出力してください:
+{"ordinary_world": "内容", "call_to_adventure": "内容", "refusal_of_call": "内容", "meeting_mentor": "内容", "crossing_threshold": "内容", "tests_allies_enemies": "内容", "approach": "内容", "ordeal": "内容", "reward": "内容", "road_back": "内容", "resurrection": "内容", "return_with_elixir": "内容"}`;
   }
 
   const fullPrompt = `ジャンル: ${projectGenre}
@@ -7014,11 +7100,114 @@ window.handleQuickAction = async (action) => {
     return;
   }
   
+  // For translate action, show language selection dialog
+  if (action === 'translate') {
+    showTranslationDialog(content);
+    return;
+  }
+  
   const result = await callAI(action, content);
   if (result) {
     showAIResult(result);
     addToAIHistory(action, result);
   }
+};
+
+// Translation dialog for selecting target language
+window.showTranslationDialog = (content) => {
+  const existing = document.getElementById('translation-dialog');
+  if (existing) existing.remove();
+  
+  const dialog = document.createElement('div');
+  dialog.id = 'translation-dialog';
+  dialog.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+  dialog.innerHTML = `
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md mx-4 animate-fade-in">
+      <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+        <i class="fas fa-language text-indigo-500"></i>
+        翻訳先を選択
+      </h3>
+      
+      <div class="space-y-3 mb-4">
+        <button onclick="executeTranslation('ja', '${escapeForOnclick(content)}')" 
+          class="w-full p-3 border-2 rounded-xl text-left hover:border-indigo-500 transition border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🇯🇵</span>
+            <div>
+              <p class="font-medium">日本語</p>
+              <p class="text-xs text-gray-500">Translate to Japanese</p>
+            </div>
+          </div>
+        </button>
+        
+        <button onclick="executeTranslation('en', '${escapeForOnclick(content)}')" 
+          class="w-full p-3 border-2 rounded-xl text-left hover:border-indigo-500 transition border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🇺🇸</span>
+            <div>
+              <p class="font-medium">English</p>
+              <p class="text-xs text-gray-500">英語に翻訳</p>
+            </div>
+          </div>
+        </button>
+        
+        <button onclick="executeTranslation('zh', '${escapeForOnclick(content)}')" 
+          class="w-full p-3 border-2 rounded-xl text-left hover:border-indigo-500 transition border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🇨🇳</span>
+            <div>
+              <p class="font-medium">中文（简体）</p>
+              <p class="text-xs text-gray-500">中国語に翻訳</p>
+            </div>
+          </div>
+        </button>
+        
+        <button onclick="executeTranslation('ko', '${escapeForOnclick(content)}')" 
+          class="w-full p-3 border-2 rounded-xl text-left hover:border-indigo-500 transition border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🇰🇷</span>
+            <div>
+              <p class="font-medium">한국어</p>
+              <p class="text-xs text-gray-500">韓国語に翻訳</p>
+            </div>
+          </div>
+        </button>
+      </div>
+      
+      <div class="text-center">
+        <button onclick="closeTranslationDialog()" 
+          class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+          キャンセル
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(dialog);
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) closeTranslationDialog();
+  });
+};
+
+// Escape function for onclick content
+function escapeForOnclick(str) {
+  return str.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n').substring(0, 500);
+}
+
+window.executeTranslation = async (targetLang, content) => {
+  closeTranslationDialog();
+  
+  const langNames = { ja: '日本語', en: 'English', zh: '中文', ko: '한국어' };
+  const result = await callAI('translate', state.currentWriting?.content || content, { targetLanguage: targetLang });
+  
+  if (result) {
+    showAIResult(result);
+    addToAIHistory(`translate_${targetLang}`, result);
+  }
+};
+
+window.closeTranslationDialog = () => {
+  const dialog = document.getElementById('translation-dialog');
+  if (dialog) dialog.remove();
 };
 
 window.handleStyleConvert = async (style) => {
