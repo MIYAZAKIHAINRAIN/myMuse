@@ -1804,6 +1804,46 @@ function renderSettingsMaterialsTab() {
 
 // Helper function to render Settings AI Chat panel
 function renderSettingsAIChat() {
+  const messages = state.settingsChatMessages || [];
+  
+  let messagesHtml = '';
+  if (messages.length > 0) {
+    messagesHtml = messages.map(msg => {
+      const alignClass = msg.role === 'user' ? 'justify-end' : 'justify-start';
+      const bgClass = msg.role === 'user' 
+        ? 'bg-indigo-600 text-white' 
+        : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+      const content = msg.content.replace(/\n/g, '<br>');
+      return `
+        <div class="flex ${alignClass}">
+          <div class="max-w-[90%] rounded-lg p-2 text-xs ${bgClass}">
+            ${content}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } else {
+    messagesHtml = `
+      <div class="text-center text-gray-500 text-xs py-4">
+        <i class="fas fa-comments text-2xl mb-2 text-indigo-300"></i>
+        <p class="font-medium">${t('chat.empty')}</p>
+      </div>
+    `;
+  }
+  
+  const isJa = state.language === 'ja';
+  const charLabel = isJa ? 'キャラ深掘り' : 'Character';
+  const checkLabel = isJa ? '設定チェック' : 'Check';
+  const ideaLabel = isJa ? 'アイデア' : 'Ideas';
+  const charPrompt = isJa ? 'キャラクターの性格を深掘りしたい' : 'Help me develop character personality';
+  const checkPrompt = isJa ? '世界観の矛盾点をチェックして' : 'Check world-building consistency';
+  const ideaPrompt = isJa ? '新しい設定のアイデアが欲しい' : 'Suggest new setting ideas';
+  
+  const buttonContent = state.aiGenerating 
+    ? '<div class="spinner" style="width:14px;height:14px;border-width:2px;"></div>' 
+    : '<i class="fas fa-paper-plane text-xs"></i>';
+  const disabledAttr = state.aiGenerating ? 'disabled' : '';
+  
   return `
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border-2 border-indigo-200 dark:border-indigo-800 flex flex-col" style="min-height: 320px; max-height: 400px;">
       <div class="p-3 border-b dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
@@ -1816,53 +1856,36 @@ function renderSettingsAIChat() {
       
       <!-- Chat Messages -->
       <div id="settings-chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2">
-        ${(state.settingsChatMessages || []).length > 0 ? 
-          state.settingsChatMessages.map(msg => \`
-            <div class="flex \${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
-              <div class="max-w-[90%] rounded-lg p-2 text-xs \${
-                msg.role === 'user' 
-                  ? 'bg-indigo-600 text-white' 
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-              }">
-                \${msg.content.replace(/\\n/g, '<br>')}
-              </div>
-            </div>
-          \`).join('') : \`
-            <div class="text-center text-gray-500 text-xs py-4">
-              <i class="fas fa-comments text-2xl mb-2 text-indigo-300"></i>
-              <p class="font-medium">\${t('chat.empty')}</p>
-            </div>
-          \`
-        }
+        ${messagesHtml}
       </div>
       
       <!-- Chat Input -->
       <div class="p-2 border-t dark:border-gray-700">
         <div class="flex gap-1">
           <input type="text" id="settings-chat-input" 
-            placeholder="\${t('ui.settingsAIPlaceholder')}"
+            placeholder="${t('ui.settingsAIPlaceholder')}"
             class="flex-1 px-2 py-1.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-xs"
             onkeypress="if(event.key === 'Enter') sendSettingsChat()">
           <button onclick="sendSettingsChat()" 
             class="px-2 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-            \${state.aiGenerating ? 'disabled' : ''}>
-            \${state.aiGenerating ? '<div class="spinner" style="width:14px;height:14px;border-width:2px;"></div>' : '<i class="fas fa-paper-plane text-xs"></i>'}
+            ${disabledAttr}>
+            ${buttonContent}
           </button>
         </div>
         
         <!-- Quick prompts -->
         <div class="flex flex-wrap gap-1 mt-1.5">
-          <button onclick="sendSettingsChatQuick('\${state.language === 'ja' ? 'キャラクターの性格を深掘りしたい' : 'Help me develop character personality'}')" 
+          <button onclick="sendSettingsChatQuick('${charPrompt}')" 
             class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
-            \${state.language === 'ja' ? 'キャラ深掘り' : 'Character'}
+            ${charLabel}
           </button>
-          <button onclick="sendSettingsChatQuick('\${state.language === 'ja' ? '世界観の矛盾点をチェックして' : 'Check world-building consistency'}')" 
+          <button onclick="sendSettingsChatQuick('${checkPrompt}')" 
             class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
-            \${state.language === 'ja' ? '設定チェック' : 'Check'}
+            ${checkLabel}
           </button>
-          <button onclick="sendSettingsChatQuick('\${state.language === 'ja' ? '新しい設定のアイデアが欲しい' : 'Suggest new setting ideas'}')" 
+          <button onclick="sendSettingsChatQuick('${ideaPrompt}')" 
             class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
-            \${state.language === 'ja' ? 'アイデア' : 'Ideas'}
+            ${ideaLabel}
           </button>
         </div>
       </div>
@@ -2018,7 +2041,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
           </div>
           
           <!-- Settings AI Chat -->
-          \${renderSettingsAIChat()}
+          ${renderSettingsAIChat()}
           
           <!-- Sync Options & Save -->
           <div class="bg-purple-50 dark:bg-purple-900/30 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-800">
@@ -2210,7 +2233,7 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
           </div>
           
           <!-- Settings AI Chat -->
-          \${renderSettingsAIChat()}
+          ${renderSettingsAIChat()}
           
           <button onclick="saveStoryOutline()" 
             class="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
@@ -2350,7 +2373,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
         </div>
         
         <!-- Settings AI Chat -->
-        \${renderSettingsAIChat()}
+        ${renderSettingsAIChat()}
         
         <!-- Save Button -->
         <button onclick="saveStoryOutline()" 
