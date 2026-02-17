@@ -41,6 +41,7 @@ const state = {
   analysisChatMessages: [], // Chat messages for analysis AI
   analysisPersona: 'neutral', // Current analysis persona
   analysisChartsOpen: true, // Show/hide analysis charts
+  settingsChatMessages: [], // Chat messages for settings AI assistant
   expandedPanel: null, // Currently expanded panel
   lastAnalysisResult: null, // Last analysis result for chart re-rendering
   adoptedIdeasText: '', // Word processor text for adopted ideas
@@ -108,6 +109,24 @@ const i18n = {
     'genre.isekai': '異世界', 'genre.gamelit': 'GameLit', 'genre.cultivation': '修真',
     'idea.generate': 'アイデアを生成', 'idea.count': '生成数', 'idea.keywords': 'キーワード', 'idea.genre': 'ジャンル',
     'chat.placeholder': '相談したいことを入力...', 'chat.empty': 'AIに相談してみましょう', 'chat.hint': 'プロット、キャラクター、文章の悩みなど何でも相談できます',
+    // UI messages
+    'ui.saving': '保存中...', 'ui.saved': '保存済み', 'ui.unsaved': '未保存', 'ui.saveFailed': '保存に失敗しました',
+    'ui.createSeries': 'シリーズを作成', 'ui.addEpisode': '新しい話を追加', 'ui.parentProject': '親プロジェクト',
+    'ui.saveSettings': '設定を保存', 'ui.saveSeriesSettings': 'シリーズ設定を保存', 'ui.autoSync': '保存時に各話へ自動反映',
+    'ui.projectRef': 'プロジェクト参照', 'ui.genSettings': '生成設定', 'ui.generateIllustration': '挿絵を生成',
+    'ui.generatedIllustrations': '生成された挿絵', 'ui.comingSoon': '近日公開予定',
+    'ui.illustrationDevNote': 'AI画像生成機能は現在開発中です。近日公開予定！',
+    'ui.quickIdeas': 'クイックアイデア生成', 'ui.generateIdeas': 'AIでアイデアを生成してみましょう',
+    'ui.adoptIdea': 'このメモを「採用したアイディア」に追加', 'ui.noPlot': 'まだプロット構成が作成されていません',
+    'ui.createPlotHint': '「ネタ考案」タブで構成を作成してください', 'ui.noAdoptedIdeas': '「ネタ考案」タブでアイディアを生成・採用してください',
+    'ui.cancelAI': 'AI生成をキャンセルしますか？', 'ui.aiCancelled': 'AI生成をキャンセルしました',
+    'ui.guestLogin': 'ゲストとしてログインしました！', 'ui.welcomeMsg': 'myMuseへようこそ！',
+    'ui.illustrationHint': 'ネタ考案タブのアウトラインと執筆内容を基に、一貫性のある挿絵を生成します',
+    'ui.saveEpisodeSettings': 'この話の設定を保存', 'ui.settingsSaved': '設定を保存しました',
+    'ui.seriesSettingsSaved': '共通設定を保存しました', 'ui.seriesSettingsSyncedTo': '共通設定を保存し、{count}話に反映しました',
+    'ui.adoptedIdeas': '採用したアイディア', 'ui.viewOnly': '参照のみ', 'ui.editInIdeasTab': 'ネタ考案タブで編集',
+    'ui.settingsAI': '設定AIアシスタント', 'ui.settingsAIHint': '設定作りの相談ができます',
+    'ui.settingsAIPlaceholder': 'キャラ設定や世界観について相談...',
   },
   en: {
     'app.title': 'myMuse', 'app.tagline': 'Your all-knowing writing companion',
@@ -157,6 +176,24 @@ const i18n = {
     'genre.biography': 'Biography',
     'idea.generate': 'Generate Ideas', 'idea.count': 'Count', 'idea.keywords': 'Keywords', 'idea.genre': 'Genre',
     'chat.placeholder': 'Ask your writing assistant...', 'chat.empty': 'Chat with AI', 'chat.hint': 'Ask about plot, characters, writing style, and more',
+    // UI messages
+    'ui.saving': 'Saving...', 'ui.saved': 'Saved', 'ui.unsaved': 'Unsaved', 'ui.saveFailed': 'Failed to save',
+    'ui.createSeries': 'Create Series', 'ui.addEpisode': 'Add Episode', 'ui.parentProject': 'Parent Project',
+    'ui.saveSettings': 'Save Settings', 'ui.saveSeriesSettings': 'Save Series Settings', 'ui.autoSync': 'Auto-sync to all episodes on save',
+    'ui.projectRef': 'Project Reference', 'ui.genSettings': 'Generation Settings', 'ui.generateIllustration': 'Generate Illustration',
+    'ui.generatedIllustrations': 'Generated Illustrations', 'ui.comingSoon': 'Coming Soon',
+    'ui.illustrationDevNote': 'AI image generation is currently under development. Coming soon!',
+    'ui.quickIdeas': 'Quick Idea Generation', 'ui.generateIdeas': 'Generate ideas with AI',
+    'ui.adoptIdea': 'Add this to adopted ideas', 'ui.noPlot': 'No plot structure yet',
+    'ui.createPlotHint': 'Create a plot structure in the Ideas tab', 'ui.noAdoptedIdeas': 'Generate and adopt ideas in the Ideas tab',
+    'ui.cancelAI': 'Cancel AI generation?', 'ui.aiCancelled': 'AI generation cancelled',
+    'ui.guestLogin': 'Logged in as guest!', 'ui.welcomeMsg': 'Welcome to myMuse!',
+    'ui.illustrationHint': 'Generate consistent illustrations based on outline and content',
+    'ui.saveEpisodeSettings': 'Save Episode Settings', 'ui.settingsSaved': 'Settings saved',
+    'ui.seriesSettingsSaved': 'Series settings saved', 'ui.seriesSettingsSyncedTo': 'Series settings saved and synced to {count} episodes',
+    'ui.adoptedIdeas': 'Adopted Ideas', 'ui.viewOnly': 'View Only', 'ui.editInIdeasTab': 'Edit in Ideas Tab',
+    'ui.settingsAI': 'Settings AI Assistant', 'ui.settingsAIHint': 'Get help with your settings',
+    'ui.settingsAIPlaceholder': 'Ask about characters, world-building...',
   },
   zh: {
     'app.title': 'myMuse', 'app.tagline': '全知全能的写作伙伴',
@@ -185,6 +222,24 @@ const i18n = {
     'genre.xianxia': '仙侠', 'genre.wuxia': '武侠', 'genre.cultivation': '修真', 'genre.isekai': '异世界',
     'genre.litrpg': 'LitRPG', 'genre.progression': '成长流', 'genre.urbanFantasy': '都市奇幻',
     'chat.placeholder': '输入您的问题...', 'chat.empty': '与AI对话', 'chat.hint': '询问情节、人物、写作风格等',
+    // UI messages
+    'ui.saving': '保存中...', 'ui.saved': '已保存', 'ui.unsaved': '未保存', 'ui.saveFailed': '保存失败',
+    'ui.createSeries': '创建系列', 'ui.addEpisode': '添加新篇', 'ui.parentProject': '父项目',
+    'ui.saveSettings': '保存设置', 'ui.saveSeriesSettings': '保存系列设置', 'ui.autoSync': '保存时自动同步到所有篇章',
+    'ui.projectRef': '项目参考', 'ui.genSettings': '生成设置', 'ui.generateIllustration': '生成插图',
+    'ui.generatedIllustrations': '已生成的插图', 'ui.comingSoon': '即将推出',
+    'ui.illustrationDevNote': 'AI图像生成功能正在开发中，敬请期待！',
+    'ui.quickIdeas': '快速创意生成', 'ui.generateIdeas': '使用AI生成创意',
+    'ui.adoptIdea': '添加到采用的创意', 'ui.noPlot': '尚未创建情节结构',
+    'ui.createPlotHint': '在创意标签页中创建情节结构', 'ui.noAdoptedIdeas': '在创意标签页中生成并采用创意',
+    'ui.cancelAI': '取消AI生成？', 'ui.aiCancelled': 'AI生成已取消',
+    'ui.guestLogin': '已以访客身份登录！', 'ui.welcomeMsg': '欢迎来到myMuse！',
+    'ui.illustrationHint': '基于大纲和内容生成一致的插图',
+    'ui.saveEpisodeSettings': '保存本话设置', 'ui.settingsSaved': '设置已保存',
+    'ui.seriesSettingsSaved': '系列设置已保存', 'ui.seriesSettingsSyncedTo': '系列设置已保存并同步到{count}话',
+    'ui.adoptedIdeas': '已采用的创意', 'ui.viewOnly': '仅查看', 'ui.editInIdeasTab': '在创意标签页编辑',
+    'ui.settingsAI': '设置AI助手', 'ui.settingsAIHint': '获取设置创作帮助',
+    'ui.settingsAIPlaceholder': '询问角色设定或世界观...',
   },
   ko: {
     'app.title': 'myMuse', 'app.tagline': '모든 것을 아는 글쓰기 동반자',
@@ -203,6 +258,24 @@ const i18n = {
     'auth.login': '로그인', 'auth.signup': '회원가입', 'auth.email': '이메일', 'auth.password': '비밀번호', 'auth.name': '이름',
     'common.save': '저장', 'common.cancel': '취소', 'common.delete': '삭제', 'common.loading': '로딩 중...', 'common.error': '오류가 발생했습니다',
     'chat.placeholder': '질문을 입력하세요...', 'chat.empty': 'AI와 대화하기',
+    // UI messages
+    'ui.saving': '저장 중...', 'ui.saved': '저장됨', 'ui.unsaved': '미저장', 'ui.saveFailed': '저장 실패',
+    'ui.createSeries': '시리즈 만들기', 'ui.addEpisode': '새 화 추가', 'ui.parentProject': '상위 프로젝트',
+    'ui.saveSettings': '설정 저장', 'ui.saveSeriesSettings': '시리즈 설정 저장', 'ui.autoSync': '저장 시 모든 화에 자동 동기화',
+    'ui.projectRef': '프로젝트 참조', 'ui.genSettings': '생성 설정', 'ui.generateIllustration': '삽화 생성',
+    'ui.generatedIllustrations': '생성된 삽화', 'ui.comingSoon': '출시 예정',
+    'ui.illustrationDevNote': 'AI 이미지 생성 기능은 현재 개발 중입니다. 곧 출시됩니다!',
+    'ui.quickIdeas': '빠른 아이디어 생성', 'ui.generateIdeas': 'AI로 아이디어 생성하기',
+    'ui.adoptIdea': '채택한 아이디어에 추가', 'ui.noPlot': '아직 플롯 구조가 없습니다',
+    'ui.createPlotHint': '아이디어 탭에서 플롯 구조를 만드세요', 'ui.noAdoptedIdeas': '아이디어 탭에서 아이디어를 생성하고 채택하세요',
+    'ui.cancelAI': 'AI 생성을 취소하시겠습니까?', 'ui.aiCancelled': 'AI 생성이 취소되었습니다',
+    'ui.guestLogin': '게스트로 로그인했습니다!', 'ui.welcomeMsg': 'myMuse에 오신 것을 환영합니다!',
+    'ui.illustrationHint': '개요와 내용을 기반으로 일관된 삽화 생성',
+    'ui.saveEpisodeSettings': '이 화의 설정 저장', 'ui.settingsSaved': '설정이 저장되었습니다',
+    'ui.seriesSettingsSaved': '시리즈 설정이 저장되었습니다', 'ui.seriesSettingsSyncedTo': '시리즈 설정이 저장되고 {count}화에 동기화되었습니다',
+    'ui.adoptedIdeas': '채택한 아이디어', 'ui.viewOnly': '보기 전용', 'ui.editInIdeasTab': '아이디어 탭에서 편집',
+    'ui.settingsAI': '설정 AI 어시스턴트', 'ui.settingsAIHint': '설정 작성에 대한 도움받기',
+    'ui.settingsAIPlaceholder': '캐릭터 설정이나 세계관에 대해 물어보세요...',
   },
   es: {
     'app.title': 'myMuse', 'app.tagline': 'Tu compañero de escritura omnisciente',
@@ -687,15 +760,15 @@ function updateSaveIndicator(status) {
   
   switch(status) {
     case 'saving':
-      indicator.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>保存中...';
+      indicator.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i>${t('ui.saving')}`;
       indicator.className = 'text-sm text-yellow-600 dark:text-yellow-400 flex items-center';
       break;
     case 'saved':
-      indicator.innerHTML = '<i class="fas fa-check mr-1"></i>保存済み';
+      indicator.innerHTML = `<i class="fas fa-check mr-1"></i>${t('ui.saved')}`;
       indicator.className = 'text-sm text-green-600 dark:text-green-400 flex items-center';
       break;
     case 'unsaved':
-      indicator.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>未保存';
+      indicator.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i>${t('ui.unsaved')}`;
       indicator.className = 'text-sm text-red-600 dark:text-red-400 flex items-center';
       break;
   }
@@ -1523,7 +1596,7 @@ function renderLibraryItem(library) {
             <button onclick="event.stopPropagation(); openAddChildProjectModal('${library.id}')" 
               class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg">
               <i class="fas fa-plus text-green-500"></i>
-              新しい話を追加
+              ${t('ui.addEpisode')}
             </button>
             <button onclick="event.stopPropagation(); editLibrarySettings('${library.id}')" 
               class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -1568,7 +1641,7 @@ function renderLibraryItem(library) {
           <button onclick="openAddChildProjectModal('${library.id}')" 
             class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition">
             <i class="fas fa-plus"></i>
-            新しい話を追加
+            ${t('ui.addEpisode')}
           </button>
         </div>
       ` : ''}
@@ -1729,6 +1802,74 @@ function renderSettingsMaterialsTab() {
   return renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline);
 }
 
+// Helper function to render Settings AI Chat panel
+function renderSettingsAIChat() {
+  return `
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border-2 border-indigo-200 dark:border-indigo-800 flex flex-col" style="min-height: 320px; max-height: 400px;">
+      <div class="p-3 border-b dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+        <h3 class="font-semibold flex items-center gap-2 text-sm">
+          <i class="fas fa-robot"></i>
+          ${t('ui.settingsAI')}
+        </h3>
+        <p class="text-xs text-indigo-100 mt-0.5">${t('ui.settingsAIHint')}</p>
+      </div>
+      
+      <!-- Chat Messages -->
+      <div id="settings-chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2">
+        ${(state.settingsChatMessages || []).length > 0 ? 
+          state.settingsChatMessages.map(msg => \`
+            <div class="flex \${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+              <div class="max-w-[90%] rounded-lg p-2 text-xs \${
+                msg.role === 'user' 
+                  ? 'bg-indigo-600 text-white' 
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+              }">
+                \${msg.content.replace(/\\n/g, '<br>')}
+              </div>
+            </div>
+          \`).join('') : \`
+            <div class="text-center text-gray-500 text-xs py-4">
+              <i class="fas fa-comments text-2xl mb-2 text-indigo-300"></i>
+              <p class="font-medium">\${t('chat.empty')}</p>
+            </div>
+          \`
+        }
+      </div>
+      
+      <!-- Chat Input -->
+      <div class="p-2 border-t dark:border-gray-700">
+        <div class="flex gap-1">
+          <input type="text" id="settings-chat-input" 
+            placeholder="\${t('ui.settingsAIPlaceholder')}"
+            class="flex-1 px-2 py-1.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-xs"
+            onkeypress="if(event.key === 'Enter') sendSettingsChat()">
+          <button onclick="sendSettingsChat()" 
+            class="px-2 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            \${state.aiGenerating ? 'disabled' : ''}>
+            \${state.aiGenerating ? '<div class="spinner" style="width:14px;height:14px;border-width:2px;"></div>' : '<i class="fas fa-paper-plane text-xs"></i>'}
+          </button>
+        </div>
+        
+        <!-- Quick prompts -->
+        <div class="flex flex-wrap gap-1 mt-1.5">
+          <button onclick="sendSettingsChatQuick('\${state.language === 'ja' ? 'キャラクターの性格を深掘りしたい' : 'Help me develop character personality'}')" 
+            class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+            \${state.language === 'ja' ? 'キャラ深掘り' : 'Character'}
+          </button>
+          <button onclick="sendSettingsChatQuick('\${state.language === 'ja' ? '世界観の矛盾点をチェックして' : 'Check world-building consistency'}')" 
+            class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+            \${state.language === 'ja' ? '設定チェック' : 'Check'}
+          </button>
+          <button onclick="sendSettingsChatQuick('\${state.language === 'ja' ? '新しい設定のアイデアが欲しい' : 'Suggest new setting ideas'}')" 
+            class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+            \${state.language === 'ja' ? 'アイデア' : 'Ideas'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // Render settings tab for a Library (Series)
 function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
   const childProjects = state.projects.filter(p => p.library_id === state.currentProject?.id);
@@ -1749,7 +1890,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
           </div>
           <div class="text-right">
             <span class="px-3 py-1 bg-white/20 rounded-full text-sm">
-              <i class="fas fa-crown mr-1"></i>親プロジェクト
+              <i class="fas fa-crown mr-1"></i>${t('ui.parentProject')}
             </span>
           </div>
         </div>
@@ -1809,7 +1950,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
             </div>
             <button onclick="openAddChildProjectModal('${state.currentProject?.id}')" 
               class="w-full mt-3 px-4 py-2 border-2 border-dashed border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition text-sm">
-              <i class="fas fa-plus mr-1"></i>新しい話を追加
+              <i class="fas fa-plus mr-1"></i>${t('ui.addEpisode')}
             </button>
           </div>
         </div>
@@ -1855,19 +1996,19 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
           </div>
         </div>
         
-        <!-- Right Column: World Setting & Save -->
+        <!-- Right Column: World Setting, AI Chat & Save -->
         <div class="w-full lg:w-1/3 flex flex-col gap-4">
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1 border-2 border-purple-200 dark:border-purple-800">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
               <i class="fas fa-globe"></i>
               共通世界観設定
               <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">シリーズ共通</span>
             </h3>
             <p class="text-sm text-gray-500 mb-3">シリーズ全体の舞台・世界観</p>
-            <div class="relative h-[calc(100%-100px)]">
-              <textarea id="library-world"
+            <div class="relative">
+              <textarea id="library-world" rows="5"
                 placeholder="【舞台】&#10;・時代: &#10;・場所: &#10;&#10;【世界のルール】&#10;..."
-                class="w-full h-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
+                class="w-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
                 oninput="updateLibrarySettings('shared_world_setting', this.value)">${librarySettings.shared_world_setting || ''}</textarea>
               <button onclick="expandTextarea('library-world', '共通世界観設定')" 
                 class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
@@ -1876,11 +2017,14 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
             </div>
           </div>
           
+          <!-- Settings AI Chat -->
+          \${renderSettingsAIChat()}
+          
           <!-- Sync Options & Save -->
           <div class="bg-purple-50 dark:bg-purple-900/30 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-800">
             <label class="flex items-center gap-2 mb-3 cursor-pointer">
               <input type="checkbox" id="sync-settings-to-children" class="rounded text-purple-600" checked>
-              <span class="text-sm font-medium">保存時に各話へ自動反映</span>
+              <span class="text-sm font-medium">${t('ui.autoSync')}</span>
             </label>
             <p class="text-xs text-gray-500 mb-3">チェックすると、共通設定が全ての話に反映されます</p>
           </div>
@@ -1888,7 +2032,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
           <button onclick="saveLibrarySettingsFromTab()" 
             class="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 shadow-lg font-medium flex items-center justify-center gap-2">
             <i class="fas fa-save"></i>
-            シリーズ設定を保存
+            ${t('ui.saveSeriesSettings')}
           </button>
         </div>
       </div>
@@ -2065,10 +2209,13 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
             </div>
           </div>
           
+          <!-- Settings AI Chat -->
+          \${renderSettingsAIChat()}
+          
           <button onclick="saveStoryOutline()" 
             class="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
             <i class="fas fa-save"></i>
-            この話の設定を保存
+            ${t('ui.saveEpisodeSettings')}
           </button>
         </div>
       </div>
@@ -2202,11 +2349,14 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
           </div>
         </div>
         
+        <!-- Settings AI Chat -->
+        \${renderSettingsAIChat()}
+        
         <!-- Save Button -->
         <button onclick="saveStoryOutline()" 
           class="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
           <i class="fas fa-save"></i>
-          設定を保存
+          ${t('ui.saveSettings')}
         </button>
       </div>
     </div>
@@ -2319,7 +2469,7 @@ function renderIdeasTab() {
             <button onclick="adoptIdeasDocument()" 
               class="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 text-sm flex items-center justify-center gap-2">
               <i class="fas fa-check-circle"></i>
-              このメモを「採用したアイディア」に追加
+              ${t('ui.adoptIdea')}
             </button>
           </div>
         </div>
@@ -2330,7 +2480,7 @@ function renderIdeasTab() {
             <button onclick="toggleQuickIdeas()" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
               <span class="flex items-center gap-2 font-semibold">
                 <i class="fas fa-magic text-purple-500"></i>
-                <span>クイックアイデア生成</span>
+                <span>${t('ui.quickIdeas')}</span>
                 <span class="text-xs text-gray-500 font-normal">(${state.ideas?.length || 0}件)</span>
               </span>
               <i class="fas fa-chevron-${state.showQuickIdeas ? 'up' : 'down'} text-gray-400"></i>
@@ -2376,7 +2526,7 @@ function renderIdeasTab() {
                 ` : `
                   <p class="text-center text-gray-500 text-sm py-6">
                     <i class="fas fa-lightbulb text-2xl mb-2 text-yellow-400"></i><br>
-                    AIでアイデアを生成してみましょう
+                    ${t('ui.generateIdeas')}
                   </p>
                 `}
               </div>
@@ -2478,14 +2628,14 @@ function renderPlotTab() {
       <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl shadow-sm border border-green-200 dark:border-green-800 overflow-hidden">
         <div class="flex items-center justify-between p-3 border-b border-green-200 dark:border-green-700 bg-white/50 dark:bg-gray-800/50">
           <h3 class="font-semibold text-green-700 dark:text-green-400 flex items-center gap-2">
-            <i class="fas fa-lightbulb"></i>採用したアイディア
+            <i class="fas fa-lightbulb"></i>${t('ui.adoptedIdeas')}
             <span class="text-xs bg-green-200 dark:bg-green-800 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
-              参照のみ
+              ${t('ui.viewOnly')}
             </span>
           </h3>
           <button onclick="switchTab('ideas')" 
             class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1">
-            <i class="fas fa-edit"></i>ネタ考案タブで編集
+            <i class="fas fa-edit"></i>${t('ui.editInIdeasTab')}
           </button>
         </div>
         
@@ -2544,7 +2694,7 @@ function renderPlotTab() {
           </h3>
           <button onclick="switchTab('ideas')" 
             class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1">
-            <i class="fas fa-edit"></i>ネタ考案タブで編集
+            <i class="fas fa-edit"></i>${t('ui.editInIdeasTab')}
           </button>
         </div>
         ${renderPlotStructureReadOnly(template, structure)}
@@ -2601,8 +2751,8 @@ function renderPlotStructureReadOnly(template, structure) {
     return `
       <div class="text-center py-8 text-gray-500">
         <i class="fas fa-sitemap text-4xl mb-3 opacity-30"></i>
-        <p>まだプロット構成が作成されていません</p>
-        <p class="text-sm mt-1">「ネタ考案」タブで構成を作成してください</p>
+        <p>${t('ui.noPlot')}</p>
+        <p class="text-sm mt-1">${t('ui.createPlotHint')}</p>
       </div>
     `;
   }
@@ -2664,7 +2814,7 @@ function renderIllustrationTab() {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
           <h3 class="font-semibold mb-3 flex items-center gap-2">
             <i class="fas fa-book-open text-blue-500"></i>
-            プロジェクト参照
+            ${t('ui.projectRef')}
           </h3>
           <div class="space-y-2 text-sm">
             <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
@@ -2676,7 +2826,7 @@ function renderIllustrationTab() {
               <span>世界観・設定を自動反映</span>
             </div>
             <p class="text-xs text-gray-500 mt-2">
-              ネタ考案タブのアウトラインと執筆内容を基に、一貫性のある挿絵を生成します
+              ${t('ui.illustrationHint')}
             </p>
           </div>
         </div>
@@ -2753,7 +2903,7 @@ function renderIllustrationTab() {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
           <h3 class="font-semibold mb-3 flex items-center gap-2">
             <i class="fas fa-sliders-h text-blue-500"></i>
-            生成設定
+            ${t('ui.genSettings')}
           </h3>
           <div class="space-y-3">
             <div>
@@ -2819,7 +2969,7 @@ function renderIllustrationTab() {
               <button disabled
                 class="w-full px-4 py-3 bg-gray-400 text-white rounded-lg cursor-not-allowed flex items-center justify-center gap-2 opacity-75">
                 <i class="fas fa-wand-magic-sparkles"></i>
-                <span>挿絵を生成</span>
+                <span>${t('ui.generateIllustration')}</span>
               </button>
               <div class="absolute inset-0 flex items-center justify-center">
                 <span class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold rounded-full shadow-lg animate-pulse">
@@ -2829,7 +2979,7 @@ function renderIllustrationTab() {
             </div>
             <p class="text-xs text-center text-gray-500 mt-2">
               <i class="fas fa-info-circle mr-1"></i>
-              AI画像生成機能は現在開発中です。近日公開予定！
+              ${t('ui.illustrationDevNote')}
             </p>
           </div>
         </div>
@@ -2840,7 +2990,7 @@ function renderIllustrationTab() {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 flex-1 overflow-y-auto">
           <h3 class="font-semibold mb-4 flex items-center gap-2">
             <i class="fas fa-images text-green-500"></i>
-            生成された挿絵
+            ${t('ui.generatedIllustrations')}
             <span class="text-sm text-gray-500">(${generatedImages.length}枚)</span>
           </h3>
           
@@ -2958,9 +3108,17 @@ function renderWritingTab() {
             <option value="Merriweather">Merriweather</option>
             <option value="Roboto">Roboto</option>
           </optgroup>
-          <optgroup label="中国語フォント">
+          <optgroup label="中国語フォント (簡体字)">
             <option value="Noto Sans SC">Noto Sans SC (简体)</option>
             <option value="Noto Serif SC">Noto Serif SC (简体)</option>
+          </optgroup>
+          <optgroup label="中国語フォント (繁体字)">
+            <option value="Noto Sans TC">Noto Sans TC (繁體)</option>
+            <option value="Noto Serif TC">Noto Serif TC (繁體)</option>
+          </optgroup>
+          <optgroup label="韓国語フォント">
+            <option value="Noto Sans KR">Noto Sans KR (한국어)</option>
+            <option value="Noto Serif KR">Noto Serif KR (한국어)</option>
           </optgroup>
         </select>
         
@@ -4466,7 +4624,7 @@ function renderModals() {
           <i class="fas fa-times"></i>
         </button>
         <h3 class="text-lg font-semibold mb-4">
-          <i class="fas fa-plus-circle mr-2 text-green-500"></i>新しい話を追加
+          <i class="fas fa-plus-circle mr-2 text-green-500"></i>${t('ui.addEpisode')}
         </h3>
         <div id="add-child-project-content"></div>
       </div>
@@ -6925,6 +7083,93 @@ async function sendIdeasChatMessage(message) {
   // Scroll to bottom again
   setTimeout(() => {
     const container = $('#ideas-chat-messages');
+    if (container) container.scrollTop = container.scrollHeight;
+  }, 100);
+}
+
+// Settings AI Chat Functions
+window.sendSettingsChat = async () => {
+  const input = $('#settings-chat-input');
+  if (!input || !input.value.trim()) return;
+  
+  const message = input.value.trim();
+  input.value = '';
+  
+  await sendSettingsChatMessage(message);
+};
+
+window.sendSettingsChatQuick = async (prompt) => {
+  await sendSettingsChatMessage(prompt);
+};
+
+async function sendSettingsChatMessage(message) {
+  if (!state.settingsChatMessages) {
+    state.settingsChatMessages = [];
+  }
+  
+  // Add user message
+  state.settingsChatMessages.push({ role: 'user', content: message });
+  render();
+  
+  // Scroll to bottom
+  setTimeout(() => {
+    const container = $('#settings-chat-messages');
+    if (container) container.scrollTop = container.scrollHeight;
+  }, 100);
+  
+  state.aiGenerating = true;
+  render();
+  
+  try {
+    // Build context from current project settings
+    const currentProject = state.currentProject || {};
+    const isLibrary = currentProject.is_library;
+    const parentLibrary = currentProject.library_id ? 
+      state.libraries.find(l => l.id === currentProject.library_id) : null;
+    
+    const context = {
+      projectTitle: currentProject.title,
+      projectGenres: currentProject.genre,
+      isLibrary,
+      parentLibrary: parentLibrary?.title,
+      characters: state.characters || [],
+      worldSettings: state.worldSettings || [],
+      storyOutline: state.storyOutline,
+      plot: state.plot
+    };
+    
+    const response = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'settings_chat',
+        content: message,
+        context,
+        sessionId: state.sessionId
+      })
+    });
+    
+    if (!response.ok) throw new Error('Chat failed');
+    
+    const result = await response.json();
+    
+    // Add AI response
+    state.settingsChatMessages.push({ role: 'assistant', content: result.response });
+    
+  } catch (e) {
+    console.error('Settings chat error:', e);
+    state.settingsChatMessages.push({ 
+      role: 'assistant', 
+      content: t('common.error') + ' ' + e.message
+    });
+  }
+  
+  state.aiGenerating = false;
+  render();
+  
+  // Scroll to bottom again
+  setTimeout(() => {
+    const container = $('#settings-chat-messages');
     if (container) container.scrollTop = container.scrollHeight;
   }, 100);
 }

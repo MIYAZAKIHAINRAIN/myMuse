@@ -267,6 +267,21 @@ ${options?.systemContext || ''}
 
 ユーザーの質問: ${content}`;
     
+    case 'settings_chat':
+      return `あなたは創作支援AIアシスタントです。ユーザーのキャラクター設定、世界観構築、専門用語の整理をサポートしてください。
+
+${options?.systemContext || ''}
+
+【重要な指示】
+- 設定の矛盾点があれば優しく指摘してください
+- キャラクターの深掘りや世界観の拡張を提案してください
+- 既存の設定との一貫性を保つアドバイスをしてください
+- 具体的で実用的な提案を心がけてください
+
+回答は適度な長さ（200-400文字程度）で、建設的かつ親しみやすい口調でお願いします。
+
+ユーザーの質問: ${content}`;
+    
     case 'analysis_chat':
       const persona = options?.persona || 'あなたは客観的で冷静な文芸批評家です。';
       const writing = options?.writing || '';
