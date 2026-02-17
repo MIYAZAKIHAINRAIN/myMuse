@@ -1636,7 +1636,7 @@ function renderHeader() {
           </span>
         ` : ''}
         
-        <button onclick="toggleZenMode()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="${t('writing.zenMode')}">
+        <button onclick="toggleZenMode()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="${t("writing.zenMode")}">
           <i class="fas ${state.zenMode ? 'fa-compress' : 'fa-expand'}"></i>
         </button>
         
@@ -2158,7 +2158,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
                 placeholder="【主人公】&#10;名前: &#10;年齢: &#10;性格: &#10;&#10;【メインキャラクター】&#10;..."
                 class="w-full h-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
                 oninput="updateLibrarySettings('shared_characters', this.value)">${librarySettings.shared_characters || ''}</textarea>
-              <button onclick="expandTextarea('library-characters', '${t("ui.sharedCharacters")}')" 
+              <button onclick="expandTextarea('library-characters', 'ui.sharedCharacters')" 
                 class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
@@ -2177,7 +2177,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
                 placeholder="【魔法体系】&#10;・〇〇: 説明&#10;&#10;【組織】&#10;・△△: 説明"
                 class="w-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
                 oninput="updateLibrarySettings('shared_terminology', this.value)">${librarySettings.shared_terminology || ''}</textarea>
-              <button onclick="expandTextarea('library-terminology', '${t("ui.sharedTerminology")}')" 
+              <button onclick="expandTextarea('library-terminology', 'ui.sharedTerminology')" 
                 class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
@@ -2199,7 +2199,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
                 placeholder="【舞台】&#10;・時代: &#10;・場所: &#10;&#10;【世界のルール】&#10;..."
                 class="w-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
                 oninput="updateLibrarySettings('shared_world_setting', this.value)">${librarySettings.shared_world_setting || ''}</textarea>
-              <button onclick="expandTextarea('library-world', '${t("ui.sharedWorldSetting")}')" 
+              <button onclick="expandTextarea('library-world', 'ui.sharedWorldSetting')" 
                 class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
@@ -2268,15 +2268,15 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
           <div class="grid grid-cols-3 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
               <h4 class="text-sm font-medium text-blue-500 mb-2"><i class="fas fa-users mr-1"></i>${t('ui.sharedCharacters')}</h4>
-              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_characters || '\uff08' + t('ui.notSet') + '\uff09'}</p>
+              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_characters || '(' + t('ui.notSet') + ')'}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
               <h4 class="text-sm font-medium text-yellow-500 mb-2"><i class="fas fa-globe mr-1"></i>${t('ui.sharedWorldSetting')}</h4>
-              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_world_setting || '\uff08' + t('ui.notSet') + '\uff09'}</p>
+              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_world_setting || '(' + t('ui.notSet') + ')'}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
               <h4 class="text-sm font-medium text-green-500 mb-2"><i class="fas fa-book mr-1"></i>${t('ui.sharedTerminology')}</h4>
-              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_terminology || '\uff08' + t('ui.notSet') + '\uff09'}</p>
+              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_terminology || '(' + t('ui.notSet') + ')'}</p>
             </div>
           </div>
         </div>
@@ -2296,7 +2296,7 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
             <div class="flex flex-wrap gap-2">
               ${projectGenres.length > 0 ? projectGenres.map(g => `
                 <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 rounded-full text-sm">${g}</span>
-              ').join('') : '<span class="text-gray-500 text-sm">' + t('ui.notSet') + '</span>'}
+              `).join('') : '<span class="text-gray-500 text-sm">' + t('ui.notSet') + '</span>'}
             </div>
           </div>
           
@@ -2312,7 +2312,7 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
                 placeholder="${t('ui.episodeGoalPlaceholder')}"
                 class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                 oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal}</textarea>
-              <button onclick="expandTextarea('settings-storyGoal', '${t("ui.episodeGoal")}')" 
+              <button onclick="expandTextarea('settings-storyGoal', 'ui.episodeGoal')" 
                 class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
@@ -2334,7 +2334,7 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
                 placeholder="${t('ui.episodeCharactersPlaceholder')}"
                 class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                 oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters}</textarea>
-              <button onclick="expandTextarea('settings-characters', '${t("ui.episodeCharacters")}')" 
+              <button onclick="expandTextarea('settings-characters', 'ui.episodeCharacters')" 
                 class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
@@ -2352,7 +2352,7 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
                 placeholder="${t('ui.episodeTerminologyPlaceholder')}"
                 class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                 oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology}</textarea>
-              <button onclick="expandTextarea('settings-terminology', '${t("ui.episodeTerminology")}')" 
+              <button onclick="expandTextarea('settings-terminology', 'ui.episodeTerminology')" 
                 class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
@@ -2374,7 +2374,7 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
                 placeholder="【主な舞台】&#10;・〇〇城: 説明&#10;&#10;【シーン】&#10;..."
                 class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                 oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting}</textarea>
-              <button onclick="expandTextarea('settings-worldSetting', '${t("ui.episodeSetting")}')" 
+              <button onclick="expandTextarea('settings-worldSetting', 'ui.episodeSetting')" 
                 class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
@@ -2392,7 +2392,7 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
                 placeholder="【起】&#10;・シーン1: &#10;&#10;【承】&#10;・シーン2: &#10;&#10;【転】&#10;..."
                 class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                 oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes}</textarea>
-              <button onclick="expandTextarea('settings-episodes', '${t("ui.episodeStructure")}')" 
+              <button onclick="expandTextarea('settings-episodes', 'ui.episodeStructure')" 
                 class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
@@ -2451,7 +2451,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
               placeholder="この物語で伝えたいこと、読者に感じてほしいこと、理想の結末..."
               class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal}</textarea>
-            <button onclick="expandTextarea('settings-storyGoal', '${t("ui.storyGoal")}')" 
+            <button onclick="expandTextarea('settings-storyGoal', 'ui.storyGoal')" 
               class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
               <i class="fas fa-expand text-xs"></i>
             </button>
@@ -2473,7 +2473,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
               placeholder="【主人公】&#10;名前: &#10;年齢: &#10;性格: &#10;目標: &#10;&#10;【ヒロイン】&#10;名前: &#10;..."
               class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters}</textarea>
-            <button onclick="expandTextarea('settings-characters', '${t("ui.charSettings")}')" 
+            <button onclick="expandTextarea('settings-characters', 'ui.charSettings')" 
               class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
               <i class="fas fa-expand text-xs"></i>
             </button>
@@ -2492,7 +2492,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
               placeholder="【魔法】&#10;・ファイアボール: 炎の球を放つ初級魔法&#10;&#10;【組織】&#10;・騎士団: ..."
               class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology}</textarea>
-            <button onclick="expandTextarea('settings-terminology', '${t("ui.terminologySettings")}')" 
+            <button onclick="expandTextarea('settings-terminology', 'ui.terminologySettings')" 
               class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
               <i class="fas fa-expand text-xs"></i>
             </button>
@@ -2514,7 +2514,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
               placeholder="【舞台】&#10;・時代: &#10;・場所: &#10;&#10;【世界のルール】&#10;・魔法が存在する&#10;..."
               class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting}</textarea>
-            <button onclick="expandTextarea('settings-worldSetting', '${t("ui.worldSettings")}')" 
+            <button onclick="expandTextarea('settings-worldSetting', 'ui.worldSettings')" 
               class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
               <i class="fas fa-expand text-xs"></i>
             </button>
@@ -2533,7 +2533,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
               placeholder="第1話: プロローグ - 主人公の日常&#10;第2話: 事件発生 - 異変の始まり&#10;第3話: 旅立ち - 冒険への決意&#10;..."
               class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes}</textarea>
-            <button onclick="expandTextarea('settings-episodes', '${t("ui.episodeOutline")}')" 
+            <button onclick="expandTextarea('settings-episodes', 'ui.episodeOutline')" 
               class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
               <i class="fas fa-expand text-xs"></i>
             </button>
@@ -2602,7 +2602,7 @@ function renderIdeasTab() {
             <!-- Outline Toggle -->
             <button onclick="toggleIdeasOutline()" 
               class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" 
-              title="${t('ui.showOutline')}">
+              title="${t("ui.showOutline")}">
               <i class="fas fa-list-ul mr-1"></i>
               ${t('ui.outline')}
             </button>
@@ -2610,7 +2610,7 @@ function renderIdeasTab() {
             <!-- Link to Settings Tab -->
             <button onclick="switchTab('settings_materials')" 
               class="px-3 py-1.5 text-sm bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50" 
-              title="${t('ui.editSettings')}">
+              title="${t("ui.editSettings")}">
               <i class="fas fa-cog mr-1"></i>
               ${t('ui.editSettings')}
             </button>
@@ -2647,9 +2647,9 @@ function renderIdeasTab() {
 ・「設定・資料」タブで世界観やキャラクターを設定すると、AIがより良い提案をします
 ・プロット・ライティング・分析タブでも設定が反映されます"
                 oninput="updateIdeasDocumentCount(this.value); updateIdeasOutline();">${state.ideasDocument || ''}</textarea>
-              <button onclick="expandTextarea('ideas-document', 'ネタ・プロットメモ')" 
+              <button onclick="expandTextarea('ideas-document', 'tab.ideas')" 
                 class="absolute bottom-12 right-3 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
-                title="拡大表示">
+                title="${t("ui.expand")}">
                 <i class="fas fa-expand"></i>
               </button>
             </div>
@@ -2904,9 +2904,9 @@ function renderPlotStructure(template, structure) {
             <textarea id="plot-${part}" rows="4" 
               class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               placeholder="${getPlotPlaceholder(part)}">${structure[part] || ''}</textarea>
-            <button onclick="expandTextarea('plot-${part}', '${t(`plot.${part}`)}')" 
+            <button onclick="expandTextarea('plot-${part}', 'plot.${part}')" 
               class="absolute bottom-2 right-2 p-1 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded"
-              title="拡大表示">
+              title="${t("ui.expand")}">
               <i class="fas fa-expand text-sm"></i>
             </button>
           </div>
@@ -2921,9 +2921,9 @@ function renderPlotStructure(template, structure) {
             <label class="block font-medium text-indigo-600">${t(`plot.${part}`)}</label>
             <textarea id="plot-${part}" rows="3"
               class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none">${structure[part] || ''}</textarea>
-            <button onclick="expandTextarea('plot-${part}', '${t(`plot.${part}`)}')" 
+            <button onclick="expandTextarea('plot-${part}', 'plot.${part}')" 
               class="absolute bottom-2 right-2 p-1 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded"
-              title="拡大表示">
+              title="${t("ui.expand")}">
               <i class="fas fa-expand text-sm"></i>
             </button>
           </div>
@@ -3279,7 +3279,7 @@ function renderWritingTab() {
         ` : ''}
         
         ${isVertical ? `
-        <button onclick="toggleVerticalTextMode()" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="${t('writing.textModeTitle')}">
+        <button onclick="toggleVerticalTextMode()" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="${t("writing.textModeTitle")}">
           <i class="fas fa-font mr-1"></i>
           ${state.verticalTextMode === 'upright' ? t('writing.textUpright') : t('writing.textSideways')}
         </button>
@@ -3345,7 +3345,7 @@ function renderWritingTab() {
         </div>
         
         <!-- Outline Toggle Button -->
-        <button onclick="toggleOutline()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="${t('ui.showOutline')}">
+        <button onclick="toggleOutline()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="${t("ui.showOutline")}">
           <i class="fas fa-list-ul mr-1"></i>
           ${t('ui.outline')}
         </button>
@@ -3451,9 +3451,9 @@ function renderWritingTab() {
             onclick="detectAndUpdateStyleLabel()"
             onkeyup="detectAndUpdateStyleLabel()">${writing?.content || ''}</textarea>
           <!-- Expand Button (bottom-right) -->
-          <button onclick="expandTextarea('editor', 'エディタ')" 
+          <button onclick="expandTextarea('editor', 'tab.writing')" 
             class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
-            title="拡大表示">
+            title="${t("ui.expand")}">
             <i class="fas fa-expand"></i>
           </button>
         </div>
@@ -6693,9 +6693,14 @@ async function sendAnalysisChatMessage(message) {
 // Expand/Fullscreen Panel Functions
 // ============================================
 
-window.expandTextarea = (textareaId, title) => {
+window.expandTextarea = (textareaId, titleOrKey) => {
   const textarea = document.getElementById(textareaId);
   if (!textarea) return;
+  
+  // If titleOrKey starts with 'ui.', 'plot.', or 'tab.', treat it as a translation key
+  const title = (titleOrKey && (titleOrKey.startsWith('ui.') || titleOrKey.startsWith('plot.') || titleOrKey.startsWith('tab.'))) 
+    ? t(titleOrKey) 
+    : (titleOrKey || t('ui.editSettings'));
   
   const existingModal = document.getElementById('expand-textarea-modal');
   if (existingModal) existingModal.remove();
@@ -6708,7 +6713,7 @@ window.expandTextarea = (textareaId, title) => {
       <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-lg font-semibold flex items-center gap-2">
           <i class="fas fa-expand text-indigo-500"></i>
-          ${title || '編集'}
+          ${title}
         </h3>
         <button onclick="closeExpandModal('${textareaId}')" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
           <i class="fas fa-times text-xl"></i>
@@ -6717,7 +6722,7 @@ window.expandTextarea = (textareaId, title) => {
       <div class="flex-1 p-4 overflow-hidden">
         <textarea id="expanded-textarea" 
           class="w-full h-full min-h-[60vh] px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none focus:ring-2 focus:ring-indigo-500 text-base"
-          placeholder="ここに入力...">${textarea.value || ''}</textarea>
+          placeholder="...">${textarea.value || ''}</textarea>
       </div>
       <div class="flex justify-between items-center p-4 border-t border-gray-200 dark:border-gray-700">
         <span class="text-sm text-gray-500">
