@@ -81,6 +81,8 @@ const i18n = {
     'ai.formal': '敬語', 'ai.casual': 'カジュアル', 'ai.literary': '文学的',
     'ai.customPrompt': 'カスタム指示', 'ai.targetWords': '目標文字数', 'ai.generate': '生成',
     'writing.zenMode': 'ZENモード', 'writing.vertical': '縦書き', 'writing.horizontal': '横書き',
+    'writing.switchToVertical': '縦書きに切替', 'writing.switchToHorizontal': '横書きに切替',
+    'writing.textUpright': '正立', 'writing.textSideways': '横倒し', 'writing.textModeTitle': '英数字の表示方法を切り替え',
     'writing.export': 'エクスポート', 'writing.readAloud': '音声読み上げ', 'writing.characters': '文字数',
     'analysis.emotionCurve': '感情曲線', 'analysis.radar': '作品成分チャート', 'analysis.reviews': 'ペルソナ評価',
     'analysis.analyze': '作品を分析する', 'analysis.noContent': '分析するコンテンツがありません',
@@ -127,6 +129,45 @@ const i18n = {
     'ui.adoptedIdeas': '採用したアイディア', 'ui.viewOnly': '参照のみ', 'ui.editInIdeasTab': 'ネタ考案タブで編集',
     'ui.settingsAI': '設定AIアシスタント', 'ui.settingsAIHint': '設定作りの相談ができます',
     'ui.settingsAIPlaceholder': 'キャラ設定や世界観について相談...',
+    // Series and project settings
+    'ui.series': 'シリーズ', 'ui.seriesSharedSettings': 'シリーズ共通設定',
+    'ui.seriesGenre': 'シリーズのジャンル', 'ui.seriesDescription': 'シリーズの説明',
+    'ui.seriesEpisodes': 'このシリーズの話', 'ui.noEpisodes': 'まだ話がありません',
+    'ui.episodesSharedSettings': '話のシリーズ共通設定',
+    'ui.sharedCharacters': '共通キャラクター設定', 'ui.sharedTerminology': '共通専門用語',
+    'ui.sharedWorldSetting': '共通世界観設定', 'ui.seriesShared': 'シリーズ共通',
+    'ui.removeFromSeries': 'シリーズから外す', 'ui.createSeriesTitle': 'シリーズ（ライブラリ）を作成',
+    'ui.viewSeriesSettings': 'シリーズ共通設定を参照', 'ui.editSeriesSettings': 'シリーズ設定を編集',
+    // Episode specific
+    'ui.episodeGoal': 'この話の目標', 'ui.episodeGoalHint': 'この話で達成したいこと、見せ場など',
+    'ui.episodeGoalPlaceholder': 'この話のクライマックス、伏線、読者に伝えたいこと...',
+    'ui.episodeCharacters': 'この話の登場人物', 'ui.episodeCharactersHint': 'この話で新登場するキャラクターや、話固有の設定',
+    'ui.episodeCharactersPlaceholder': '【この話で初登場】\n・〇〇: 役割、特徴\n\n【この話での変化】\n...',
+    'ui.episodeTerminology': 'この話の専門用語', 'ui.episodeTerminologyPlaceholder': 'この話で新たに登場する用語、概念...',
+    'ui.episodeSetting': 'この話の舞台', 'ui.episodeSettingHint': 'この話の具体的な場所、シーン設定',
+    'ui.episodeStructure': 'この話の構成', 'ui.episodeOutline': '各話アウトライン',
+    // Writing
+    'ui.standardText': '標準テキスト', 'ui.outline': 'アウトライン', 'ui.showOutline': 'アウトライン表示',
+    // AI assistant
+    'ui.aiPartner': 'AIパートナー', 'ui.quickActions': 'クイックアクション',
+    'ui.enterCustomPrompt': 'カスタム指示を入力', 'ui.aiResponseHistory': 'AIレスポンス履歴',
+    'ui.historyEmptyHint': 'アクションを実行するとここに履歴が表示されます',
+    // Settings
+    'ui.genreSettings': 'ジャンル', 'ui.charSettings': 'キャラ設定',
+    'ui.terminologySettings': '専門用語', 'ui.worldSettings': '世界観設定',
+    'ui.storyGoal': '描きたい物語', 'ui.expand': '拡大',
+    'ui.autoSyncHint': 'チェックすると、共通設定が全ての話に反映されます',
+    'ui.inheritedFromSeries': 'シリーズから継承', 'ui.notSet': '未設定', 'ui.readOnly': '読み取り専用',
+    'ui.selectMultiple': '複数選択可', 'ui.partOfSeries': 'シリーズの一部',
+    // Text styles and editing
+    'ui.title': 'タイトル', 'ui.heading1': '見出し 1', 'ui.heading2': '見出し 2', 'ui.heading3': '見出し 3',
+    'ui.editSettings': '設定を編集', 'ui.characters': '文字',
+    'ui.pleaseEnterCustomPrompt': 'カスタム指示を入力してください',
+    // Modals
+    'ui.createNewSeries': '新しいシリーズ（ライブラリ）を作成',
+    'ui.seriesCreateHint': 'シリーズを作成すると、複数の話（プロジェクト）を1つにまとめ、キャラクター設定や世界観を共有できます。',
+    'ui.seriesName': 'シリーズ名', 'ui.seriesDescOptional': 'シリーズの説明（任意）',
+    'ui.rename': '名前を変更', 'ui.createFirstEpisode': '最初の話を作成',
   },
   en: {
     'app.title': 'myMuse', 'app.tagline': 'Your all-knowing writing companion',
@@ -147,6 +188,8 @@ const i18n = {
     'ai.formal': 'Formal', 'ai.casual': 'Casual', 'ai.literary': 'Literary',
     'ai.customPrompt': 'Custom Prompt', 'ai.targetWords': 'Target Words', 'ai.generate': 'Generate',
     'writing.zenMode': 'ZEN Mode', 'writing.vertical': 'Vertical', 'writing.horizontal': 'Horizontal',
+    'writing.switchToVertical': 'Switch to Vertical', 'writing.switchToHorizontal': 'Switch to Horizontal',
+    'writing.textUpright': '|||', 'writing.textSideways': '≡', 'writing.textModeTitle': 'Toggle text orientation',
     'writing.export': 'Export', 'writing.readAloud': 'Read Aloud', 'writing.characters': 'Characters',
     'analysis.emotionCurve': 'Emotion Curve', 'analysis.radar': 'Genre Chart', 'analysis.reviews': 'Reviews',
     'analysis.analyze': 'Analyze Work', 'analysis.noContent': 'No content to analyze',
@@ -194,6 +237,45 @@ const i18n = {
     'ui.adoptedIdeas': 'Adopted Ideas', 'ui.viewOnly': 'View Only', 'ui.editInIdeasTab': 'Edit in Ideas Tab',
     'ui.settingsAI': 'Settings AI Assistant', 'ui.settingsAIHint': 'Get help with your settings',
     'ui.settingsAIPlaceholder': 'Ask about characters, world-building...',
+    // Series and project settings
+    'ui.series': 'Series', 'ui.seriesSharedSettings': 'Series Shared Settings',
+    'ui.seriesGenre': 'Series Genre', 'ui.seriesDescription': 'Series Description',
+    'ui.seriesEpisodes': 'Episodes in this Series', 'ui.noEpisodes': 'No episodes yet',
+    'ui.episodesSharedSettings': 'Series Shared Settings',
+    'ui.sharedCharacters': 'Shared Character Settings', 'ui.sharedTerminology': 'Shared Terminology',
+    'ui.sharedWorldSetting': 'Shared World Setting', 'ui.seriesShared': 'Series Shared',
+    'ui.removeFromSeries': 'Remove from Series', 'ui.createSeriesTitle': 'Create Series (Library)',
+    'ui.viewSeriesSettings': 'View Series Settings', 'ui.editSeriesSettings': 'Edit Series Settings',
+    // Episode specific
+    'ui.episodeGoal': 'Episode Goal', 'ui.episodeGoalHint': 'What you want to achieve in this episode',
+    'ui.episodeGoalPlaceholder': 'Climax, foreshadowing, message to readers...',
+    'ui.episodeCharacters': 'Episode Characters', 'ui.episodeCharactersHint': 'New characters or episode-specific settings',
+    'ui.episodeCharactersPlaceholder': '【New in this episode】\n- Character: Role, traits\n\n【Changes】\n...',
+    'ui.episodeTerminology': 'Episode Terminology', 'ui.episodeTerminologyPlaceholder': 'New terms appearing in this episode...',
+    'ui.episodeSetting': 'Episode Setting', 'ui.episodeSettingHint': 'Specific locations and scenes',
+    'ui.episodeStructure': 'Episode Structure', 'ui.episodeOutline': 'Episode Outline',
+    // Writing
+    'ui.standardText': 'Standard Text', 'ui.outline': 'Outline', 'ui.showOutline': 'Show Outline',
+    // AI assistant
+    'ui.aiPartner': 'AI Partner', 'ui.quickActions': 'Quick Actions',
+    'ui.enterCustomPrompt': 'Enter custom prompt', 'ui.aiResponseHistory': 'AI Response History',
+    'ui.historyEmptyHint': 'History will appear here after actions',
+    // Settings
+    'ui.genreSettings': 'Genre', 'ui.charSettings': 'Character Settings',
+    'ui.terminologySettings': 'Terminology', 'ui.worldSettings': 'World Setting',
+    'ui.storyGoal': 'Story Goal', 'ui.expand': 'Expand',
+    'ui.autoSyncHint': 'When checked, shared settings will be applied to all episodes',
+    'ui.inheritedFromSeries': 'Inherited from Series', 'ui.notSet': 'Not set', 'ui.readOnly': 'Read Only',
+    'ui.selectMultiple': 'Multiple selection', 'ui.partOfSeries': 'Part of series',
+    // Text styles and editing
+    'ui.title': 'Title', 'ui.heading1': 'Heading 1', 'ui.heading2': 'Heading 2', 'ui.heading3': 'Heading 3',
+    'ui.editSettings': 'Edit Settings', 'ui.characters': 'chars',
+    'ui.pleaseEnterCustomPrompt': 'Please enter a custom prompt',
+    // Modals
+    'ui.createNewSeries': 'Create New Series (Library)',
+    'ui.seriesCreateHint': 'Creating a series allows you to group multiple episodes together and share character settings and world-building.',
+    'ui.seriesName': 'Series Name', 'ui.seriesDescOptional': 'Series Description (optional)',
+    'ui.rename': 'Rename', 'ui.createFirstEpisode': 'Create First Episode',
   },
   zh: {
     'app.title': 'myMuse', 'app.tagline': '全知全能的写作伙伴',
@@ -207,6 +289,8 @@ const i18n = {
     'ai.formal': '正式', 'ai.casual': '随意', 'ai.literary': '文学',
     'ai.customPrompt': '自定义指令', 'ai.targetWords': '目标字数', 'ai.generate': '生成',
     'writing.zenMode': 'ZEN模式', 'writing.vertical': '竖排', 'writing.horizontal': '横排',
+    'writing.switchToVertical': '切换为竖排', 'writing.switchToHorizontal': '切换为横排',
+    'writing.textUpright': '|||', 'writing.textSideways': '≡', 'writing.textModeTitle': '切换文字方向',
     'writing.export': '导出', 'writing.readAloud': '朗读', 'writing.characters': '字数',
     'analysis.emotionCurve': '情感曲线', 'analysis.radar': '类型图', 'analysis.reviews': '评价',
     'analysis.analyze': '分析作品', 'analysis.noContent': '没有可分析的内容',
@@ -240,6 +324,45 @@ const i18n = {
     'ui.adoptedIdeas': '已采用的创意', 'ui.viewOnly': '仅查看', 'ui.editInIdeasTab': '在创意标签页编辑',
     'ui.settingsAI': '设置AI助手', 'ui.settingsAIHint': '获取设置创作帮助',
     'ui.settingsAIPlaceholder': '询问角色设定或世界观...',
+    // Series and project settings
+    'ui.series': '系列', 'ui.seriesSharedSettings': '系列共享设置',
+    'ui.seriesGenre': '系列类型', 'ui.seriesDescription': '系列简介',
+    'ui.seriesEpisodes': '本系列章节', 'ui.noEpisodes': '暂无章节',
+    'ui.episodesSharedSettings': '系列共享设置',
+    'ui.sharedCharacters': '共享角色设定', 'ui.sharedTerminology': '共享术语',
+    'ui.sharedWorldSetting': '共享世界观设定', 'ui.seriesShared': '系列共享',
+    'ui.removeFromSeries': '从系列移除', 'ui.createSeriesTitle': '创建系列（图书馆）',
+    'ui.viewSeriesSettings': '查看系列设置', 'ui.editSeriesSettings': '编辑系列设置',
+    // Episode specific
+    'ui.episodeGoal': '本章目标', 'ui.episodeGoalHint': '本章想要达成的目标、亮点等',
+    'ui.episodeGoalPlaceholder': '本章高潮、伏笔、想传达给读者的...',
+    'ui.episodeCharacters': '本章人物', 'ui.episodeCharactersHint': '新登场角色或本章特定设定',
+    'ui.episodeCharactersPlaceholder': '【本章首次登场】\n・角色：角色、特点\n\n【本章变化】\n...',
+    'ui.episodeTerminology': '本章术语', 'ui.episodeTerminologyPlaceholder': '本章新出现的术语、概念...',
+    'ui.episodeSetting': '本章场景', 'ui.episodeSettingHint': '具体地点和场景设定',
+    'ui.episodeStructure': '本章结构', 'ui.episodeOutline': '章节大纲',
+    // Writing
+    'ui.standardText': '标准文本', 'ui.outline': '大纲', 'ui.showOutline': '显示大纲',
+    // AI assistant
+    'ui.aiPartner': 'AI伙伴', 'ui.quickActions': '快捷操作',
+    'ui.enterCustomPrompt': '输入自定义指令', 'ui.aiResponseHistory': 'AI响应历史',
+    'ui.historyEmptyHint': '执行操作后历史将在此显示',
+    // Settings
+    'ui.genreSettings': '类型', 'ui.charSettings': '角色设定',
+    'ui.terminologySettings': '术语', 'ui.worldSettings': '世界观设定',
+    'ui.storyGoal': '故事目标', 'ui.expand': '展开',
+    'ui.autoSyncHint': '勾选后，共享设置将应用于所有章节',
+    'ui.inheritedFromSeries': '从系列继承', 'ui.notSet': '未设置', 'ui.readOnly': '只读',
+    'ui.selectMultiple': '可多选', 'ui.partOfSeries': '系列的一部分',
+    // Text styles and editing
+    'ui.title': '标题', 'ui.heading1': '一级标题', 'ui.heading2': '二级标题', 'ui.heading3': '三级标题',
+    'ui.editSettings': '编辑设置', 'ui.characters': '字',
+    'ui.pleaseEnterCustomPrompt': '请输入自定义提示',
+    // Modals
+    'ui.createNewSeries': '创建新系列（图书馆）',
+    'ui.seriesCreateHint': '创建系列后，可以将多个章节组合在一起，共享角色设定和世界观。',
+    'ui.seriesName': '系列名称', 'ui.seriesDescOptional': '系列简介（可选）',
+    'ui.rename': '重命名', 'ui.createFirstEpisode': '创建第一章',
   },
   ko: {
     'app.title': 'myMuse', 'app.tagline': '모든 것을 아는 글쓰기 동반자',
@@ -252,7 +375,10 @@ const i18n = {
     'ai.summarize': '요약', 'ai.translate': '번역', 'ai.titleSuggestion': '제목 제안',
     'ai.formal': '격식체', 'ai.casual': '비격식체', 'ai.literary': '문학적',
     'ai.customPrompt': '사용자 정의', 'ai.targetWords': '목표 글자 수', 'ai.generate': '생성',
-    'writing.zenMode': 'ZEN 모드', 'writing.export': '내보내기', 'writing.readAloud': '읽어주기', 'writing.characters': '글자 수',
+    'writing.zenMode': 'ZEN 모드', 'writing.vertical': '세로쓰기', 'writing.horizontal': '가로쓰기',
+    'writing.switchToVertical': '세로쓰기로 전환', 'writing.switchToHorizontal': '가로쓰기로 전환',
+    'writing.textUpright': '|||', 'writing.textSideways': '≡', 'writing.textModeTitle': '텍스트 방향 전환',
+    'writing.export': '내보내기', 'writing.readAloud': '읽어주기', 'writing.characters': '글자 수',
     'analysis.analyze': '작품 분석', 'analysis.noContent': '분석할 내용이 없습니다',
     'settings.lightMode': '라이트 모드', 'settings.darkMode': '다크 모드', 'settings.logout': '로그아웃', 'settings.betaNote': '베타 기간 모든 기능 무료',
     'auth.login': '로그인', 'auth.signup': '회원가입', 'auth.email': '이메일', 'auth.password': '비밀번호', 'auth.name': '이름',
@@ -276,6 +402,45 @@ const i18n = {
     'ui.adoptedIdeas': '채택한 아이디어', 'ui.viewOnly': '보기 전용', 'ui.editInIdeasTab': '아이디어 탭에서 편집',
     'ui.settingsAI': '설정 AI 어시스턴트', 'ui.settingsAIHint': '설정 작성에 대한 도움받기',
     'ui.settingsAIPlaceholder': '캐릭터 설정이나 세계관에 대해 물어보세요...',
+    // Series and project settings
+    'ui.series': '시리즈', 'ui.seriesSharedSettings': '시리즈 공유 설정',
+    'ui.seriesGenre': '시리즈 장르', 'ui.seriesDescription': '시리즈 설명',
+    'ui.seriesEpisodes': '이 시리즈의 화', 'ui.noEpisodes': '아직 화가 없습니다',
+    'ui.episodesSharedSettings': '시리즈 공유 설정',
+    'ui.sharedCharacters': '공유 캐릭터 설정', 'ui.sharedTerminology': '공유 용어',
+    'ui.sharedWorldSetting': '공유 세계관 설정', 'ui.seriesShared': '시리즈 공유',
+    'ui.removeFromSeries': '시리즈에서 제거', 'ui.createSeriesTitle': '시리즈(라이브러리) 만들기',
+    'ui.viewSeriesSettings': '시리즈 설정 보기', 'ui.editSeriesSettings': '시리즈 설정 편집',
+    // Episode specific
+    'ui.episodeGoal': '이 화의 목표', 'ui.episodeGoalHint': '이 화에서 달성하고 싶은 것, 하이라이트 등',
+    'ui.episodeGoalPlaceholder': '이 화의 클라이맥스, 복선, 독자에게 전하고 싶은 것...',
+    'ui.episodeCharacters': '이 화의 등장인물', 'ui.episodeCharactersHint': '새로 등장하는 캐릭터나 화별 설정',
+    'ui.episodeCharactersPlaceholder': '【이 화에서 첫 등장】\n・캐릭터: 역할, 특징\n\n【이 화에서의 변화】\n...',
+    'ui.episodeTerminology': '이 화의 용어', 'ui.episodeTerminologyPlaceholder': '이 화에서 새로 등장하는 용어, 개념...',
+    'ui.episodeSetting': '이 화의 무대', 'ui.episodeSettingHint': '구체적인 장소와 장면 설정',
+    'ui.episodeStructure': '이 화의 구성', 'ui.episodeOutline': '각 화 개요',
+    // Writing
+    'ui.standardText': '표준 텍스트', 'ui.outline': '개요', 'ui.showOutline': '개요 표시',
+    // AI assistant
+    'ui.aiPartner': 'AI 파트너', 'ui.quickActions': '빠른 작업',
+    'ui.enterCustomPrompt': '사용자 지정 프롬프트 입력', 'ui.aiResponseHistory': 'AI 응답 기록',
+    'ui.historyEmptyHint': '작업 실행 후 기록이 여기에 표시됩니다',
+    // Settings
+    'ui.genreSettings': '장르', 'ui.charSettings': '캐릭터 설정',
+    'ui.terminologySettings': '용어', 'ui.worldSettings': '세계관 설정',
+    'ui.storyGoal': '스토리 목표', 'ui.expand': '확장',
+    'ui.autoSyncHint': '체크하면 공유 설정이 모든 화에 적용됩니다',
+    'ui.inheritedFromSeries': '시리즈에서 상속', 'ui.notSet': '미설정', 'ui.readOnly': '읽기 전용',
+    'ui.selectMultiple': '다중 선택 가능', 'ui.partOfSeries': '시리즈의 일부',
+    // Text styles and editing
+    'ui.title': '제목', 'ui.heading1': '제목 1', 'ui.heading2': '제목 2', 'ui.heading3': '제목 3',
+    'ui.editSettings': '설정 편집', 'ui.characters': '자',
+    'ui.pleaseEnterCustomPrompt': '사용자 지정 프롬프트를 입력하세요',
+    // Modals
+    'ui.createNewSeries': '새 시리즈(라이브러리) 만들기',
+    'ui.seriesCreateHint': '시리즈를 만들면 여러 화를 하나로 묶고 캐릭터 설정과 세계관을 공유할 수 있습니다.',
+    'ui.seriesName': '시리즈 이름', 'ui.seriesDescOptional': '시리즈 설명 (선택사항)',
+    'ui.rename': '이름 바꾸기', 'ui.createFirstEpisode': '첫 화 만들기',
   },
   es: {
     'app.title': 'myMuse', 'app.tagline': 'Tu compañero de escritura omnisciente',
@@ -1601,17 +1766,17 @@ function renderLibraryItem(library) {
             <button onclick="event.stopPropagation(); editLibrarySettings('${library.id}')" 
               class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
               <i class="fas fa-cog text-blue-500"></i>
-              共通設定を編集
+              ${t('ui.editSeriesSettings')}
             </button>
             <button onclick="event.stopPropagation(); renameProject('${library.id}', '${library.title.replace(/'/g, "\\'")}')" 
               class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
               <i class="fas fa-edit text-indigo-500"></i>
-              名前を変更
+              ${t('ui.rename')}
             </button>
             <button onclick="event.stopPropagation(); deleteProject('${library.id}', '${library.title.replace(/'/g, "\\'")}')" 
               class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-b-lg">
               <i class="fas fa-trash"></i>
-              削除
+              ${t('common.delete')}
             </button>
           </div>
         </div>
@@ -1896,6 +2061,7 @@ function renderSettingsAIChat() {
 // Render settings tab for a Library (Series)
 function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
   const childProjects = state.projects.filter(p => p.library_id === state.currentProject?.id);
+  const aiChatHtml = renderSettingsAIChat();
   
   return `
     <div class="h-full flex flex-col gap-4 overflow-y-auto">
@@ -1906,9 +2072,9 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
             <i class="fas fa-layer-group text-2xl"></i>
           </div>
           <div class="flex-1">
-            <h2 class="text-xl font-bold">${state.currentProject?.title || 'シリーズ'}</h2>
+            <h2 class="text-xl font-bold">${state.currentProject?.title || t('ui.series')}</h2>
             <p class="text-purple-200 text-sm">
-              <i class="fas fa-book-open mr-1"></i>${childProjects.length}話のシリーズ共通設定
+              <i class="fas fa-book-open mr-1"></i>${childProjects.length} ${t('ui.episodesSharedSettings')}
             </p>
           </div>
           <div class="text-right">
@@ -1926,7 +2092,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-600">
               <i class="fas fa-tags"></i>
-              シリーズのジャンル
+              ${t('ui.seriesGenre')}
             </h3>
             <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-3 border rounded-lg dark:border-gray-600 bg-purple-50 dark:bg-purple-900/20">
               ${allGenres.map(g => `
@@ -1944,7 +2110,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-600">
               <i class="fas fa-info-circle"></i>
-              シリーズの説明
+              ${t('ui.seriesDescription')}
             </h3>
             <textarea id="library-desc" rows="4" 
               placeholder="このシリーズの概要、テーマ、対象読者など..."
@@ -1956,7 +2122,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-300">
               <i class="fas fa-list-ol"></i>
-              このシリーズの話 (${childProjects.length})
+              ${t('ui.seriesEpisodes')} (${childProjects.length})
             </h3>
             <div class="space-y-2 max-h-40 overflow-y-auto">
               ${childProjects.length > 0 ? childProjects.map((p, i) => `
@@ -1967,7 +2133,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
                 </div>
               `).join('') : `
                 <p class="text-sm text-gray-500 text-center py-4">
-                  <i class="fas fa-info-circle mr-1"></i>まだ話がありません
+                  <i class="fas fa-info-circle mr-1"></i>${t('ui.noEpisodes')}
                 </p>
               `}
             </div>
@@ -1983,17 +2149,17 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1 border-2 border-purple-200 dark:border-purple-800">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
               <i class="fas fa-users"></i>
-              共通キャラクター設定
-              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">シリーズ共通</span>
+              ${t('ui.sharedCharacters')}
+              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">${t('ui.seriesShared')}</span>
             </h3>
-            <p class="text-sm text-gray-500 mb-3">シリーズ全体で登場するキャラクターの設定</p>
+            <p class="text-sm text-gray-500 mb-3">${t('ui.sharedCharacters')}</p>
             <div class="relative h-[calc(100%-100px)]">
               <textarea id="library-characters" 
                 placeholder="【主人公】&#10;名前: &#10;年齢: &#10;性格: &#10;&#10;【メインキャラクター】&#10;..."
                 class="w-full h-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
                 oninput="updateLibrarySettings('shared_characters', this.value)">${librarySettings.shared_characters || ''}</textarea>
-              <button onclick="expandTextarea('library-characters', '共通キャラクター設定')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <button onclick="expandTextarea('library-characters', '${t("ui.sharedCharacters")}')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
             </div>
@@ -2003,16 +2169,16 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-green-500">
               <i class="fas fa-book"></i>
-              共通専門用語
-              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">シリーズ共通</span>
+              ${t('ui.sharedTerminology')}
+              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">${t('ui.seriesShared')}</span>
             </h3>
             <div class="relative">
               <textarea id="library-terminology" rows="6"
                 placeholder="【魔法体系】&#10;・〇〇: 説明&#10;&#10;【組織】&#10;・△△: 説明"
                 class="w-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
                 oninput="updateLibrarySettings('shared_terminology', this.value)">${librarySettings.shared_terminology || ''}</textarea>
-              <button onclick="expandTextarea('library-terminology', '共通専門用語')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <button onclick="expandTextarea('library-terminology', '${t("ui.sharedTerminology")}')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
             </div>
@@ -2024,24 +2190,24 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
               <i class="fas fa-globe"></i>
-              共通世界観設定
-              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">シリーズ共通</span>
+              ${t('ui.sharedWorldSetting')}
+              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">${t('ui.seriesShared')}</span>
             </h3>
-            <p class="text-sm text-gray-500 mb-3">シリーズ全体の舞台・世界観</p>
+            <p class="text-sm text-gray-500 mb-3">${t('ui.sharedWorldSetting')}</p>
             <div class="relative">
               <textarea id="library-world" rows="5"
                 placeholder="【舞台】&#10;・時代: &#10;・場所: &#10;&#10;【世界のルール】&#10;..."
                 class="w-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
                 oninput="updateLibrarySettings('shared_world_setting', this.value)">${librarySettings.shared_world_setting || ''}</textarea>
-              <button onclick="expandTextarea('library-world', '共通世界観設定')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <button onclick="expandTextarea('library-world', '${t("ui.sharedWorldSetting")}')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
             </div>
           </div>
           
           <!-- Settings AI Chat -->
-          ${renderSettingsAIChat()}
+          ${aiChatHtml}
           
           <!-- Sync Options & Save -->
           <div class="bg-purple-50 dark:bg-purple-900/30 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-800">
@@ -2049,7 +2215,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
               <input type="checkbox" id="sync-settings-to-children" class="rounded text-purple-600" checked>
               <span class="text-sm font-medium">${t('ui.autoSync')}</span>
             </label>
-            <p class="text-xs text-gray-500 mb-3">チェックすると、共通設定が全ての話に反映されます</p>
+            <p class="text-xs text-gray-500 mb-3">${t('ui.autoSyncHint')}</p>
           </div>
           
           <button onclick="saveLibrarySettingsFromTab()" 
@@ -2065,6 +2231,7 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
 
 // Render settings tab for a Child Project (belongs to a library)
 function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, parentLibrary, parentSettings) {
+  const aiChatHtml = renderSettingsAIChat();
   return `
     <div class="h-full flex flex-col gap-4 overflow-y-auto">
       <!-- Parent Library Reference Banner -->
@@ -2074,15 +2241,15 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
             <i class="fas fa-file-alt text-xl"></i>
           </div>
           <div class="flex-1">
-            <h2 class="text-lg font-bold">${state.currentProject?.title || 'プロジェクト'}</h2>
+            <h2 class="text-lg font-bold">${state.currentProject?.title || t('sidebar.projects')}</h2>
             <p class="text-indigo-200 text-sm">
-              <i class="fas fa-link mr-1"></i>「${parentLibrary.title}」シリーズの一部
+              <i class="fas fa-link mr-1"></i>「${parentLibrary.title}」${t('ui.partOfSeries')}
             </p>
           </div>
           <button onclick="selectProject('${parentLibrary.id}')" 
             class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm transition flex items-center gap-1">
             <i class="fas fa-layer-group"></i>
-            シリーズ設定を編集
+            ${t('ui.editSeriesSettings')}
           </button>
         </div>
       </div>
@@ -2092,24 +2259,24 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
         <button onclick="toggleParentSettingsPreview()" class="w-full p-4 flex items-center justify-between text-left">
           <div class="flex items-center gap-2">
             <i class="fas fa-layer-group text-purple-500"></i>
-            <span class="font-medium text-purple-700 dark:text-purple-300">シリーズ共通設定を参照</span>
-            <span class="text-xs px-2 py-0.5 bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-full">読み取り専用</span>
+            <span class="font-medium text-purple-700 dark:text-purple-300">${t('ui.viewSeriesSettings')}</span>
+            <span class="text-xs px-2 py-0.5 bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-full">${t('ui.readOnly')}</span>
           </div>
           <i id="parent-settings-chevron" class="fas fa-chevron-down text-purple-500 transition-transform"></i>
         </button>
         <div id="parent-settings-preview" class="hidden px-4 pb-4">
           <div class="grid grid-cols-3 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
-              <h4 class="text-sm font-medium text-blue-500 mb-2"><i class="fas fa-users mr-1"></i>共通キャラクター</h4>
-              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_characters || '（未設定）'}</p>
+              <h4 class="text-sm font-medium text-blue-500 mb-2"><i class="fas fa-users mr-1"></i>${t('ui.sharedCharacters')}</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_characters || '\uff08' + t('ui.notSet') + '\uff09'}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
-              <h4 class="text-sm font-medium text-yellow-500 mb-2"><i class="fas fa-globe mr-1"></i>共通世界観</h4>
-              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_world_setting || '（未設定）'}</p>
+              <h4 class="text-sm font-medium text-yellow-500 mb-2"><i class="fas fa-globe mr-1"></i>${t('ui.sharedWorldSetting')}</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_world_setting || '\uff08' + t('ui.notSet') + '\uff09'}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
-              <h4 class="text-sm font-medium text-green-500 mb-2"><i class="fas fa-book mr-1"></i>共通専門用語</h4>
-              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_terminology || '（未設定）'}</p>
+              <h4 class="text-sm font-medium text-green-500 mb-2"><i class="fas fa-book mr-1"></i>${t('ui.sharedTerminology')}</h4>
+              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_terminology || '\uff08' + t('ui.notSet') + '\uff09'}</p>
             </div>
           </div>
         </div>
@@ -2123,13 +2290,13 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-indigo-600">
               <i class="fas fa-tags"></i>
-              ジャンル
-              <span class="text-xs px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 rounded-full">シリーズから継承</span>
+              ${t('ui.genreSettings')}
+              <span class="text-xs px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 rounded-full">${t('ui.inheritedFromSeries')}</span>
             </h3>
             <div class="flex flex-wrap gap-2">
               ${projectGenres.length > 0 ? projectGenres.map(g => `
                 <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 rounded-full text-sm">${g}</span>
-              `).join('') : '<span class="text-gray-500 text-sm">未設定</span>'}
+              ').join('') : '<span class="text-gray-500 text-sm">' + t('ui.notSet') + '</span>'}
             </div>
           </div>
           
@@ -2137,16 +2304,16 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-red-500">
               <i class="fas fa-bullseye"></i>
-              この話の目標
+              ${t('ui.episodeGoal')}
             </h3>
-            <p class="text-sm text-gray-500 mb-3">この話で達成したいこと、見せ場など</p>
+            <p class="text-sm text-gray-500 mb-3">${t('ui.episodeGoalHint')}</p>
             <div class="relative h-[calc(100%-80px)]">
               <textarea id="settings-storyGoal" 
-                placeholder="この話のクライマックス、伏線、読者に伝えたいこと..."
+                placeholder="${t('ui.episodeGoalPlaceholder')}"
                 class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                 oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal}</textarea>
-              <button onclick="expandTextarea('settings-storyGoal', 'この話の目標')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <button onclick="expandTextarea('settings-storyGoal', '${t("ui.episodeGoal")}')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
             </div>
@@ -2159,16 +2326,16 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
               <i class="fas fa-user-plus"></i>
-              この話の登場人物
+              ${t('ui.episodeCharacters')}
             </h3>
-            <p class="text-sm text-gray-500 mb-3">この話で新登場するキャラクターや、話固有の設定</p>
+            <p class="text-sm text-gray-500 mb-3">${t('ui.episodeCharactersHint')}</p>
             <div class="relative h-[calc(100%-80px)]">
               <textarea id="settings-characters" 
-                placeholder="【この話で初登場】&#10;・〇〇: 役割、特徴&#10;&#10;【この話での変化】&#10;..."
+                placeholder="${t('ui.episodeCharactersPlaceholder')}"
                 class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                 oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters}</textarea>
-              <button onclick="expandTextarea('settings-characters', 'この話の登場人物')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <button onclick="expandTextarea('settings-characters', '${t("ui.episodeCharacters")}')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
             </div>
@@ -2178,15 +2345,15 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-green-500">
               <i class="fas fa-book"></i>
-              この話の専門用語
+              ${t('ui.episodeTerminology')}
             </h3>
             <div class="relative">
               <textarea id="settings-terminology" rows="5"
-                placeholder="この話で新たに登場する用語、概念..."
+                placeholder="${t('ui.episodeTerminologyPlaceholder')}"
                 class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                 oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology}</textarea>
-              <button onclick="expandTextarea('settings-terminology', 'この話の専門用語')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <button onclick="expandTextarea('settings-terminology', '${t("ui.episodeTerminology")}')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
             </div>
@@ -2199,16 +2366,16 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
               <i class="fas fa-map-marker-alt"></i>
-              この話の舞台
+              ${t('ui.episodeSetting')}
             </h3>
-            <p class="text-sm text-gray-500 mb-3">この話の具体的な場所、シーン設定</p>
+            <p class="text-sm text-gray-500 mb-3">${t('ui.episodeSettingHint')}</p>
             <div class="relative">
               <textarea id="settings-worldSetting" rows="5"
                 placeholder="【主な舞台】&#10;・〇〇城: 説明&#10;&#10;【シーン】&#10;..."
                 class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                 oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting}</textarea>
-              <button onclick="expandTextarea('settings-worldSetting', 'この話の舞台')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <button onclick="expandTextarea('settings-worldSetting', '${t("ui.episodeSetting")}')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
             </div>
@@ -2218,22 +2385,22 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-500">
               <i class="fas fa-list"></i>
-              この話の構成
+              ${t('ui.episodeStructure')}
             </h3>
             <div class="relative h-[calc(100%-60px)]">
               <textarea id="settings-episodes"
                 placeholder="【起】&#10;・シーン1: &#10;&#10;【承】&#10;・シーン2: &#10;&#10;【転】&#10;..."
                 class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
                 oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes}</textarea>
-              <button onclick="expandTextarea('settings-episodes', 'この話の構成')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+              <button onclick="expandTextarea('settings-episodes', '${t("ui.episodeStructure")}')" 
+                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
                 <i class="fas fa-expand text-xs"></i>
               </button>
             </div>
           </div>
           
           <!-- Settings AI Chat -->
-          ${renderSettingsAIChat()}
+          ${aiChatHtml}
           
           <button onclick="saveStoryOutline()" 
             class="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
@@ -2248,6 +2415,7 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
 
 // Render settings tab for a Standalone Project (not in a library)
 function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
+  const aiChatHtml = renderSettingsAIChat();
   return `
     <div class="h-full flex flex-col lg:flex-row gap-4 lg:gap-6">
       <!-- Left Column: Basic Settings -->
@@ -2256,9 +2424,9 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
           <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
             <i class="fas fa-tags"></i>
-            ジャンル設定
+            ${t('ui.genreSettings')}
           </h3>
-          <p class="text-sm text-gray-500 mb-3">作品のジャンルを選択してください（複数選択可）</p>
+          <p class="text-sm text-gray-500 mb-3">${t('ui.selectMultiple')}</p>
           <div class="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto p-3 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-900">
             ${allGenres.map(g => `
               <label class="flex items-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-gray-800 p-2 rounded-lg transition">
@@ -2275,7 +2443,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
           <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-red-500">
             <i class="fas fa-bullseye"></i>
-            描きたい物語
+            ${t('ui.storyGoal')}
           </h3>
           <p class="text-sm text-gray-500 mb-3">テーマ、メッセージ、結末のイメージなど</p>
           <div class="relative">
@@ -2283,8 +2451,8 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
               placeholder="この物語で伝えたいこと、読者に感じてほしいこと、理想の結末..."
               class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal}</textarea>
-            <button onclick="expandTextarea('settings-storyGoal', '描きたい物語')" 
-              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+            <button onclick="expandTextarea('settings-storyGoal', '${t("ui.storyGoal")}')" 
+              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
               <i class="fas fa-expand text-xs"></i>
             </button>
           </div>
@@ -2297,7 +2465,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
           <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
             <i class="fas fa-users"></i>
-            キャラクター設定
+            ${t('ui.charSettings')}
           </h3>
           <p class="text-sm text-gray-500 mb-3">登場人物の名前、性格、役割など</p>
           <div class="relative h-[calc(100%-80px)]">
@@ -2305,8 +2473,8 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
               placeholder="【主人公】&#10;名前: &#10;年齢: &#10;性格: &#10;目標: &#10;&#10;【ヒロイン】&#10;名前: &#10;..."
               class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters}</textarea>
-            <button onclick="expandTextarea('settings-characters', 'キャラクター設定')" 
-              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+            <button onclick="expandTextarea('settings-characters', '${t("ui.charSettings")}')" 
+              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
               <i class="fas fa-expand text-xs"></i>
             </button>
           </div>
@@ -2316,7 +2484,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
           <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-green-500">
             <i class="fas fa-book"></i>
-            専門用語・設定
+            ${t('ui.terminologySettings')}
           </h3>
           <p class="text-sm text-gray-500 mb-3">魔法、技術、組織、独自の概念など</p>
           <div class="relative">
@@ -2324,8 +2492,8 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
               placeholder="【魔法】&#10;・ファイアボール: 炎の球を放つ初級魔法&#10;&#10;【組織】&#10;・騎士団: ..."
               class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology}</textarea>
-            <button onclick="expandTextarea('settings-terminology', '専門用語・設定')" 
-              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+            <button onclick="expandTextarea('settings-terminology', '${t("ui.terminologySettings")}')" 
+              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
               <i class="fas fa-expand text-xs"></i>
             </button>
           </div>
@@ -2338,7 +2506,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
           <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
             <i class="fas fa-globe"></i>
-            世界観設定
+            ${t('ui.worldSettings')}
           </h3>
           <p class="text-sm text-gray-500 mb-3">舞台、時代、ルール、雰囲気など</p>
           <div class="relative">
@@ -2346,8 +2514,8 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
               placeholder="【舞台】&#10;・時代: &#10;・場所: &#10;&#10;【世界のルール】&#10;・魔法が存在する&#10;..."
               class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting}</textarea>
-            <button onclick="expandTextarea('settings-worldSetting', '世界観設定')" 
-              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+            <button onclick="expandTextarea('settings-worldSetting', '${t("ui.worldSettings")}')" 
+              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
               <i class="fas fa-expand text-xs"></i>
             </button>
           </div>
@@ -2357,7 +2525,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
           <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-500">
             <i class="fas fa-list-ol"></i>
-            各話アウトライン
+            ${t('ui.episodeOutline')}
           </h3>
           <p class="text-sm text-gray-500 mb-3">章・話ごとのあらすじ</p>
           <div class="relative h-[calc(100%-80px)]">
@@ -2365,15 +2533,15 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
               placeholder="第1話: プロローグ - 主人公の日常&#10;第2話: 事件発生 - 異変の始まり&#10;第3話: 旅立ち - 冒険への決意&#10;..."
               class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
               oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes}</textarea>
-            <button onclick="expandTextarea('settings-episodes', '各話アウトライン')" 
-              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="拡大">
+            <button onclick="expandTextarea('settings-episodes', '${t("ui.episodeOutline")}')" 
+              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
               <i class="fas fa-expand text-xs"></i>
             </button>
           </div>
         </div>
         
         <!-- Settings AI Chat -->
-        ${renderSettingsAIChat()}
+        ${aiChatHtml}
         
         <!-- Save Button -->
         <button onclick="saveStoryOutline()" 
@@ -2410,23 +2578,23 @@ function renderIdeasTab() {
               <div id="ideas-style-menu" class="hidden absolute left-0 top-full mt-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg py-1 z-20 w-48 border border-gray-200 dark:border-gray-700">
                 <button onclick="applyIdeasStyle('normal')" class="block w-full px-4 py-2 text-sm text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
                   <span class="w-6 inline-block text-center text-gray-400"><i class="fas fa-font"></i></span>
-                  標準テキスト
+                  ${t('ui.standardText')}
                 </button>
                 <button onclick="applyIdeasStyle('title')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
                   <span class="w-6 inline-block h-5 text-xs font-bold text-indigo-600 bg-indigo-100 rounded text-center">H</span>
-                  <span class="text-lg font-bold ml-2">タイトル</span>
+                  <span class="text-lg font-bold ml-2">${t('ui.title')}</span>
                 </button>
                 <button onclick="applyIdeasStyle('h1')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
                   <span class="w-6 inline-block h-5 text-xs font-bold text-indigo-500 bg-indigo-50 rounded text-center">H1</span>
-                  <span class="text-base font-semibold ml-2">見出し 1</span>
+                  <span class="text-base font-semibold ml-2">${t('ui.heading1')}</span>
                 </button>
                 <button onclick="applyIdeasStyle('h2')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
                   <span class="w-6 inline-block h-5 text-xs font-bold text-indigo-400 bg-indigo-50/50 rounded text-center">H2</span>
-                  <span class="text-sm font-medium ml-2">見出し 2</span>
+                  <span class="text-sm font-medium ml-2">${t('ui.heading2')}</span>
                 </button>
                 <button onclick="applyIdeasStyle('h3')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
                   <span class="w-6 inline-block h-5 text-xs font-bold text-gray-500 bg-gray-100 rounded text-center">H3</span>
-                  <span class="text-sm ml-2">見出し 3</span>
+                  <span class="text-sm ml-2">${t('ui.heading3')}</span>
                 </button>
               </div>
             </div>
@@ -2434,25 +2602,25 @@ function renderIdeasTab() {
             <!-- Outline Toggle -->
             <button onclick="toggleIdeasOutline()" 
               class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" 
-              title="アウトライン表示">
+              title="${t('ui.showOutline')}">
               <i class="fas fa-list-ul mr-1"></i>
-              アウトライン
+              ${t('ui.outline')}
             </button>
             
             <!-- Link to Settings Tab -->
             <button onclick="switchTab('settings_materials')" 
               class="px-3 py-1.5 text-sm bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50" 
-              title="設定・資料タブを開く">
+              title="${t('ui.editSettings')}">
               <i class="fas fa-cog mr-1"></i>
-              設定を編集
+              ${t('ui.editSettings')}
             </button>
             
             <div class="flex-1"></div>
             <span class="text-xs text-gray-500" id="ideas-doc-chars">
-              ${(state.ideasDocument || '').length} 文字
+              ${(state.ideasDocument || '').length} ${t('ui.characters')}
             </span>
             <button onclick="saveIdeasDocument()" class="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700">
-              <i class="fas fa-save mr-1"></i>保存
+              <i class="fas fa-save mr-1"></i>${t('common.save')}
             </button>
           </div>
           
@@ -2461,7 +2629,7 @@ function renderIdeasTab() {
             <!-- Ideas Outline Panel -->
             <div id="ideas-outline-panel" class="${state.showIdeasOutline ? '' : 'hidden'} w-56 border-r border-gray-200 dark:border-gray-700 overflow-y-auto p-2 bg-gray-50 dark:bg-gray-900/50">
               <h4 class="text-xs font-semibold text-gray-500 mb-2 flex items-center gap-2">
-                <i class="fas fa-list-ul"></i>アウトライン
+                <i class="fas fa-list-ul"></i>${t('ui.outline')}
               </h4>
               <div id="ideas-outline-content" class="space-y-1 text-sm">
                 ${renderIdeasOutline()}
@@ -3105,15 +3273,15 @@ function renderWritingTab() {
       <!-- Toolbar -->
       <div class="flex flex-wrap items-center gap-2 mb-4 bg-white dark:bg-gray-800 rounded-lg p-2 shadow-sm">
         ${['ja', 'zh', 'ko'].includes(state.language) ? `
-        <button onclick="toggleWritingDirection()" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="${isVertical ? '横書きに切替' : '縦書きに切替'}">
+        <button onclick="toggleWritingDirection()" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="${isVertical ? t('writing.switchToHorizontal') : t('writing.switchToVertical')}">
           <i class="fas ${isVertical ? 'fa-grip-lines' : 'fa-grip-lines-vertical'}"></i>
         </button>
         ` : ''}
         
         ${isVertical ? `
-        <button onclick="toggleVerticalTextMode()" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="英数字の表示方法を切り替え">
+        <button onclick="toggleVerticalTextMode()" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="${t('writing.textModeTitle')}">
           <i class="fas fa-font mr-1"></i>
-          ${state.verticalTextMode === 'upright' ? '正立' : '横倒し'}
+          ${state.verticalTextMode === 'upright' ? t('writing.textUpright') : t('writing.textSideways')}
         </button>
         ` : ''}
         
@@ -3149,44 +3317,44 @@ function renderWritingTab() {
         <div class="relative">
           <button onclick="toggleStyleMenu()" id="style-menu-btn" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2 min-w-28">
             <i class="fas fa-paragraph text-indigo-500"></i>
-            <span id="current-style-label">標準テキスト</span>
+            <span id="current-style-label">${t('ui.standardText')}</span>
             <i class="fas fa-chevron-down text-xs ml-auto"></i>
           </button>
           <div id="style-menu" class="hidden absolute left-0 top-full mt-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg py-1 z-20 w-48 border border-gray-200 dark:border-gray-700">
             <button onclick="applyTextStyle('normal')" class="block w-full px-4 py-2 text-sm text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
               <span class="w-6 text-center text-gray-400"><i class="fas fa-font"></i></span>
-              <span>標準テキスト</span>
+              <span>${t('ui.standardText')}</span>
             </button>
             <button onclick="applyTextStyle('title')" class="block w-full px-4 py-3 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
               <span class="w-6 h-5 flex items-center justify-center text-xs font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 rounded">H</span>
-              <span class="text-xl font-bold">タイトル</span>
+              <span class="text-xl font-bold">${t('ui.title')}</span>
             </button>
             <button onclick="applyTextStyle('h1')" class="block w-full px-4 py-2.5 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
               <span class="w-6 h-5 flex items-center justify-center text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 rounded">H1</span>
-              <span class="text-lg font-semibold">見出し 1</span>
+              <span class="text-lg font-semibold">${t('ui.heading1')}</span>
             </button>
             <button onclick="applyTextStyle('h2')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
               <span class="w-6 h-5 flex items-center justify-center text-xs font-bold text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/20 dark:text-indigo-400 rounded">H2</span>
-              <span class="text-base font-medium">見出し 2</span>
+              <span class="text-base font-medium">${t('ui.heading2')}</span>
             </button>
             <button onclick="applyTextStyle('h3')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2">
               <span class="w-6 h-5 flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded">H3</span>
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">見出し 3</span>
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${t('ui.heading3')}</span>
             </button>
           </div>
         </div>
         
         <!-- Outline Toggle Button -->
-        <button onclick="toggleOutline()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="アウトライン表示">
+        <button onclick="toggleOutline()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="${t('ui.showOutline')}">
           <i class="fas fa-list-ul mr-1"></i>
-          アウトライン
+          ${t('ui.outline')}
         </button>
         
         <div class="flex-1"></div>
         
         <!-- Save indicator and button -->
         <span id="save-indicator" class="text-sm text-green-600 dark:text-green-400 flex items-center">
-          <i class="fas fa-check mr-1"></i>保存済み
+          <i class="fas fa-check mr-1"></i>${t('ui.saved')}
         </span>
         
         <button onclick="manualSave()" class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 flex items-center gap-1">
@@ -3255,7 +3423,7 @@ function renderWritingTab() {
           <div class="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h4 class="font-medium text-sm flex items-center gap-2">
               <i class="fas fa-list-ul text-indigo-500"></i>
-              アウトライン
+              ${t('ui.outline')}
             </h4>
             <button onclick="toggleOutline()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
               <i class="fas fa-times"></i>
@@ -4308,7 +4476,7 @@ function renderRightSidebar() {
     <aside class="sidebar-right fixed right-0 top-14 bottom-0 w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-30">
       <div class="p-4 space-y-4">
         <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-          <i class="fas fa-robot mr-1"></i>AIパートナー
+          <i class="fas fa-robot mr-1"></i>${t('ui.aiPartner')}
         </h3>
         
         <!-- AI Generating Status / Cancel -->
@@ -4316,19 +4484,19 @@ function renderRightSidebar() {
         <div class="bg-indigo-100 dark:bg-indigo-900/30 rounded-lg p-4 space-y-2">
           <div class="flex items-center gap-2">
             <div class="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-            <span class="text-indigo-700 dark:text-indigo-300 text-sm font-medium">AI生成中...</span>
+            <span class="text-indigo-700 dark:text-indigo-300 text-sm font-medium">${t('common.loading')}</span>
           </div>
           <button onclick="cancelAIGeneration()"
             class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition flex items-center justify-center gap-2">
             <i class="fas fa-times-circle"></i>
-            キャンセル
+            ${t('common.cancel')}
           </button>
         </div>
         ` : ''}
         
         <!-- Quick Actions -->
         <div class="space-y-2 ${state.aiGenerating ? 'opacity-50 pointer-events-none' : ''}">
-          <p class="text-xs text-gray-500">クイックアクション</p>
+          <p class="text-xs text-gray-500">${t('ui.quickActions')}</p>
           <div class="grid grid-cols-2 gap-2">
             ${[
               { action: 'continue', icon: 'fa-forward', label: t('ai.continue') },
@@ -4368,7 +4536,7 @@ function renderRightSidebar() {
           <p class="text-xs text-gray-500">${t('ai.customPrompt')}</p>
           <textarea id="custom-prompt" rows="3" 
             class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 resize-none"
-            placeholder="カスタム指示を入力..."></textarea>
+            placeholder="${t('ui.enterCustomPrompt')}"></textarea>
           <div class="flex gap-2">
             <input type="number" id="target-words" placeholder="${t('ai.targetWords')}"
               class="flex-1 px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600">
@@ -4382,9 +4550,9 @@ function renderRightSidebar() {
         
         <!-- AI Response History -->
         <div class="space-y-2">
-          <p class="text-xs text-gray-500">AIレスポンス履歴</p>
+          <p class="text-xs text-gray-500">${t('ui.aiResponseHistory')}</p>
           <div id="ai-history" class="max-h-64 overflow-y-auto space-y-2">
-            <p class="text-sm text-gray-400 italic">アクションを実行するとここに履歴が表示されます</p>
+            <p class="text-sm text-gray-400 italic">${t('ui.historyEmptyHint')}</p>
           </div>
         </div>
       </div>
@@ -4601,19 +4769,19 @@ function renderModals() {
           <i class="fas fa-times"></i>
         </button>
         <h3 class="text-lg font-semibold mb-4">
-          <i class="fas fa-layer-group mr-2 text-purple-500"></i>新しいシリーズ（ライブラリ）を作成
+          <i class="fas fa-layer-group mr-2 text-purple-500"></i>${t('ui.createNewSeries')}
         </h3>
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          シリーズを作成すると、複数の話（プロジェクト）を1つにまとめ、キャラクター設定や世界観を共有できます。
+          ${t('ui.seriesCreateHint')}
         </p>
         <form id="new-library-form" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium mb-1">シリーズ名</label>
+            <label class="block text-sm font-medium mb-1">${t('ui.seriesName')}</label>
             <input type="text" id="new-library-title" required placeholder="例: 異世界冒険譚シリーズ"
               class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">シリーズの説明（任意）</label>
+            <label class="block text-sm font-medium mb-1">${t('ui.seriesDescOptional')}</label>
             <textarea id="new-library-description" rows="2" placeholder="シリーズの概要を入力..."
               class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"></textarea>
           </div>
@@ -5302,7 +5470,7 @@ window.editLibrarySettings = async (libraryId) => {
           キャンセル
         </button>
         <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-          <i class="fas fa-save mr-1"></i>保存
+          <i class="fas fa-save mr-1"></i>${t('common.save')}
         </button>
       </div>
     </form>
@@ -7287,14 +7455,14 @@ function updateStyleLabel(style) {
   if (!label) return;
   
   const labels = {
-    normal: '標準テキスト',
-    title: 'タイトル',
-    h1: '見出し 1',
-    h2: '見出し 2',
-    h3: '見出し 3'
+    normal: t('ui.standardText'),
+    title: t('ui.title'),
+    h1: t('ui.heading1'),
+    h2: t('ui.heading2'),
+    h3: t('ui.heading3')
   };
   
-  label.textContent = labels[style] || '標準テキスト';
+  label.textContent = labels[style] || t('ui.standardText');
 }
 
 // Detect current line style and update label
@@ -7498,7 +7666,7 @@ window.handleCustomAction = async () => {
   const targetWords = parseInt($('#target-words')?.value) || 0;
   
   if (!customPrompt) {
-    alert('カスタム指示を入力してください');
+    alert(t('ui.pleaseEnterCustomPrompt'));
     return;
   }
   
