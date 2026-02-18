@@ -2040,7 +2040,7 @@ function renderSettingsAIChat() {
   const disabledAttr = state.aiGenerating ? 'disabled' : '';
   
   return `
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border-2 border-indigo-200 dark:border-indigo-800 flex flex-col" style="min-height: 320px; max-height: 400px;">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border-2 border-indigo-200 dark:border-indigo-800 flex flex-col h-full">
       <div class="p-3 border-b dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
         <h3 class="font-semibold flex items-center gap-2 text-sm">
           <i class="fas fa-robot"></i>
@@ -2484,19 +2484,55 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
           ${renderSettingsSectionContent(currentSettingsSection, allGenres, projectGenres, storyOutline)}
         </div>
         
-        <!-- 右: AIチャット -->
-        <div class="w-72 hidden lg:flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <!-- 右: AIチャット (レスポンシブ縦長デザイン) -->
+        <!-- 右: AIチャット (レスポンシブ縦長デザイン) -->
+        <div class="w-80 xl:w-96 hidden lg:flex flex-col" style="min-height: 500px;">
           ${aiChatHtml}
         </div>
       </div>
       
       <!-- 保存ボタン -->
-      <div class="mt-4">
+      <div class="mt-4 flex gap-3">
+        <!-- モバイル用AIチャットボタン -->
+        <button onclick="toggleSettingsAIChatModal()" 
+          class="lg:hidden px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 shadow-lg font-medium flex items-center justify-center gap-2">
+          <i class="fas fa-robot"></i>
+          <span>AI</span>
+        </button>
         <button onclick="saveStoryOutline()" 
-          class="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
+          class="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
           <i class="fas fa-save"></i>
           ${t('ui.saveSettings')}
         </button>
+      </div>
+      
+      <!-- モバイル用AIチャットモーダル -->
+      <div id="settings-ai-chat-modal" class="fixed inset-0 bg-black/50 z-50 hidden lg:hidden">
+        <div class="absolute inset-4 bottom-20 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+          <div class="p-3 border-b dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex items-center justify-between">
+            <h3 class="font-semibold flex items-center gap-2 text-sm">
+              <i class="fas fa-robot"></i>
+              ${t('ui.settingsAI')}
+            </h3>
+            <button onclick="toggleSettingsAIChatModal()" class="p-1 hover:bg-white/20 rounded-lg">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div id="settings-chat-messages-mobile" class="flex-1 overflow-y-auto p-3 space-y-2">
+          </div>
+          <div class="p-3 border-t dark:border-gray-700">
+            <div class="flex gap-2">
+              <input type="text" id="settings-chat-input-mobile" 
+                placeholder="${t('ui.settingsAIPlaceholder')}"
+                class="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm"
+                onkeypress="if(event.key === 'Enter') sendSettingsChatMobile()">
+              <button onclick="sendSettingsChatMobile()" 
+                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -2506,6 +2542,49 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
 window.switchSettingsSection = (sectionId) => {
   state.currentSettingsSection = sectionId;
   render();
+};
+
+// モバイル用設定AIチャットモーダルのトグル
+window.toggleSettingsAIChatModal = () => {
+  const modal = document.getElementById('settings-ai-chat-modal');
+  if (modal) {
+    modal.classList.toggle('hidden');
+    // モーダル開いた時にメッセージをコピー
+    if (!modal.classList.contains('hidden')) {
+      syncSettingsChatToMobile();
+    }
+  }
+};
+
+// デスクトップのチャットメッセージをモバイルに同期
+function syncSettingsChatToMobile() {
+  const desktopMessages = document.getElementById('settings-chat-messages');
+  const mobileMessages = document.getElementById('settings-chat-messages-mobile');
+  if (desktopMessages && mobileMessages) {
+    mobileMessages.innerHTML = desktopMessages.innerHTML;
+    mobileMessages.scrollTop = mobileMessages.scrollHeight;
+  }
+}
+
+// モバイル用設定チャット送信
+window.sendSettingsChatMobile = async () => {
+  const input = document.getElementById('settings-chat-input-mobile');
+  if (!input) return;
+  const message = input.value.trim();
+  if (!message) return;
+  input.value = '';
+  
+  // デスクトップの入力欄に値を設定して送信
+  const desktopInput = document.getElementById('settings-chat-input');
+  if (desktopInput) {
+    desktopInput.value = message;
+  }
+  
+  // 送信処理を実行
+  await sendSettingsChat();
+  
+  // モーダルのメッセージを更新
+  setTimeout(() => syncSettingsChatToMobile(), 100);
 };
 
 // 各セクションのコンテンツをレンダリング
