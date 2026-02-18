@@ -57,6 +57,8 @@ const state = {
   achievements: [],
   monthlyAchievements: [],
   currentMonthProgress: null,
+  // Settings Section
+  currentSettingsSection: 'genre', // 設定タブの現在選択中のセクション
 };
 
 // ============================================
@@ -2444,18 +2446,84 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
 // Render settings tab for a Standalone Project (not in a library)
 function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
   const aiChatHtml = renderSettingsAIChat();
+  
+  // 設定項目のリスト
+  const settingsItems = [
+    { id: 'genre', icon: 'fa-tags', color: 'indigo', label: t('ui.genreSettings') },
+    { id: 'storyGoal', icon: 'fa-bullseye', color: 'red', label: t('ui.storyGoal') },
+    { id: 'characters', icon: 'fa-users', color: 'blue', label: t('ui.charSettings') },
+    { id: 'terminology', icon: 'fa-book', color: 'green', label: t('ui.terminologySettings') },
+    { id: 'worldSetting', icon: 'fa-globe', color: 'yellow', label: t('ui.worldSettings') },
+    { id: 'episodes', icon: 'fa-list-ol', color: 'purple', label: t('ui.episodeOutline') },
+  ];
+  
+  // 現在選択中の設定項目（デフォルトはジャンル）
+  const currentSettingsSection = state.currentSettingsSection || 'genre';
+  
   return `
-    <div class="h-full flex flex-col lg:flex-row gap-4 lg:gap-6">
-      <!-- Left Column: Basic Settings -->
-      <div class="w-full lg:w-1/3 flex flex-col gap-4 overflow-y-auto">
-        <!-- Genre Settings Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-            <i class="fas fa-tags"></i>
-            ${t('ui.genreSettings')}
-          </h3>
-          <p class="text-sm text-gray-500 mb-3">${t('ui.selectMultiple')}</p>
-          <div class="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto p-3 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-900">
+    <div class="h-full flex flex-col">
+      <!-- 上部: 項目選択ボタン -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 mb-4">
+        <div class="flex flex-wrap gap-2">
+          ${settingsItems.map(item => `
+            <button onclick="switchSettingsSection('${item.id}')" 
+              class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${currentSettingsSection === item.id 
+                ? `bg-${item.color}-100 dark:bg-${item.color}-900/30 text-${item.color}-700 dark:text-${item.color}-300 ring-2 ring-${item.color}-500` 
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+              <i class="fas ${item.icon}"></i>
+              <span class="hidden sm:inline">${item.label}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+      
+      <!-- メインコンテンツ -->
+      <div class="flex-1 flex gap-4 min-h-0">
+        <!-- 左: 編集エリア -->
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+          ${renderSettingsSectionContent(currentSettingsSection, allGenres, projectGenres, storyOutline)}
+        </div>
+        
+        <!-- 右: AIチャット -->
+        <div class="w-72 hidden lg:flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+          ${aiChatHtml}
+        </div>
+      </div>
+      
+      <!-- 保存ボタン -->
+      <div class="mt-4">
+        <button onclick="saveStoryOutline()" 
+          class="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
+          <i class="fas fa-save"></i>
+          ${t('ui.saveSettings')}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// 設定セクションの切り替え
+window.switchSettingsSection = (sectionId) => {
+  state.currentSettingsSection = sectionId;
+  render();
+};
+
+// 各セクションのコンテンツをレンダリング
+function renderSettingsSectionContent(sectionId, allGenres, projectGenres, storyOutline) {
+  const sections = {
+    genre: () => `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+            <i class="fas fa-tags text-indigo-600 dark:text-indigo-400"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-indigo-600 dark:text-indigo-400">${t('ui.genreSettings')}</h3>
+            <p class="text-sm text-gray-500">${t('ui.selectMultiple')}</p>
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2 p-3 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-900">
             ${allGenres.map(g => `
               <label class="flex items-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-gray-800 p-2 rounded-lg transition">
                 <input type="checkbox" name="project-genre" value="${g.value}" 
@@ -2466,120 +2534,181 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
             `).join('')}
           </div>
         </div>
-        
-        <!-- Story Goal Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-red-500">
-            <i class="fas fa-bullseye"></i>
-            ${t('ui.storyGoal')}
-          </h3>
-          <p class="text-sm text-gray-500 mb-3">テーマ、メッセージ、結末のイメージなど</p>
-          <div class="relative">
-            <textarea id="settings-storyGoal" rows="6" 
-              placeholder="この物語で伝えたいこと、読者に感じてほしいこと、理想の結末..."
-              class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-              oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal}</textarea>
-            <button onclick="expandTextarea('settings-storyGoal', 'ui.storyGoal')" 
-              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-              <i class="fas fa-expand text-xs"></i>
-            </button>
+      </div>
+    `,
+    storyGoal: () => `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <i class="fas fa-bullseye text-red-500"></i>
           </div>
+          <div>
+            <h3 class="font-bold text-lg text-red-500">${t('ui.storyGoal')}</h3>
+            <p class="text-sm text-gray-500">テーマ、メッセージ、結末のイメージなど</p>
+          </div>
+        </div>
+        <div class="flex-1 relative">
+          <textarea id="settings-storyGoal"
+            placeholder="この物語で伝えたいこと、読者に感じてほしいこと、理想の結末...
+
+例:
+・テーマ: 友情と成長
+・メッセージ: 困難を乗り越える勇気
+・結末: 主人公が仲間と共に目標を達成する"
+            class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+            oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal || ''}</textarea>
+          <button onclick="expandTextarea('settings-storyGoal', 'ui.storyGoal')" 
+            class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-red-500 bg-white dark:bg-gray-600 rounded-lg shadow-sm" title="${t("ui.expand")}">
+            <i class="fas fa-expand"></i>
+          </button>
         </div>
       </div>
-      
-      <!-- Middle Column: Characters & World -->
-      <div class="w-full lg:w-1/3 flex flex-col gap-4 overflow-y-auto">
-        <!-- Characters Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
-          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
-            <i class="fas fa-users"></i>
-            ${t('ui.charSettings')}
-          </h3>
-          <p class="text-sm text-gray-500 mb-3">登場人物の名前、性格、役割など</p>
-          <div class="relative h-[calc(100%-80px)]">
-            <textarea id="settings-characters" 
-              placeholder="【主人公】&#10;名前: &#10;年齢: &#10;性格: &#10;目標: &#10;&#10;【ヒロイン】&#10;名前: &#10;..."
-              class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-              oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters}</textarea>
-            <button onclick="expandTextarea('settings-characters', 'ui.charSettings')" 
-              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-              <i class="fas fa-expand text-xs"></i>
-            </button>
+    `,
+    characters: () => `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <i class="fas fa-users text-blue-500"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-blue-500">${t('ui.charSettings')}</h3>
+            <p class="text-sm text-gray-500">登場人物の名前、性格、役割など</p>
           </div>
         </div>
-        
-        <!-- Terminology Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-green-500">
-            <i class="fas fa-book"></i>
-            ${t('ui.terminologySettings')}
-          </h3>
-          <p class="text-sm text-gray-500 mb-3">魔法、技術、組織、独自の概念など</p>
-          <div class="relative">
-            <textarea id="settings-terminology" rows="5"
-              placeholder="【魔法】&#10;・ファイアボール: 炎の球を放つ初級魔法&#10;&#10;【組織】&#10;・騎士団: ..."
-              class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-              oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology}</textarea>
-            <button onclick="expandTextarea('settings-terminology', 'ui.terminologySettings')" 
-              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-              <i class="fas fa-expand text-xs"></i>
-            </button>
-          </div>
+        <div class="flex-1 relative">
+          <textarea id="settings-characters"
+            placeholder="【主人公】
+名前: 
+年齢: 
+性格: 
+目標: 
+特徴: 
+
+【ヒロイン/サブキャラ】
+名前: 
+関係性: 
+役割: 
+
+【敵/ライバル】
+名前: 
+動機: "
+            class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
+            oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters || ''}</textarea>
+          <button onclick="expandTextarea('settings-characters', 'ui.charSettings')" 
+            class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-blue-500 bg-white dark:bg-gray-600 rounded-lg shadow-sm" title="${t("ui.expand")}">
+            <i class="fas fa-expand"></i>
+          </button>
         </div>
       </div>
-      
-      <!-- Right Column: World & Episodes -->
-      <div class="w-full lg:w-1/3 flex flex-col gap-4 overflow-y-auto">
-        <!-- World Setting Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
-            <i class="fas fa-globe"></i>
-            ${t('ui.worldSettings')}
-          </h3>
-          <p class="text-sm text-gray-500 mb-3">舞台、時代、ルール、雰囲気など</p>
-          <div class="relative">
-            <textarea id="settings-worldSetting" rows="6"
-              placeholder="【舞台】&#10;・時代: &#10;・場所: &#10;&#10;【世界のルール】&#10;・魔法が存在する&#10;..."
-              class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-              oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting}</textarea>
-            <button onclick="expandTextarea('settings-worldSetting', 'ui.worldSettings')" 
-              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-              <i class="fas fa-expand text-xs"></i>
-            </button>
+    `,
+    terminology: () => `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <i class="fas fa-book text-green-500"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-green-500">${t('ui.terminologySettings')}</h3>
+            <p class="text-sm text-gray-500">魔法、技術、組織、独自の概念など</p>
           </div>
         </div>
-        
-        <!-- Episodes Outline Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
-          <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-500">
-            <i class="fas fa-list-ol"></i>
-            ${t('ui.episodeOutline')}
-          </h3>
-          <p class="text-sm text-gray-500 mb-3">章・話ごとのあらすじ</p>
-          <div class="relative h-[calc(100%-80px)]">
-            <textarea id="settings-episodes"
-              placeholder="第1話: プロローグ - 主人公の日常&#10;第2話: 事件発生 - 異変の始まり&#10;第3話: 旅立ち - 冒険への決意&#10;..."
-              class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-              oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes}</textarea>
-            <button onclick="expandTextarea('settings-episodes', 'ui.episodeOutline')" 
-              class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-              <i class="fas fa-expand text-xs"></i>
-            </button>
-          </div>
+        <div class="flex-1 relative">
+          <textarea id="settings-terminology"
+            placeholder="【魔法/スキル】
+・ファイアボール: 炎の球を放つ初級魔法
+・ヒーリング: 傷を癒す回復魔法
+
+【組織/勢力】
+・騎士団: 王国を守る精鋭部隊
+・魔導士ギルド: 魔法使いの組合
+
+【独自概念】
+・マナ: 魔力の源
+・聖獣: 守護者として存在する神聖な生物"
+            class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
+            oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology || ''}</textarea>
+          <button onclick="expandTextarea('settings-terminology', 'ui.terminologySettings')" 
+            class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-green-500 bg-white dark:bg-gray-600 rounded-lg shadow-sm" title="${t("ui.expand")}">
+            <i class="fas fa-expand"></i>
+          </button>
         </div>
-        
-        <!-- Settings AI Chat -->
-        ${aiChatHtml}
-        
-        <!-- Save Button -->
-        <button onclick="saveStoryOutline()" 
-          class="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
-          <i class="fas fa-save"></i>
-          ${t('ui.saveSettings')}
-        </button>
       </div>
-    </div>
-  `;
+    `,
+    worldSetting: () => `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+            <i class="fas fa-globe text-yellow-500"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-yellow-500">${t('ui.worldSettings')}</h3>
+            <p class="text-sm text-gray-500">舞台、時代、ルール、雰囲気など</p>
+          </div>
+        </div>
+        <div class="flex-1 relative">
+          <textarea id="settings-worldSetting"
+            placeholder="【舞台】
+・時代: 中世ファンタジー / 近未来 / 現代
+・場所: 王国アルディア / 東京 / 異世界
+
+【世界のルール】
+・魔法が存在する
+・科学技術のレベル
+・政治体制
+
+【雰囲気/トーン】
+・明るい冒険活劇
+・ダークファンタジー
+・日常系コメディ"
+            class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
+            oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting || ''}</textarea>
+          <button onclick="expandTextarea('settings-worldSetting', 'ui.worldSettings')" 
+            class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-yellow-500 bg-white dark:bg-gray-600 rounded-lg shadow-sm" title="${t("ui.expand")}">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      </div>
+    `,
+    episodes: () => `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <i class="fas fa-list-ol text-purple-500"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-purple-500">${t('ui.episodeOutline')}</h3>
+            <p class="text-sm text-gray-500">章・話ごとのあらすじ</p>
+          </div>
+        </div>
+        <div class="flex-1 relative">
+          <textarea id="settings-episodes"
+            placeholder="第1話: プロローグ
+- 主人公の日常を描く
+- 物語の伏線を張る
+
+第2話: 事件発生
+- 異変の始まり
+- 主人公が巻き込まれる
+
+第3話: 旅立ち
+- 冒険への決意
+- 仲間との出会い
+
+第4話: 試練
+- 最初の困難
+- 成長のきっかけ"
+            class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
+            oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes || ''}</textarea>
+          <button onclick="expandTextarea('settings-episodes', 'ui.episodeOutline')" 
+            class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-purple-500 bg-white dark:bg-gray-600 rounded-lg shadow-sm" title="${t("ui.expand")}">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      </div>
+    `
+  };
+  
+  return sections[sectionId] ? sections[sectionId]() : sections.genre();
 }
 
 function renderIdeasTab() {
