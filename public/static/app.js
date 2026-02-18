@@ -1502,7 +1502,7 @@ function render() {
       ${!isMobile ? renderHeader() : ''}
       <div class="flex h-screen ${isMobile ? '' : 'pt-14'}">
         ${!isMobile ? renderLeftSidebar() : ''}
-        <main class="flex-1 overflow-hidden ${!isMobile && state.sidebarOpen.left ? 'ml-64' : ''} ${!isMobile && state.sidebarOpen.right ? 'mr-80' : ''} transition-all duration-300">
+        <main class="flex-1 overflow-hidden ${!isMobile && state.sidebarOpen.left ? 'ml-64' : ''} transition-all duration-300">
           ${renderMainContent()}
         </main>
         ${!isMobile ? renderRightSidebar() : ''}
@@ -1645,10 +1645,6 @@ function renderHeader() {
         
         <button onclick="openModal('settings')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
           <i class="fas fa-cog"></i>
-        </button>
-        
-        <button onclick="toggleSidebar('right')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-          <i class="fas fa-robot"></i>
         </button>
       </div>
     </header>
