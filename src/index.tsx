@@ -82,9 +82,11 @@ app.get('*', (c) => {
     /* Animation */
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+    @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .animate-fade-in { animation: fadeIn 0.3s ease-out; }
     .animate-slide-in { animation: slideIn 0.3s ease-out; }
+    .animate-slide-in-right { animation: slideInRight 0.3s ease-out; }
     .animate-pulse-slow { animation: pulse 2s infinite; }
     
     /* ZEN Mode */

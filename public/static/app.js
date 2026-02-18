@@ -16,7 +16,8 @@ const state = {
   language: localStorage.getItem('language') || 'ja',
   theme: localStorage.getItem('theme') || 'light',
   zenMode: false,
-  sidebarOpen: { left: true, right: true },
+  sidebarOpen: { left: true, right: false },
+  rightSidebarCollapsed: true, // 右サイドバー折りたたみ状態
   showOutline: false,
   calendarDate: new Date(),
   calendarEvents: [],
@@ -68,8 +69,9 @@ const i18n = {
     'sidebar.projects': 'プロジェクト', 'sidebar.newProject': '新規プロジェクト', 'sidebar.newFolder': '新規フォルダ',
     'sidebar.trash': 'ゴミ箱', 'sidebar.search': '全文検索', 'sidebar.calendar': '創作カレンダー',
     'sidebar.language': '言語', 'sidebar.aiCredits': 'AI利用量',
-    'tab.ideas': 'ネタ考案', 'tab.plot': 'プロット', 'tab.writing': 'ライティング',
-    'tab.settings_materials': '設定・資料',
+    'tab.ideas': 'ネタ考案', 'tab.plot': 'プロット', 'tab.writing': '執筆',
+    'tab.settings_materials': '設定',
+    'tab.conception': '構想', 'tab.analysis_chat': '分析・相談',
     'tab.illustration': '挿絵', 'tab.analysis': '分析・批評', 'tab.consultation': '相談AI', 'tab.achievements': '実績',
     'achievement.title': '実績トロフィー', 'achievement.monthly': '今月の実績', 'achievement.all': '獲得バッジ',
     'achievement.progress': '進捗', 'achievement.unlocked': '解除済み', 'achievement.locked': '未解除',
@@ -177,6 +179,7 @@ const i18n = {
     'sidebar.language': 'Language', 'sidebar.aiCredits': 'AI Credits',
     'tab.ideas': 'Ideas', 'tab.plot': 'Plot', 'tab.writing': 'Writing',
     'tab.settings_materials': 'Settings',
+    'tab.conception': 'Conception', 'tab.analysis_chat': 'Analysis & Chat',
     'tab.illustration': 'Illustration', 'tab.analysis': 'Analysis', 'tab.consultation': 'AI Chat', 'tab.achievements': 'Achievements',
     'achievement.title': 'Achievements', 'achievement.monthly': 'Monthly Goals', 'achievement.all': 'Badges',
     'achievement.progress': 'Progress', 'achievement.unlocked': 'Unlocked', 'achievement.locked': 'Locked',
@@ -1706,6 +1709,18 @@ function renderLeftSidebar() {
           <span>${t('sidebar.calendar')}</span>
         </button>
         
+        <!-- Achievements -->
+        <button onclick="openAchievementModal()" class="w-full flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+          <i class="fas fa-trophy text-yellow-500"></i>
+          <span>${t('tab.achievements')}</span>
+        </button>
+        
+        <!-- Trash -->
+        <button onclick="openModal('trash')" class="w-full flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+          <i class="fas fa-trash-alt"></i>
+          <span>${t('sidebar.trash')}</span>
+        </button>
+        
         <!-- AI Credits -->
         <div class="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
           <div class="flex items-center justify-between text-sm mb-1">
@@ -1848,14 +1863,17 @@ function renderProjectItem(project) {
 }
 
 function renderMainContent() {
+  // 新タブ構成: 設定 → 構想 → 執筆 → 分析・相談
+  const tabs = ['settings_materials', 'conception', 'writing', 'analysis_chat'];
+  
   return `
     <div class="h-full flex flex-col">
       <!-- Tabs -->
       <div class="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4">
-        ${['settings_materials', 'ideas', 'plot', 'writing', 'illustration', 'analysis', 'consultation', 'achievements'].map(tab => `
+        ${tabs.map(tab => `
           <button onclick="switchTab('${tab}')" 
-            class="px-4 py-3 text-sm font-medium transition ${state.currentTab === tab ? 'tab-active' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'} ${tab === 'achievements' ? 'ml-auto bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent' : ''}">
-            <i class="fas ${getTabIcon(tab)} mr-1 ${tab === 'achievements' ? 'text-yellow-500' : ''}"></i>
+            class="px-4 py-3 text-sm font-medium transition ${state.currentTab === tab ? 'tab-active' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}">
+            <i class="fas ${getTabIcon(tab)} mr-1"></i>
             ${t(`tab.${tab}`)}
           </button>
         `).join('')}
@@ -1870,20 +1888,34 @@ function renderMainContent() {
 }
 
 function getTabIcon(tab) {
-  const icons = { settings_materials: 'fa-cog', ideas: 'fa-lightbulb', plot: 'fa-sitemap', writing: 'fa-pen-fancy', illustration: 'fa-image', analysis: 'fa-chart-pie', consultation: 'fa-comments', achievements: 'fa-trophy' };
+  const icons = { 
+    settings_materials: 'fa-cog', 
+    conception: 'fa-lightbulb',  // 構想タブ（ネタ+プロット統合）
+    writing: 'fa-pen-fancy', 
+    analysis_chat: 'fa-chart-line',  // 分析・相談統合
+    // Legacy icons for backward compatibility
+    ideas: 'fa-lightbulb', 
+    plot: 'fa-sitemap', 
+    illustration: 'fa-image', 
+    analysis: 'fa-chart-pie', 
+    consultation: 'fa-comments', 
+    achievements: 'fa-trophy' 
+  };
   return icons[tab] || 'fa-circle';
 }
 
 function renderTabContent() {
   switch (state.currentTab) {
     case 'settings_materials': return renderSettingsMaterialsTab();
-    case 'ideas': return renderIdeasTab();
-    case 'plot': return renderPlotTab();
+    case 'conception': return renderConceptionTab();  // 新・構想タブ（ネタ+プロット統合）
     case 'writing': return renderWritingTab();
-    case 'illustration': return renderIllustrationTab();
-    case 'analysis': return renderAnalysisTab();
-    case 'consultation': return renderConsultationTab();
-    case 'achievements': return renderAchievementsTab();
+    case 'analysis_chat': return renderAnalysisChatTab();  // 新・分析・相談統合
+    // Legacy tab support
+    case 'ideas': return renderConceptionTab();
+    case 'plot': return renderConceptionTab();
+    case 'analysis': return renderAnalysisChatTab();
+    case 'consultation': return renderAnalysisChatTab();
+    case 'achievements': return renderAchievementsModal();  // モーダルとして返す
     default: return renderWritingTab();
   }
 }
@@ -2798,6 +2830,408 @@ function renderIdeasTab() {
   `;
 }
 
+// ============================================
+// 構想タブ（ネタ考案 + プロット統合）
+// ============================================
+function renderConceptionTab() {
+  let structure = {};
+  try { structure = JSON.parse(state.plot?.structure || '{}'); } catch (e) {}
+  const template = state.plot?.template || 'kishotenketsu';
+  const adoptedIdeas = (state.ideas || []).filter(idea => idea.adopted);
+  
+  // サブタブの状態管理
+  const conceptionSubTab = state.conceptionSubTab || 'ideas';
+  
+  return `
+    <div class="h-full flex flex-col">
+      <!-- サブタブ切り替え -->
+      <div class="flex gap-2 mb-4 bg-white dark:bg-gray-800 rounded-xl p-2 shadow-sm">
+        <button onclick="switchConceptionSubTab('ideas')" 
+          class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${conceptionSubTab === 'ideas' 
+            ? 'bg-indigo-600 text-white' 
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+          <i class="fas fa-lightbulb mr-2"></i>ネタ・メモ
+        </button>
+        <button onclick="switchConceptionSubTab('plot')" 
+          class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${conceptionSubTab === 'plot' 
+            ? 'bg-indigo-600 text-white' 
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+          <i class="fas fa-sitemap mr-2"></i>プロット構成
+        </button>
+      </div>
+      
+      <!-- サブタブコンテンツ -->
+      <div class="flex-1 overflow-hidden">
+        ${conceptionSubTab === 'ideas' ? renderConceptionIdeasContent() : renderConceptionPlotContent(template, structure, adoptedIdeas)}
+      </div>
+    </div>
+  `;
+}
+
+// 構想タブ - ネタ・メモセクション
+function renderConceptionIdeasContent() {
+  return `
+    <div class="h-full flex gap-4">
+      <!-- メインドキュメントエリア -->
+      <div class="flex-1 flex flex-col">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm flex-1 flex flex-col overflow-hidden">
+          <!-- ツールバー -->
+          <div class="flex flex-wrap items-center gap-2 p-3 border-b dark:border-gray-700">
+            <h3 class="font-semibold flex items-center gap-2">
+              <i class="fas fa-lightbulb text-yellow-500"></i>
+              ネタ・プロットメモ
+            </h3>
+            
+            <!-- スタイルセレクター -->
+            <div class="relative ml-2">
+              <button onclick="toggleIdeasStyleMenu()" id="ideas-style-menu-btn" 
+                class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2">
+                <i class="fas fa-paragraph text-indigo-500"></i>
+                <span id="ideas-current-style">標準</span>
+                <i class="fas fa-chevron-down text-xs"></i>
+              </button>
+              <div id="ideas-style-menu" class="hidden absolute left-0 top-full mt-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg py-1 z-20 w-48 border border-gray-200 dark:border-gray-700">
+                <button onclick="applyIdeasStyle('normal')" class="block w-full px-4 py-2 text-sm text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+                  <span class="w-6 inline-block text-center text-gray-400"><i class="fas fa-font"></i></span>
+                  ${t('ui.standardText')}
+                </button>
+                <button onclick="applyIdeasStyle('title')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+                  <span class="w-6 inline-block h-5 text-xs font-bold text-indigo-600 bg-indigo-100 rounded text-center">H</span>
+                  <span class="text-lg font-bold ml-2">${t('ui.title')}</span>
+                </button>
+                <button onclick="applyIdeasStyle('h1')" class="block w-full px-4 py-2 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+                  <span class="w-6 inline-block h-5 text-xs font-bold text-indigo-500 bg-indigo-50 rounded text-center">H1</span>
+                  <span class="text-base font-semibold ml-2">${t('ui.heading1')}</span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- アウトラインボタン -->
+            <button onclick="toggleIdeasOutline()" 
+              class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" 
+              title="${t("ui.showOutline")}">
+              <i class="fas fa-list-ul mr-1"></i>
+              ${t('ui.outline')}
+            </button>
+            
+            <div class="flex-1"></div>
+            <span class="text-xs text-gray-500" id="ideas-doc-chars">
+              ${(state.ideasDocument || '').length} ${t('ui.characters')}
+            </span>
+            <button onclick="saveIdeasDocument()" class="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700">
+              <i class="fas fa-save mr-1"></i>${t('common.save')}
+            </button>
+          </div>
+          
+          <!-- ドキュメントエリア -->
+          <div class="flex-1 flex overflow-hidden">
+            <!-- アウトラインパネル -->
+            <div id="ideas-outline-panel" class="${state.showIdeasOutline ? '' : 'hidden'} w-56 border-r border-gray-200 dark:border-gray-700 overflow-y-auto p-2 bg-gray-50 dark:bg-gray-900/50">
+              <h4 class="text-xs font-semibold text-gray-500 mb-2 flex items-center gap-2">
+                <i class="fas fa-list-ul"></i>${t('ui.outline')}
+              </h4>
+              <div id="ideas-outline-content" class="space-y-1 text-sm">
+                ${renderIdeasOutline()}
+              </div>
+            </div>
+            
+            <!-- エディタ -->
+            <div class="flex-1 relative">
+              <textarea id="ideas-document" 
+                class="w-full h-full p-4 text-sm resize-none focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                placeholder="ここにネタやプロットのアイデアを自由に書き込んでください...
+
+【使い方のヒント】
+・右側のAIチャットで相談しながらアイデアを膨らませましょう
+・「設定」タブで世界観やキャラクターを設定すると、AIがより良い提案をします
+・「プロット構成」サブタブで物語の骨格を組み立てましょう"
+                oninput="updateIdeasDocumentCount(this.value); updateIdeasOutline();">${state.ideasDocument || ''}</textarea>
+              <button onclick="expandTextarea('ideas-document', 'tab.ideas')" 
+                class="absolute bottom-12 right-3 p-2 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+                title="${t("ui.expand")}">
+                <i class="fas fa-expand"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- プロット構成へ移動ボタン -->
+          <div class="p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+            <button onclick="switchConceptionSubTab('plot')" 
+              class="w-full px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 text-sm flex items-center justify-center gap-2">
+              <i class="fas fa-arrow-right"></i>
+              プロット構成へ進む
+            </button>
+          </div>
+        </div>
+        
+        <!-- クイックアイデア生成 -->
+        <div class="mt-3">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+            <button onclick="toggleQuickIdeas()" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+              <span class="flex items-center gap-2 font-semibold">
+                <i class="fas fa-magic text-purple-500"></i>
+                <span>${t('ui.quickIdeas')}</span>
+                <span class="text-xs text-gray-500 font-normal">(${state.ideas?.length || 0}件)</span>
+              </span>
+              <i class="fas fa-chevron-${state.showQuickIdeas ? 'up' : 'down'} text-gray-400"></i>
+            </button>
+            
+            ${state.showQuickIdeas ? `
+              <div class="p-4">
+                <div class="flex gap-2 mb-3">
+                  <input type="text" id="quick-idea-keywords" placeholder="キーワード（任意）"
+                    class="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
+                  <select id="quick-idea-count" class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm">
+                    <option value="3">3件</option>
+                    <option value="5" selected>5件</option>
+                    <option value="10">10件</option>
+                  </select>
+                  <button onclick="handleGenerateIdeas()" 
+                    class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 text-sm"
+                    ${state.aiGenerating ? 'disabled' : ''}>
+                    ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-magic mr-1"></i>生成'}
+                  </button>
+                </div>
+                
+                ${state.ideas?.length > 0 ? `
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-48 overflow-y-auto">
+                    ${state.ideas.map(idea => `
+                      <div class="relative bg-gray-50 dark:bg-gray-900 rounded-lg p-3 text-sm ${idea.adopted ? 'ring-2 ring-green-500' : ''} group hover:shadow-md transition-shadow">
+                        <div class="font-medium mb-1 pr-6">${idea.title}</div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">${idea.content || ''}</p>
+                        <div class="flex justify-between items-center mt-2">
+                          <span class="text-xs text-gray-500">${idea.genre || ''}</span>
+                          ${idea.adopted ? 
+                            `<span class="text-xs text-green-500"><i class="fas fa-check mr-1"></i>採用済</span>` :
+                            `<button onclick="adoptIdea('${idea.id}')" class="text-xs text-indigo-600 hover:underline">採用</button>`
+                          }
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : `
+                  <p class="text-center text-gray-500 text-sm py-4">
+                    <i class="fas fa-lightbulb text-2xl mb-2 text-yellow-400"></i><br>
+                    ${t('ui.generateIdeas')}
+                  </p>
+                `}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+      
+      <!-- AIチャットパネル -->
+      <div class="w-72 flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div class="p-3 border-b dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+          <h3 class="font-semibold flex items-center gap-2">
+            <i class="fas fa-robot"></i>
+            構想AIアシスタント
+          </h3>
+          <p class="text-xs text-indigo-100 mt-1">アイデアについて相談できます</p>
+        </div>
+        
+        <!-- チャットメッセージ -->
+        <div id="ideas-chat-messages" class="flex-1 overflow-y-auto p-3 space-y-3 max-h-[400px]">
+          ${(state.ideasChatMessages || []).length > 0 ? 
+            state.ideasChatMessages.map(msg => `
+              <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+                <div class="max-w-[85%] rounded-lg p-3 text-sm ${
+                  msg.role === 'user' 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                }">
+                  ${msg.content.replace(/\\n/g, '<br>')}
+                </div>
+              </div>
+            `).join('') : `
+              <div class="text-center text-gray-500 text-sm py-6">
+                <i class="fas fa-comments text-2xl mb-2 text-indigo-300"></i>
+                <p class="font-medium">AIに質問してみましょう！</p>
+                <p class="text-xs mt-1 text-gray-400">例: 「ファンタジー世界の魔法システムを考えて」</p>
+              </div>
+            `
+          }
+        </div>
+        
+        <!-- チャット入力 -->
+        <div class="p-3 border-t dark:border-gray-700">
+          <div class="flex gap-2">
+            <input type="text" id="ideas-chat-input" 
+              placeholder="アイデアについて相談..."
+              class="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm"
+              onkeypress="if(event.key === 'Enter') sendIdeasChat()">
+            <button onclick="sendIdeasChat()" 
+              class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              ${state.aiGenerating ? 'disabled' : ''}>
+              ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-paper-plane"></i>'}
+            </button>
+          </div>
+          
+          <!-- クイックプロンプト -->
+          <div class="flex flex-wrap gap-1 mt-2">
+            <button onclick="sendIdeasChatQuick('キャラクターのアイデアをください')" 
+              class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              キャラ案
+            </button>
+            <button onclick="sendIdeasChatQuick('プロットの展開を考えてください')" 
+              class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              展開
+            </button>
+            <button onclick="sendIdeasChatQuick('この物語の山場を提案してください')" 
+              class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              山場
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// 構想タブ - プロット構成セクション
+function renderConceptionPlotContent(template, structure, adoptedIdeas) {
+  return `
+    <div class="h-full flex gap-4">
+      <!-- メインプロットエリア -->
+      <div class="flex-1 overflow-y-auto space-y-4">
+        <!-- 採用アイデア表示 -->
+        ${adoptedIdeas.length > 0 ? `
+          <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl shadow-sm border border-green-200 dark:border-green-800 overflow-hidden">
+            <div class="flex items-center justify-between p-3 border-b border-green-200 dark:border-green-700 bg-white/50 dark:bg-gray-800/50">
+              <h3 class="font-semibold text-green-700 dark:text-green-400 flex items-center gap-2">
+                <i class="fas fa-lightbulb"></i>${t('ui.adoptedIdeas')}
+                <span class="text-xs bg-green-200 dark:bg-green-800 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
+                  ${adoptedIdeas.length}件
+                </span>
+              </h3>
+              <button onclick="switchConceptionSubTab('ideas')" 
+                class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1">
+                <i class="fas fa-edit"></i>編集
+              </button>
+            </div>
+            <div class="p-3 max-h-32 overflow-y-auto">
+              <div class="flex flex-wrap gap-2">
+                ${adoptedIdeas.map(idea => `
+                  <span class="inline-flex items-center gap-1 px-3 py-1 bg-white dark:bg-gray-800 rounded-full text-sm border border-green-200 dark:border-green-700">
+                    <i class="fas fa-check-circle text-green-500 text-xs"></i>
+                    ${idea.title}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        ` : `
+          <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
+            <p class="text-gray-500 text-sm">
+              <i class="fas fa-lightbulb mr-1"></i>
+              「ネタ・メモ」でアイデアを採用すると、ここに表示されます
+            </p>
+            <button onclick="switchConceptionSubTab('ideas')" 
+              class="mt-2 px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+              ネタ・メモへ
+            </button>
+          </div>
+        `}
+        
+        <!-- テンプレート選択 -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <i class="fas fa-th-large text-indigo-500"></i>
+            プロットテンプレート
+          </h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            ${[
+              { id: 'kishotenketsu', name: '起承転結', icon: 'fa-stream' },
+              { id: 'three_act', name: '三幕構成', icon: 'fa-theater-masks' },
+              { id: 'blake_snyder', name: 'ブレイク・スナイダー', icon: 'fa-film' },
+              { id: 'free', name: 'フリー', icon: 'fa-edit' }
+            ].map(t => `
+              <button onclick="setPlotTemplate('${t.id}')" 
+                class="p-3 rounded-lg border-2 transition ${template === t.id 
+                  ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30' 
+                  : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'}">
+                <i class="fas ${t.icon} text-lg ${template === t.id ? 'text-indigo-600' : 'text-gray-400'}"></i>
+                <p class="text-sm mt-1 ${template === t.id ? 'font-medium text-indigo-600' : ''}">${t.name}</p>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+        
+        <!-- プロット構造エディタ -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold flex items-center gap-2">
+              <i class="fas fa-sitemap text-purple-500"></i>
+              プロット構成
+            </h3>
+            <button onclick="savePlot()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
+              <i class="fas fa-save mr-1"></i>${t('common.save')}
+            </button>
+          </div>
+          ${renderPlotStructure(template, structure)}
+        </div>
+        
+        <!-- AI生成ボタン -->
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4">
+          <button onclick="handleGeneratePlot()" 
+            class="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 flex items-center justify-center gap-2"
+            ${state.aiGenerating ? 'disabled' : ''}>
+            ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-magic mr-2"></i>'}
+            AIでプロットを生成
+          </button>
+          <p class="text-xs text-center text-gray-500 mt-2">
+            設定やネタを基にAIがプロット案を提案します
+          </p>
+        </div>
+      </div>
+      
+      <!-- 執筆へ進むパネル -->
+      <div class="w-64 flex flex-col">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 flex-1">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <i class="fas fa-pen-fancy text-indigo-500"></i>
+            次のステップ
+          </h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            プロットの準備ができたら、執筆を始めましょう。
+          </p>
+          <button onclick="switchTab('writing')" 
+            class="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 flex items-center justify-center gap-2">
+            <i class="fas fa-arrow-right"></i>
+            執筆タブへ
+          </button>
+        </div>
+        
+        <!-- 進捗サマリー -->
+        <div class="mt-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+          <h4 class="text-sm font-medium mb-3 text-gray-600 dark:text-gray-400">構想の進捗</h4>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <i class="fas ${state.ideasDocument ? 'fa-check-circle text-green-500' : 'fa-circle text-gray-300'}"></i>
+              <span class="text-sm">ネタ・メモ</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="fas ${adoptedIdeas.length > 0 ? 'fa-check-circle text-green-500' : 'fa-circle text-gray-300'}"></i>
+              <span class="text-sm">アイデア採用 (${adoptedIdeas.length}件)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="fas ${Object.values(structure).some(v => v) ? 'fa-check-circle text-green-500' : 'fa-circle text-gray-300'}"></i>
+              <span class="text-sm">プロット構成</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// サブタブ切り替え関数
+window.switchConceptionSubTab = (subTab) => {
+  state.conceptionSubTab = subTab;
+  render();
+};
+
 function renderPlotTab() {
   let structure = {};
   try { structure = JSON.parse(state.plot?.structure || '{}'); } catch (e) {}
@@ -3592,6 +4026,317 @@ function parseHeadings(content) {
   });
   
   return headings;
+}
+
+// ============================================
+// 分析・相談タブ（統合版）
+// ============================================
+function renderAnalysisChatTab() {
+  const analysisSubTab = state.analysisSubTab || 'analysis';
+  
+  return `
+    <div class="h-full flex flex-col">
+      <!-- サブタブ切り替え -->
+      <div class="flex gap-2 mb-4 bg-white dark:bg-gray-800 rounded-xl p-2 shadow-sm">
+        <button onclick="switchAnalysisSubTab('analysis')" 
+          class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${analysisSubTab === 'analysis' 
+            ? 'bg-purple-600 text-white' 
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+          <i class="fas fa-chart-line mr-2"></i>分析・批評
+        </button>
+        <button onclick="switchAnalysisSubTab('consultation')" 
+          class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${analysisSubTab === 'consultation' 
+            ? 'bg-purple-600 text-white' 
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+          <i class="fas fa-comments mr-2"></i>相談AI
+        </button>
+      </div>
+      
+      <!-- サブタブコンテンツ -->
+      <div class="flex-1 overflow-hidden">
+        ${analysisSubTab === 'analysis' ? renderAnalysisSubContent() : renderConsultationSubContent()}
+      </div>
+    </div>
+  `;
+}
+
+// 分析サブタブ
+function renderAnalysisSubContent() {
+  const personas = [
+    { id: 'neutral', name: '客観的な批評家', icon: 'fa-user-tie', desc: '冷静で客観的な分析' },
+    { id: 'encouraging', name: '応援する編集者', icon: 'fa-heart', desc: '励ましながらアドバイス' },
+    { id: 'strict', name: '厳格な文芸評論家', icon: 'fa-gavel', desc: '厳しくも的確な指摘' },
+    { id: 'reader', name: '熱心な読者', icon: 'fa-book-reader', desc: '読者目線での感想' },
+    { id: 'mentor', name: '経験豊富な作家', icon: 'fa-feather-alt', desc: '先輩作家としてのアドバイス' }
+  ];
+  
+  const currentPersona = state.analysisPersona || 'neutral';
+  const selectedPersona = personas.find(p => p.id === currentPersona);
+  
+  return `
+    <div class="h-full flex flex-col">
+      <!-- チャットエリア -->
+      <div class="flex-1 flex gap-4 min-h-0">
+        <!-- ペルソナ設定（デスクトップ） -->
+        <div class="w-48 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hidden lg:flex flex-col">
+          <div class="p-3 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="font-semibold text-sm flex items-center gap-2">
+              <i class="fas fa-masks-theater text-purple-500"></i>
+              ペルソナ
+            </h3>
+          </div>
+          <div class="overflow-y-auto flex-1 p-2 space-y-1">
+            ${personas.map(p => `
+              <button onclick="setAnalysisPersona('${p.id}')"
+                class="w-full text-left p-2 rounded-lg text-xs transition ${currentPersona === p.id 
+                  ? 'bg-purple-100 dark:bg-purple-900/30 border border-purple-300' 
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'}">
+                <div class="flex items-center gap-2">
+                  <i class="fas ${p.icon} ${currentPersona === p.id ? 'text-purple-600' : 'text-gray-400'}"></i>
+                  <span class="${currentPersona === p.id ? 'text-purple-700 dark:text-purple-300 font-medium' : ''}">${p.name}</span>
+                </div>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+        
+        <!-- チャット -->
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm flex flex-col overflow-hidden">
+          <div class="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fas ${selectedPersona.icon} text-purple-500"></i>
+              <span class="font-medium text-sm">${selectedPersona.name}</span>
+            </div>
+            <button onclick="handleAnalyze()" 
+              class="px-3 py-1 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 flex items-center gap-1"
+              ${state.aiGenerating ? 'disabled' : ''}>
+              ${state.aiGenerating ? '<div class="spinner w-4 h-4"></div>' : '<i class="fas fa-magic"></i>'}
+              自動分析
+            </button>
+          </div>
+          
+          <div id="analysis-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4">
+            ${renderAnalysisChatMessages()}
+          </div>
+          
+          <div class="p-3 border-t border-gray-200 dark:border-gray-700">
+            <form id="analysis-chat-form" class="flex gap-2">
+              <input type="text" id="analysis-chat-input" 
+                placeholder="作品について質問・相談..."
+                class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700">
+              <button type="submit" 
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                ${state.aiGenerating ? 'disabled' : ''}>
+                ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-paper-plane"></i>'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 分析チャート（折りたたみ） -->
+      <div class="mt-4">
+        <button onclick="toggleAnalysisCharts()" 
+          class="w-full flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700">
+          <span class="font-medium flex items-center gap-2">
+            <i class="fas fa-chart-bar text-indigo-500"></i>
+            分析チャート
+          </span>
+          <i class="fas ${state.analysisChartsOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-gray-400"></i>
+        </button>
+        
+        ${state.analysisChartsOpen ? `
+          <div class="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+              <h3 class="text-sm font-semibold mb-2 flex items-center gap-2">
+                <i class="fas fa-chart-line text-indigo-500"></i>${t('analysis.emotionCurve')}
+              </h3>
+              <div class="h-40">
+                <canvas id="emotion-chart"></canvas>
+              </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+              <h3 class="text-sm font-semibold mb-2 flex items-center gap-2">
+                <i class="fas fa-chart-pie text-indigo-500"></i>${t('analysis.radar')}
+              </h3>
+              <div class="h-40">
+                <canvas id="radar-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+// 相談AIサブタブ
+function renderConsultationSubContent() {
+  return `
+    <div class="h-full flex gap-4">
+      <!-- スレッドリスト -->
+      <div class="w-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hidden md:flex flex-col">
+        <div class="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <h3 class="font-semibold text-sm">相談履歴</h3>
+          <button onclick="createNewThread()" class="px-2 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-2 space-y-1">
+          ${(state.chatThreads || []).length > 0 ? state.chatThreads.map(thread => `
+            <button onclick="selectThread('${thread.id}')"
+              class="w-full text-left p-2 rounded-lg text-sm transition ${state.currentThread === thread.id 
+                ? 'bg-indigo-100 dark:bg-indigo-900/30' 
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700'}">
+              <p class="truncate font-medium">${thread.title || '新しい相談'}</p>
+              <p class="text-xs text-gray-500 truncate">${thread.lastMessage || ''}</p>
+            </button>
+          `).join('') : `
+            <p class="text-center text-gray-500 text-sm py-4">
+              まだ相談履歴がありません
+            </p>
+          `}
+        </div>
+      </div>
+      
+      <!-- チャットエリア -->
+      <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm flex flex-col overflow-hidden">
+        <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+          <h3 class="font-semibold flex items-center gap-2">
+            <i class="fas fa-robot"></i>
+            相談AI
+          </h3>
+          <p class="text-xs text-indigo-100 mt-1">プロット、キャラクター、文章の悩みなど何でも相談できます</p>
+        </div>
+        
+        <div id="consultation-messages" class="flex-1 overflow-y-auto p-4 space-y-4">
+          ${renderConsultationMessages()}
+        </div>
+        
+        <div class="p-3 border-t border-gray-200 dark:border-gray-700">
+          <form onsubmit="sendConsultationMessage(event)" class="flex gap-2">
+            <input type="text" id="consultation-input" 
+              placeholder="${t('chat.placeholder')}"
+              class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700">
+            <button type="submit" 
+              class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              ${state.aiGenerating ? 'disabled' : ''}>
+              ${state.aiGenerating ? '<div class="spinner"></div>' : '<i class="fas fa-paper-plane"></i>'}
+            </button>
+          </form>
+          
+          <!-- クイックプロンプト -->
+          <div class="flex flex-wrap gap-1 mt-2">
+            <button onclick="sendQuickConsultation('この章の展開に迷っています')" 
+              class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200">
+              展開の相談
+            </button>
+            <button onclick="sendQuickConsultation('キャラクターの動機付けを深めたい')" 
+              class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200">
+              キャラ相談
+            </button>
+            <button onclick="sendQuickConsultation('文章のリズムを改善したい')" 
+              class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200">
+              文章相談
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// 相談メッセージのレンダリング
+function renderConsultationMessages() {
+  if (!state.chatMessages || state.chatMessages.length === 0) {
+    return `
+      <div class="text-center text-gray-500 py-8">
+        <i class="fas fa-comments text-4xl mb-4 opacity-50"></i>
+        <p class="font-medium">${t('chat.empty')}</p>
+        <p class="text-sm mt-2">${t('chat.hint')}</p>
+      </div>
+    `;
+  }
+  
+  return state.chatMessages.map(msg => {
+    if (msg.role === 'user') {
+      return `
+        <div class="flex justify-end">
+          <div class="max-w-[80%] bg-indigo-600 text-white rounded-2xl px-4 py-2">
+            <p class="whitespace-pre-wrap">${msg.content}</p>
+          </div>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="flex justify-start gap-2">
+          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
+            <i class="fas fa-robot text-white text-sm"></i>
+          </div>
+          <div class="max-w-[80%] bg-gray-100 dark:bg-gray-700 rounded-2xl px-4 py-2">
+            <p class="whitespace-pre-wrap">${msg.content}</p>
+          </div>
+        </div>
+      `;
+    }
+  }).join('');
+}
+
+// サブタブ切り替え
+window.switchAnalysisSubTab = (subTab) => {
+  state.analysisSubTab = subTab;
+  render();
+};
+
+// 相談AI関連の関数
+window.sendConsultationMessage = async (event) => {
+  event.preventDefault();
+  const input = document.getElementById('consultation-input');
+  const message = input.value.trim();
+  if (!message || state.aiGenerating) return;
+  
+  input.value = '';
+  state.chatMessages = state.chatMessages || [];
+  state.chatMessages.push({ role: 'user', content: message });
+  render();
+  
+  state.aiGenerating = true;
+  render();
+  
+  try {
+    const response = await callGeminiAPI('consultation', message);
+    state.chatMessages.push({ role: 'assistant', content: response });
+  } catch (error) {
+    state.chatMessages.push({ role: 'assistant', content: 'エラーが発生しました。もう一度お試しください。' });
+  } finally {
+    state.aiGenerating = false;
+    render();
+  }
+};
+
+window.sendQuickConsultation = (message) => {
+  const input = document.getElementById('consultation-input');
+  if (input) {
+    input.value = message;
+    input.focus();
+  }
+};
+
+// 実績モーダル（タブから移動）
+function renderAchievementsModal() {
+  return `
+    <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+      <div class="text-center mb-6">
+        <i class="fas fa-trophy text-5xl text-yellow-400"></i>
+        <h2 class="text-xl font-bold mt-2">${t('achievement.title')}</h2>
+        <p class="text-gray-500 text-sm mt-1">実績機能は左サイドバーのトロフィーアイコンから確認できます</p>
+      </div>
+      <button onclick="openAchievementModal()" 
+        class="w-full px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-xl font-medium">
+        <i class="fas fa-trophy mr-2"></i>実績を確認する
+      </button>
+    </div>
+  `;
 }
 
 function renderAnalysisTab() {
@@ -4469,15 +5214,35 @@ function renderChat() {
 }
 
 function renderRightSidebar() {
-  // Only show AI Partner in writing tab
-  if (!state.sidebarOpen.right || state.currentTab !== 'writing') return '';
+  // 執筆タブ以外では表示しない
+  if (state.currentTab !== 'writing') return '';
   
+  // 折りたたみ状態の場合はフローティングボタンのみ表示
+  if (state.rightSidebarCollapsed) {
+    return `
+      <button onclick="toggleRightSidebar()" 
+        class="fixed right-4 bottom-20 md:bottom-24 w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-lg flex items-center justify-center z-40 hover:from-indigo-700 hover:to-purple-700 transition group"
+        title="AIパートナーを開く">
+        <i class="fas fa-robot text-xl group-hover:scale-110 transition"></i>
+      </button>
+    `;
+  }
+  
+  // 展開状態
   return `
-    <aside class="sidebar-right fixed right-0 top-14 bottom-0 w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-30">
+    <aside class="sidebar-right fixed right-0 top-14 bottom-0 w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-30 shadow-xl animate-slide-in-right">
       <div class="p-4 space-y-4">
-        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-          <i class="fas fa-robot mr-1"></i>${t('ui.aiPartner')}
-        </h3>
+        <!-- ヘッダー（折りたたみボタン付き） -->
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+            <i class="fas fa-robot mr-1"></i>${t('ui.aiPartner')}
+          </h3>
+          <button onclick="toggleRightSidebar()" 
+            class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+            title="閉じる">
+            <i class="fas fa-times text-gray-400"></i>
+          </button>
+        </div>
         
         <!-- AI Generating Status / Cancel -->
         ${state.aiGenerating ? `
@@ -4551,7 +5316,7 @@ function renderRightSidebar() {
         <!-- AI Response History -->
         <div class="space-y-2">
           <p class="text-xs text-gray-500">${t('ui.aiResponseHistory')}</p>
-          <div id="ai-history" class="max-h-64 overflow-y-auto space-y-2">
+          <div id="ai-history" class="max-h-48 overflow-y-auto space-y-2">
             <p class="text-sm text-gray-400 italic">${t('ui.historyEmptyHint')}</p>
           </div>
         </div>
@@ -4559,6 +5324,12 @@ function renderRightSidebar() {
     </aside>
   `;
 }
+
+// 右サイドバーの切り替え
+window.toggleRightSidebar = () => {
+  state.rightSidebarCollapsed = !state.rightSidebarCollapsed;
+  render();
+};
 
 function renderAISidebar() {
   const sidebar = $('.sidebar-right');
@@ -5580,6 +6351,94 @@ window.closeModal = (name) => {
   console.log('closeModal called:', name);
   $(`#modal-${name}`)?.classList.add('hidden');
 };
+
+// 実績モーダルを開く
+window.openAchievementModal = () => {
+  // モーダルが存在しなければ作成
+  let modal = $('#modal-achievements');
+  if (!modal) {
+    const modalHtml = `
+      <div id="modal-achievements" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50" onclick="if(event.target===this)closeModal('achievements')">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl m-4 max-h-[90vh] overflow-hidden animate-fade-in" onclick="event.stopPropagation()">
+          <div id="achievements-modal-content">
+            ${renderAchievementsContent()}
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  } else {
+    // 内容を更新
+    $('#achievements-modal-content').innerHTML = renderAchievementsContent();
+  }
+  $('#modal-achievements')?.classList.remove('hidden');
+};
+
+// 実績コンテンツのレンダリング
+function renderAchievementsContent() {
+  const currentMonth = new Date().toLocaleString(state.language === 'ja' ? 'ja-JP' : 'en-US', { month: 'long', year: 'numeric' });
+  const activityLog = getActivityLog();
+  const monthlyGoals = generateAutoAchievements(activityLog);
+  const completedCount = monthlyGoals.filter(g => g.completed).length;
+  const totalCount = monthlyGoals.length;
+  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  const badgeTier = getBadgeTier(progressPercent);
+  
+  return `
+    <div class="p-6">
+      <!-- ヘッダー -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-trophy text-4xl ${badgeTier.color}"></i>
+          <div>
+            <h2 class="text-xl font-bold">${t('achievement.title')}</h2>
+            <p class="text-sm text-gray-500">${currentMonth}</p>
+          </div>
+        </div>
+        <button onclick="closeModal('achievements')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
+          <i class="fas fa-times text-gray-500"></i>
+        </button>
+      </div>
+      
+      <!-- 進捗バー -->
+      <div class="mb-6">
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-gray-600 dark:text-gray-400">${t('achievement.progress')}</span>
+          <span class="font-bold">${completedCount}/${totalCount} (${progressPercent}%)</span>
+        </div>
+        <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 transition-all duration-500 rounded-full" style="width: ${progressPercent}%"></div>
+        </div>
+      </div>
+      
+      <!-- バッジ表示 -->
+      <div class="grid grid-cols-5 gap-2 mb-6">
+        ${renderBadgeTiers(progressPercent)}
+      </div>
+      
+      <!-- 目標リスト -->
+      <div class="space-y-2 max-h-64 overflow-y-auto">
+        ${monthlyGoals.map(goal => `
+          <div class="flex items-center gap-3 p-3 rounded-lg ${goal.completed ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-50 dark:bg-gray-700'}">
+            <div class="w-8 h-8 flex items-center justify-center rounded-full ${goal.completed ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-400'}">
+              <i class="fas ${goal.completed ? 'fa-check' : 'fa-circle'}"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium ${goal.completed ? 'text-green-700 dark:text-green-300' : ''}">${goal.title}</p>
+              <p class="text-sm text-gray-500">${goal.progress}</p>
+            </div>
+            <span class="text-xl">${goal.emoji}</span>
+          </div>
+        `).join('')}
+      </div>
+      
+      <p class="text-xs text-gray-500 text-center mt-4">
+        <i class="fas fa-info-circle mr-1"></i>
+        実績は執筆活動に基づいて自動的に更新されます
+      </p>
+    </div>
+  `;
+}
 
 // Handle backdrop click to close modal
 window.handleModalBackdropClick = (event, name) => {
