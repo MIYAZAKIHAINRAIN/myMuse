@@ -72,7 +72,7 @@ const i18n = {
     'sidebar.trash': 'ゴミ箱', 'sidebar.search': '全文検索', 'sidebar.calendar': '創作カレンダー',
     'sidebar.language': '言語', 'sidebar.aiCredits': 'AI利用量',
     'tab.ideas': 'ネタ考案', 'tab.plot': 'プロット', 'tab.writing': '執筆',
-    'tab.settings_materials': '設定',
+    'tab.settings_materials': '資料集',
     'tab.conception': '構想', 'tab.analysis_chat': '分析・相談',
     'tab.illustration': '挿絵', 'tab.analysis': '分析・批評', 'tab.consultation': '相談AI', 'tab.achievements': '実績',
     'achievement.title': '実績トロフィー', 'achievement.monthly': '今月の実績', 'achievement.all': '獲得バッジ',
@@ -159,7 +159,7 @@ const i18n = {
     // Settings
     'ui.genreSettings': 'ジャンル', 'ui.charSettings': 'キャラ設定',
     'ui.terminologySettings': '専門用語', 'ui.worldSettings': '世界観設定',
-    'ui.storyGoal': '描きたい物語', 'ui.expand': '拡大',
+    'ui.storyGoal': '描きたい物語', 'ui.plotStructure': 'プロット構成', 'ui.expand': '拡大',
     'ui.autoSyncHint': 'チェックすると、共通設定が全ての話に反映されます',
     'ui.inheritedFromSeries': 'シリーズから継承', 'ui.notSet': '未設定', 'ui.readOnly': '読み取り専用',
     'ui.selectMultiple': '複数選択可', 'ui.partOfSeries': 'シリーズの一部',
@@ -180,7 +180,7 @@ const i18n = {
     'sidebar.trash': 'Trash', 'sidebar.search': 'Search', 'sidebar.calendar': 'Calendar',
     'sidebar.language': 'Language', 'sidebar.aiCredits': 'AI Credits',
     'tab.ideas': 'Ideas', 'tab.plot': 'Plot', 'tab.writing': 'Writing',
-    'tab.settings_materials': 'Settings',
+    'tab.settings_materials': 'Materials',
     'tab.conception': 'Conception', 'tab.analysis_chat': 'Analysis & Chat',
     'tab.illustration': 'Illustration', 'tab.analysis': 'Analysis', 'tab.consultation': 'AI Chat', 'tab.achievements': 'Achievements',
     'achievement.title': 'Achievements', 'achievement.monthly': 'Monthly Goals', 'achievement.all': 'Badges',
@@ -268,7 +268,7 @@ const i18n = {
     // Settings
     'ui.genreSettings': 'Genre', 'ui.charSettings': 'Character Settings',
     'ui.terminologySettings': 'Terminology', 'ui.worldSettings': 'World Setting',
-    'ui.storyGoal': 'Story Goal', 'ui.expand': 'Expand',
+    'ui.storyGoal': 'Story Goal', 'ui.plotStructure': 'Plot Structure', 'ui.expand': 'Expand',
     'ui.autoSyncHint': 'When checked, shared settings will be applied to all episodes',
     'ui.inheritedFromSeries': 'Inherited from Series', 'ui.notSet': 'Not set', 'ui.readOnly': 'Read Only',
     'ui.selectMultiple': 'Multiple selection', 'ui.partOfSeries': 'Part of series',
@@ -355,7 +355,7 @@ const i18n = {
     // Settings
     'ui.genreSettings': '类型', 'ui.charSettings': '角色设定',
     'ui.terminologySettings': '术语', 'ui.worldSettings': '世界观设定',
-    'ui.storyGoal': '故事目标', 'ui.expand': '展开',
+    'ui.storyGoal': '故事目标', 'ui.plotStructure': '情节结构', 'ui.expand': '展开',
     'ui.autoSyncHint': '勾选后，共享设置将应用于所有章节',
     'ui.inheritedFromSeries': '从系列继承', 'ui.notSet': '未设置', 'ui.readOnly': '只读',
     'ui.selectMultiple': '可多选', 'ui.partOfSeries': '系列的一部分',
@@ -433,7 +433,7 @@ const i18n = {
     // Settings
     'ui.genreSettings': '장르', 'ui.charSettings': '캐릭터 설정',
     'ui.terminologySettings': '용어', 'ui.worldSettings': '세계관 설정',
-    'ui.storyGoal': '스토리 목표', 'ui.expand': '확장',
+    'ui.storyGoal': '스토리 목표', 'ui.plotStructure': '플롯 구성', 'ui.expand': '확장',
     'ui.autoSyncHint': '체크하면 공유 설정이 모든 화에 적용됩니다',
     'ui.inheritedFromSeries': '시리즈에서 상속', 'ui.notSet': '미설정', 'ui.readOnly': '읽기 전용',
     'ui.selectMultiple': '다중 선택 가능', 'ui.partOfSeries': '시리즈의 일부',
@@ -1861,8 +1861,8 @@ function renderProjectItem(project) {
 }
 
 function renderMainContent() {
-  // 新タブ構成: 設定 → 構想 → 執筆 → 分析・相談
-  const tabs = ['settings_materials', 'conception', 'writing', 'analysis_chat'];
+  // 新タブ構成: 資料集 → 執筆 → 分析・相談
+  const tabs = ['settings_materials', 'writing', 'analysis_chat'];
   
   return `
     <div class="h-full flex flex-col">
@@ -1887,8 +1887,7 @@ function renderMainContent() {
 
 function getTabIcon(tab) {
   const icons = { 
-    settings_materials: 'fa-cog', 
-    conception: 'fa-lightbulb',  // 構想タブ（ネタ+プロット統合）
+    settings_materials: 'fa-folder-open', 
     writing: 'fa-pen-fancy', 
     analysis_chat: 'fa-chart-line',  // 分析・相談統合
     // Legacy icons for backward compatibility
@@ -1905,16 +1904,13 @@ function getTabIcon(tab) {
 function renderTabContent() {
   switch (state.currentTab) {
     case 'settings_materials': return renderSettingsMaterialsTab();
-    case 'conception': return renderConceptionTab();  // 新・構想タブ（ネタ+プロット統合）
     case 'writing': return renderWritingTab();
     case 'analysis_chat': return renderAnalysisChatTab();  // 新・分析・相談統合
     // Legacy tab support
-    case 'ideas': return renderConceptionTab();
-    case 'plot': return renderConceptionTab();
     case 'analysis': return renderAnalysisChatTab();
     case 'consultation': return renderAnalysisChatTab();
     case 'achievements': return renderAchievementsModal();  // モーダルとして返す
-    default: return renderWritingTab();
+    default: return renderSettingsMaterialsTab();
   }
 }
 
@@ -2451,6 +2447,7 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
   const settingsItems = [
     { id: 'genre', icon: 'fa-tags', color: 'indigo', label: t('ui.genreSettings') },
     { id: 'storyGoal', icon: 'fa-bullseye', color: 'red', label: t('ui.storyGoal') },
+    { id: 'plotStructure', icon: 'fa-sitemap', color: 'orange', label: t('ui.plotStructure') },
     { id: 'characters', icon: 'fa-users', color: 'blue', label: t('ui.charSettings') },
     { id: 'terminology', icon: 'fa-book', color: 'green', label: t('ui.terminologySettings') },
     { id: 'worldSetting', icon: 'fa-globe', color: 'yellow', label: t('ui.worldSettings') },
@@ -2542,6 +2539,22 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
 window.switchSettingsSection = (sectionId) => {
   state.currentSettingsSection = sectionId;
   render();
+};
+
+// プロットテンプレートの切り替え
+window.setPlotTemplate = (template) => {
+  if (!state.plot) state.plot = {};
+  state.plot.template = template;
+  render();
+};
+
+// プロット構成の更新
+window.updatePlotStructure = (key, value) => {
+  if (!state.plot) state.plot = {};
+  let structure = {};
+  try { structure = JSON.parse(state.plot.structure || '{}'); } catch (e) {}
+  structure[key] = value;
+  state.plot.structure = JSON.stringify(structure);
 };
 
 // モバイル用設定AIチャットモーダルのトグル
@@ -2643,6 +2656,115 @@ function renderSettingsSectionContent(sectionId, allGenres, projectGenres, story
         </div>
       </div>
     `,
+    plotStructure: () => {
+      let structure = {};
+      try { structure = JSON.parse(state.plot?.structure || '{}'); } catch (e) {}
+      const template = state.plot?.template || 'kishotenketsu';
+      
+      return `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+            <i class="fas fa-sitemap text-orange-500"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-orange-500">${t('ui.plotStructure')}</h3>
+            <p class="text-sm text-gray-500">物語の骨組みを構成する</p>
+          </div>
+        </div>
+        
+        <!-- テンプレート選択 -->
+        <div class="flex gap-2 mb-4">
+          <button onclick="setPlotTemplate('kishotenketsu')" 
+            class="px-3 py-1.5 text-sm rounded-lg transition ${template === 'kishotenketsu' 
+              ? 'bg-orange-500 text-white' 
+              : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+            ${t('plot.kishotenketsu')}
+          </button>
+          <button onclick="setPlotTemplate('three_act')" 
+            class="px-3 py-1.5 text-sm rounded-lg transition ${template === 'three_act' 
+              ? 'bg-orange-500 text-white' 
+              : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+            ${t('plot.threeAct')}
+          </button>
+        </div>
+        
+        <!-- プロット構成入力 -->
+        <div class="flex-1 overflow-y-auto space-y-3">
+          ${template === 'kishotenketsu' ? `
+            <div class="space-y-3">
+              <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+                  <i class="fas fa-play mr-1"></i>${t('plot.ki')}（起）
+                </label>
+                <textarea id="plot-ki" rows="3" 
+                  class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  placeholder="物語の始まり、登場人物や世界観の紹介"
+                  oninput="updatePlotStructure('ki', this.value)">${structure.ki || ''}</textarea>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+                  <i class="fas fa-arrow-right mr-1"></i>${t('plot.sho')}（承）
+                </label>
+                <textarea id="plot-sho" rows="3" 
+                  class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  placeholder="物語の展開、問題や困難の発生"
+                  oninput="updatePlotStructure('sho', this.value)">${structure.sho || ''}</textarea>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+                  <i class="fas fa-bolt mr-1"></i>${t('plot.ten')}（転）
+                </label>
+                <textarea id="plot-ten" rows="3" 
+                  class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  placeholder="クライマックス、予想外の展開"
+                  oninput="updatePlotStructure('ten', this.value)">${structure.ten || ''}</textarea>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+                  <i class="fas fa-flag-checkered mr-1"></i>${t('plot.ketsu')}（結）
+                </label>
+                <textarea id="plot-ketsu" rows="3" 
+                  class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  placeholder="物語の結末、解決と余韻"
+                  oninput="updatePlotStructure('ketsu', this.value)">${structure.ketsu || ''}</textarea>
+              </div>
+            </div>
+          ` : `
+            <div class="space-y-3">
+              <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+                  <i class="fas fa-door-open mr-1"></i>${t('plot.act1')}
+                </label>
+                <textarea id="plot-act1" rows="4" 
+                  class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  placeholder="設定、登場人物紹介、日常世界、きっかけとなる事件"
+                  oninput="updatePlotStructure('act1', this.value)">${structure.act1 || ''}</textarea>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+                  <i class="fas fa-mountain mr-1"></i>${t('plot.act2')}
+                </label>
+                <textarea id="plot-act2" rows="4" 
+                  class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  placeholder="対立と葛藤、試練、ミッドポイント、最大の危機"
+                  oninput="updatePlotStructure('act2', this.value)">${structure.act2 || ''}</textarea>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+                  <i class="fas fa-trophy mr-1"></i>${t('plot.act3')}
+                </label>
+                <textarea id="plot-act3" rows="4" 
+                  class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+                  placeholder="クライマックス、解決、新たな日常"
+                  oninput="updatePlotStructure('act3', this.value)">${structure.act3 || ''}</textarea>
+              </div>
+            </div>
+          `}
+        </div>
+      </div>
+    `;
+    },
     characters: () => `
       <div class="p-5 flex flex-col h-full">
         <div class="flex items-center gap-3 mb-4">
