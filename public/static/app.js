@@ -134,6 +134,7 @@ const i18n = {
     'ui.settingsAI': '設定AIアシスタント', 'ui.settingsAIHint': '設定作りの相談ができます',
     'ui.settingsAIPlaceholder': 'キャラ設定や世界観について相談...',
     // Series and project settings
+    'ui.parentMaterials': '親資料', 'ui.childMaterials': '子資料',
     'ui.series': 'シリーズ', 'ui.seriesSharedSettings': 'シリーズ共通設定',
     'ui.seriesGenre': 'シリーズのジャンル', 'ui.seriesDescription': 'シリーズの説明',
     'ui.seriesEpisodes': 'このシリーズの話', 'ui.noEpisodes': 'まだ話がありません',
@@ -243,6 +244,7 @@ const i18n = {
     'ui.settingsAI': 'Settings AI Assistant', 'ui.settingsAIHint': 'Get help with your settings',
     'ui.settingsAIPlaceholder': 'Ask about characters, world-building...',
     // Series and project settings
+    'ui.parentMaterials': 'Parent Materials', 'ui.childMaterials': 'Child Materials',
     'ui.series': 'Series', 'ui.seriesSharedSettings': 'Series Shared Settings',
     'ui.seriesGenre': 'Series Genre', 'ui.seriesDescription': 'Series Description',
     'ui.seriesEpisodes': 'Episodes in this Series', 'ui.noEpisodes': 'No episodes yet',
@@ -330,6 +332,7 @@ const i18n = {
     'ui.settingsAI': '设置AI助手', 'ui.settingsAIHint': '获取设置创作帮助',
     'ui.settingsAIPlaceholder': '询问角色设定或世界观...',
     // Series and project settings
+    'ui.parentMaterials': '父资料', 'ui.childMaterials': '子资料',
     'ui.series': '系列', 'ui.seriesSharedSettings': '系列共享设置',
     'ui.seriesGenre': '系列类型', 'ui.seriesDescription': '系列简介',
     'ui.seriesEpisodes': '本系列章节', 'ui.noEpisodes': '暂无章节',
@@ -408,6 +411,7 @@ const i18n = {
     'ui.settingsAI': '설정 AI 어시스턴트', 'ui.settingsAIHint': '설정 작성에 대한 도움받기',
     'ui.settingsAIPlaceholder': '캐릭터 설정이나 세계관에 대해 물어보세요...',
     // Series and project settings
+    'ui.parentMaterials': '부모 자료', 'ui.childMaterials': '자식 자료',
     'ui.series': '시리즈', 'ui.seriesSharedSettings': '시리즈 공유 설정',
     'ui.seriesGenre': '시리즈 장르', 'ui.seriesDescription': '시리즈 설명',
     'ui.seriesEpisodes': '이 시리즈의 화', 'ui.noEpisodes': '아직 화가 없습니다',
@@ -1993,6 +1997,119 @@ function renderSettingsMaterialsTab() {
   return renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline);
 }
 
+// Helper function to render Plot Structure section (shared by all settings tabs)
+function renderPlotStructureSection(description = '物語の骨組みを構成する') {
+  let structure = {};
+  try { structure = JSON.parse(state.plot?.structure || '{}'); } catch (e) {}
+  const template = state.plot?.template || 'kishotenketsu';
+  
+  const kishoteketsuHtml = `
+    <div class="space-y-3">
+      <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+        <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+          <i class="fas fa-play mr-1"></i>${t('plot.ki')}（起）
+        </label>
+        <textarea id="plot-ki" rows="3" 
+          class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+          placeholder="物語の始まり"
+          oninput="updatePlotStructure('ki', this.value)">${structure.ki || ''}</textarea>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+        <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+          <i class="fas fa-arrow-right mr-1"></i>${t('plot.sho')}（承）
+        </label>
+        <textarea id="plot-sho" rows="3" 
+          class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+          placeholder="物語の展開"
+          oninput="updatePlotStructure('sho', this.value)">${structure.sho || ''}</textarea>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+        <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+          <i class="fas fa-bolt mr-1"></i>${t('plot.ten')}（転）
+        </label>
+        <textarea id="plot-ten" rows="3" 
+          class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+          placeholder="クライマックス"
+          oninput="updatePlotStructure('ten', this.value)">${structure.ten || ''}</textarea>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+        <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+          <i class="fas fa-flag-checkered mr-1"></i>${t('plot.ketsu')}（結）
+        </label>
+        <textarea id="plot-ketsu" rows="3" 
+          class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+          placeholder="物語の結末"
+          oninput="updatePlotStructure('ketsu', this.value)">${structure.ketsu || ''}</textarea>
+      </div>
+    </div>
+  `;
+  
+  const threeActHtml = `
+    <div class="space-y-3">
+      <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+        <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+          <i class="fas fa-door-open mr-1"></i>${t('plot.act1')}
+        </label>
+        <textarea id="plot-act1" rows="4" 
+          class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+          placeholder="設定、登場人物紹介"
+          oninput="updatePlotStructure('act1', this.value)">${structure.act1 || ''}</textarea>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+        <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+          <i class="fas fa-mountain mr-1"></i>${t('plot.act2')}
+        </label>
+        <textarea id="plot-act2" rows="4" 
+          class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+          placeholder="対立と葛藤"
+          oninput="updatePlotStructure('act2', this.value)">${structure.act2 || ''}</textarea>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+        <label class="block text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1">
+          <i class="fas fa-trophy mr-1"></i>${t('plot.act3')}
+        </label>
+        <textarea id="plot-act3" rows="4" 
+          class="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+          placeholder="クライマックス、解決"
+          oninput="updatePlotStructure('act3', this.value)">${structure.act3 || ''}</textarea>
+      </div>
+    </div>
+  `;
+  
+  return `
+    <div class="p-5 flex flex-col h-full">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+          <i class="fas fa-sitemap text-orange-500"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-lg text-orange-500">${t('ui.plotStructure')}</h3>
+          <p class="text-sm text-gray-500">${description}</p>
+        </div>
+      </div>
+      
+      <div class="flex gap-2 mb-4">
+        <button onclick="setPlotTemplate('kishotenketsu')" 
+          class="px-3 py-1.5 text-sm rounded-lg transition ${template === 'kishotenketsu' 
+            ? 'bg-orange-500 text-white' 
+            : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+          ${t('plot.kishotenketsu')}
+        </button>
+        <button onclick="setPlotTemplate('three_act')" 
+          class="px-3 py-1.5 text-sm rounded-lg transition ${template === 'three_act' 
+            ? 'bg-orange-500 text-white' 
+            : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+          ${t('plot.threeAct')}
+        </button>
+      </div>
+      
+      <div class="flex-1 overflow-y-auto space-y-3">
+        ${template === 'kishotenketsu' ? kishoteketsuHtml : threeActHtml}
+      </div>
+    </div>
+  `;
+}
+
 // Helper function to render Settings AI Chat panel
 function renderSettingsAIChat() {
   const messages = state.settingsChatMessages || [];
@@ -2089,10 +2206,23 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
   const childProjects = state.projects.filter(p => p.library_id === state.currentProject?.id);
   const aiChatHtml = renderSettingsAIChat();
   
+  // 親資料の設定項目リスト（スタンドアロン版と同じ構成）
+  const settingsItems = [
+    { id: 'genre', icon: 'fa-tags', label: t('ui.genreSettings') },
+    { id: 'storyGoal', icon: 'fa-bullseye', label: t('ui.storyGoal') },
+    { id: 'plotStructure', icon: 'fa-sitemap', label: t('ui.plotStructure') },
+    { id: 'characters', icon: 'fa-users', label: t('ui.charSettings') },
+    { id: 'terminology', icon: 'fa-book', label: t('ui.terminologySettings') },
+    { id: 'worldSetting', icon: 'fa-globe', label: t('ui.worldSettings') },
+    { id: 'episodes', icon: 'fa-list-ol', label: t('ui.episodeOutline') },
+  ];
+  
+  const currentSection = state.currentSettingsSection || 'genre';
+  
   return `
-    <div class="h-full flex flex-col gap-4 overflow-y-auto">
-      <!-- Library Header Banner -->
-      <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-4 text-white shadow-lg">
+    <div class="h-full flex flex-col">
+      <!-- Parent Library Header Banner -->
+      <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-4 text-white shadow-lg mb-4">
         <div class="flex items-center gap-3">
           <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
             <i class="fas fa-layer-group text-2xl"></i>
@@ -2103,165 +2233,251 @@ function renderLibrarySettingsTab(allGenres, projectGenres, librarySettings) {
               <i class="fas fa-book-open mr-1"></i>${childProjects.length} ${t('ui.episodesSharedSettings')}
             </p>
           </div>
-          <div class="text-right">
-            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">
-              <i class="fas fa-crown mr-1"></i>${t('ui.parentProject')}
-            </span>
-          </div>
+          <span class="px-3 py-1 bg-white/20 rounded-full text-sm">
+            <i class="fas fa-crown mr-1"></i>${t('ui.parentMaterials')}
+          </span>
         </div>
       </div>
       
-      <div class="flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1">
-        <!-- Left Column -->
-        <div class="w-full lg:w-1/3 flex flex-col gap-4">
-          <!-- Genre Settings -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-600">
-              <i class="fas fa-tags"></i>
-              ${t('ui.seriesGenre')}
-            </h3>
-            <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-3 border rounded-lg dark:border-gray-600 bg-purple-50 dark:bg-purple-900/20">
-              ${allGenres.map(g => `
-                <label class="flex items-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-gray-800 p-2 rounded-lg transition">
-                  <input type="checkbox" name="project-genre" value="${g.value}" 
-                    ${projectGenres.includes(g.value) ? 'checked' : ''}
-                    onchange="updateProjectGenre()" class="rounded text-purple-600 focus:ring-purple-500">
-                  <span class="text-sm">${g.label}</span>
-                </label>
-              `).join('')}
-            </div>
-          </div>
-          
-          <!-- Series Description -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-600">
-              <i class="fas fa-info-circle"></i>
-              ${t('ui.seriesDescription')}
-            </h3>
-            <textarea id="library-desc" rows="4" 
-              placeholder="このシリーズの概要、テーマ、対象読者など..."
-              class="w-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
-              oninput="updateLibrarySettings('description', this.value)">${librarySettings.description || ''}</textarea>
-          </div>
-          
-          <!-- Child Projects List -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-300">
-              <i class="fas fa-list-ol"></i>
-              ${t('ui.seriesEpisodes')} (${childProjects.length})
-            </h3>
-            <div class="space-y-2 max-h-40 overflow-y-auto">
-              ${childProjects.length > 0 ? childProjects.map((p, i) => `
-                <div onclick="selectProject('${p.id}')" class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer text-sm">
-                  <span class="w-6 h-6 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full flex items-center justify-center text-xs font-bold">${i + 1}</span>
-                  <span class="flex-1 truncate">${p.title}</span>
-                  <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                </div>
-              `).join('') : `
-                <p class="text-sm text-gray-500 text-center py-4">
-                  <i class="fas fa-info-circle mr-1"></i>${t('ui.noEpisodes')}
-                </p>
-              `}
-            </div>
-            <button onclick="openAddChildProjectModal('${state.currentProject?.id}')" 
-              class="w-full mt-3 px-4 py-2 border-2 border-dashed border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition text-sm">
-              <i class="fas fa-plus mr-1"></i>${t('ui.addEpisode')}
+      <!-- 項目選択ボタン -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 mb-4">
+        <div class="flex flex-wrap gap-2">
+          ${settingsItems.map(item => `
+            <button onclick="switchSettingsSection('${item.id}')" 
+              class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${currentSection === item.id 
+                ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 ring-2 ring-purple-500' 
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+              <i class="fas ${item.icon}"></i>
+              <span class="hidden sm:inline">${item.label}</span>
             </button>
-          </div>
+          `).join('')}
         </div>
-        
-        <!-- Middle Column: Shared Characters -->
-        <div class="w-full lg:w-1/3 flex flex-col gap-4">
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1 border-2 border-purple-200 dark:border-purple-800">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
-              <i class="fas fa-users"></i>
-              ${t('ui.sharedCharacters')}
-              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">${t('ui.seriesShared')}</span>
-            </h3>
-            <p class="text-sm text-gray-500 mb-3">${t('ui.sharedCharacters')}</p>
-            <div class="relative h-[calc(100%-100px)]">
-              <textarea id="library-characters" 
-                placeholder="【主人公】&#10;名前: &#10;年齢: &#10;性格: &#10;&#10;【メインキャラクター】&#10;..."
-                class="w-full h-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
-                oninput="updateLibrarySettings('shared_characters', this.value)">${librarySettings.shared_characters || ''}</textarea>
-              <button onclick="expandTextarea('library-characters', 'ui.sharedCharacters')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-                <i class="fas fa-expand text-xs"></i>
-              </button>
-            </div>
-          </div>
-          
-          <!-- Shared Terminology -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-green-500">
-              <i class="fas fa-book"></i>
-              ${t('ui.sharedTerminology')}
-              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">${t('ui.seriesShared')}</span>
-            </h3>
-            <div class="relative">
-              <textarea id="library-terminology" rows="6"
-                placeholder="【魔法体系】&#10;・〇〇: 説明&#10;&#10;【組織】&#10;・△△: 説明"
-                class="w-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
-                oninput="updateLibrarySettings('shared_terminology', this.value)">${librarySettings.shared_terminology || ''}</textarea>
-              <button onclick="expandTextarea('library-terminology', 'ui.sharedTerminology')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-                <i class="fas fa-expand text-xs"></i>
-              </button>
-            </div>
-          </div>
+      </div>
+      
+      <!-- メインコンテンツ -->
+      <div class="flex-1 flex gap-4 min-h-0">
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden flex flex-col border-2 border-purple-200 dark:border-purple-800">
+          ${renderLibrarySectionContent(currentSection, allGenres, projectGenres, librarySettings, childProjects)}
         </div>
-        
-        <!-- Right Column: World Setting, AI Chat & Save -->
-        <div class="w-full lg:w-1/3 flex flex-col gap-4">
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-2 border-purple-200 dark:border-purple-800">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
-              <i class="fas fa-globe"></i>
-              ${t('ui.sharedWorldSetting')}
-              <span class="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full">${t('ui.seriesShared')}</span>
-            </h3>
-            <p class="text-sm text-gray-500 mb-3">${t('ui.sharedWorldSetting')}</p>
-            <div class="relative">
-              <textarea id="library-world" rows="5"
-                placeholder="【舞台】&#10;・時代: &#10;・場所: &#10;&#10;【世界のルール】&#10;..."
-                class="w-full px-4 py-3 text-sm border-2 border-purple-200 dark:border-purple-700 rounded-lg dark:bg-gray-700 resize-none focus:border-purple-500"
-                oninput="updateLibrarySettings('shared_world_setting', this.value)">${librarySettings.shared_world_setting || ''}</textarea>
-              <button onclick="expandTextarea('library-world', 'ui.sharedWorldSetting')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-purple-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-                <i class="fas fa-expand text-xs"></i>
-              </button>
-            </div>
-          </div>
-          
-          <!-- Settings AI Chat -->
+        <div class="w-80 xl:w-96 hidden lg:flex flex-col" style="min-height: 500px;">
           ${aiChatHtml}
-          
-          <!-- Sync Options & Save -->
-          <div class="bg-purple-50 dark:bg-purple-900/30 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-800">
-            <label class="flex items-center gap-2 mb-3 cursor-pointer">
-              <input type="checkbox" id="sync-settings-to-children" class="rounded text-purple-600" checked>
-              <span class="text-sm font-medium">${t('ui.autoSync')}</span>
-            </label>
-            <p class="text-xs text-gray-500 mb-3">${t('ui.autoSyncHint')}</p>
-          </div>
-          
-          <button onclick="saveLibrarySettingsFromTab()" 
-            class="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 shadow-lg font-medium flex items-center justify-center gap-2">
-            <i class="fas fa-save"></i>
-            ${t('ui.saveSeriesSettings')}
-          </button>
         </div>
+      </div>
+      
+      <!-- 保存ボタン -->
+      <div class="mt-4 flex gap-3">
+        <button onclick="toggleSettingsAIChatModal()" 
+          class="lg:hidden px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl shadow-lg font-medium flex items-center gap-2">
+          <i class="fas fa-robot"></i><span>AI</span>
+        </button>
+        <button onclick="saveLibrarySettingsFromTab()" 
+          class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 shadow-lg font-medium flex items-center justify-center gap-2">
+          <i class="fas fa-save"></i>
+          ${t('ui.saveSeriesSettings')}
+        </button>
       </div>
     </div>
   `;
 }
 
+// 親資料の各セクションコンテンツ
+function renderLibrarySectionContent(sectionId, allGenres, projectGenres, librarySettings, childProjects) {
+  if (sectionId === 'plotStructure') {
+    return renderPlotStructureSection('シリーズ全体の骨組み');
+  }
+  
+  const sections = {
+    genre: `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <i class="fas fa-tags text-purple-600"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-purple-600">${t('ui.genreSettings')}</h3>
+            <p class="text-sm text-gray-500">${t('ui.selectMultiple')}</p>
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2 p-3 border rounded-lg dark:border-gray-600 bg-purple-50 dark:bg-purple-900/20">
+            ${allGenres.map(g => `
+              <label class="flex items-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-gray-800 p-2 rounded-lg transition">
+                <input type="checkbox" name="project-genre" value="${g.value}" 
+                  ${projectGenres.includes(g.value) ? 'checked' : ''}
+                  onchange="updateProjectGenre()" class="rounded text-purple-600 focus:ring-purple-500">
+                <span class="text-sm">${g.label}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `,
+    storyGoal: `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <i class="fas fa-bullseye text-red-500"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-red-500">${t('ui.storyGoal')}</h3>
+            <p class="text-sm text-gray-500">${t('ui.storyGoalHint')}</p>
+          </div>
+        </div>
+        <div class="flex-1 relative">
+          <textarea id="library-storyGoal"
+            placeholder="${t('ui.storyGoalPlaceholder')}"
+            class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+            oninput="updateLibrarySettings('storyGoal', this.value)">${librarySettings.storyGoal || ''}</textarea>
+          <button onclick="expandTextarea('library-storyGoal', 'ui.storyGoal')" 
+            class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-red-500 bg-white dark:bg-gray-600 rounded-lg shadow-sm">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      </div>
+    `,
+    characters: `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <i class="fas fa-users text-blue-500"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-blue-500">${t('ui.charSettings')}</h3>
+            <p class="text-sm text-gray-500">${t('ui.charSettingsHint')}</p>
+          </div>
+        </div>
+        <div class="flex-1 relative">
+          <textarea id="library-characters"
+            placeholder="【主人公】
+名前: 
+年齢: 
+性格: 
+
+【メインキャラクター】
+..."
+            class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
+            oninput="updateLibrarySettings('shared_characters', this.value)">${librarySettings.shared_characters || ''}</textarea>
+          <button onclick="expandTextarea('library-characters', 'ui.sharedCharacters')" 
+            class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-blue-500 bg-white dark:bg-gray-600 rounded-lg shadow-sm">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      </div>
+    `,
+    terminology: `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <i class="fas fa-book text-green-500"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-green-500">${t('ui.terminologySettings')}</h3>
+            <p class="text-sm text-gray-500">${t('ui.terminologyHint')}</p>
+          </div>
+        </div>
+        <div class="flex-1 relative">
+          <textarea id="library-terminology"
+            placeholder="【魔法体系】
+・〇〇: 説明
+
+【組織】
+・△△: 説明"
+            class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
+            oninput="updateLibrarySettings('shared_terminology', this.value)">${librarySettings.shared_terminology || ''}</textarea>
+          <button onclick="expandTextarea('library-terminology', 'ui.sharedTerminology')" 
+            class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-green-500 bg-white dark:bg-gray-600 rounded-lg shadow-sm">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      </div>
+    `,
+    worldSetting: `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+            <i class="fas fa-globe text-yellow-500"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-yellow-500">${t('ui.worldSettings')}</h3>
+            <p class="text-sm text-gray-500">${t('ui.worldSettingsHint')}</p>
+          </div>
+        </div>
+        <div class="flex-1 relative">
+          <textarea id="library-world"
+            placeholder="【舞台】
+・時代: 
+・場所: 
+
+【世界のルール】
+..."
+            class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
+            oninput="updateLibrarySettings('shared_world_setting', this.value)">${librarySettings.shared_world_setting || ''}</textarea>
+          <button onclick="expandTextarea('library-world', 'ui.sharedWorldSetting')" 
+            class="absolute bottom-3 right-3 p-2 text-gray-400 hover:text-yellow-500 bg-white dark:bg-gray-600 rounded-lg shadow-sm">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      </div>
+    `,
+    episodes: `
+      <div class="p-5 flex flex-col h-full">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+            <i class="fas fa-list-ol text-pink-500"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-pink-500">${t('ui.episodeOutline')} (${childProjects.length})</h3>
+            <p class="text-sm text-gray-500">${t('ui.episodeOutlineHint')}</p>
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <div class="space-y-2">
+            ${childProjects.length > 0 ? childProjects.map((p, i) => `
+              <div onclick="selectProject('${p.id}')" class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer border dark:border-gray-600">
+                <span class="w-8 h-8 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full flex items-center justify-center text-sm font-bold">${i + 1}</span>
+                <span class="flex-1 truncate font-medium">${p.title}</span>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+              </div>
+            `).join('') : `
+              <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-inbox text-4xl mb-3 text-gray-300"></i>
+                <p>${t('ui.noEpisodes')}</p>
+              </div>
+            `}
+          </div>
+          <button onclick="openAddChildProjectModal('${state.currentProject?.id}')" 
+            class="w-full mt-4 px-4 py-3 border-2 border-dashed border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition">
+            <i class="fas fa-plus mr-2"></i>${t('ui.addEpisode')}
+          </button>
+        </div>
+      </div>
+    `,
+  };
+  
+  return sections[sectionId] || sections.genre;
+}
+
 // Render settings tab for a Child Project (belongs to a library)
 function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, parentLibrary, parentSettings) {
   const aiChatHtml = renderSettingsAIChat();
+  
+  // 子資料の設定項目リスト（スタンドアロン版と同じ構成）
+  const settingsItems = [
+    { id: 'genre', icon: 'fa-tags', label: t('ui.genreSettings') },
+    { id: 'storyGoal', icon: 'fa-bullseye', label: t('ui.storyGoal') },
+    { id: 'plotStructure', icon: 'fa-sitemap', label: t('ui.plotStructure') },
+    { id: 'characters', icon: 'fa-users', label: t('ui.charSettings') },
+    { id: 'terminology', icon: 'fa-book', label: t('ui.terminologySettings') },
+    { id: 'worldSetting', icon: 'fa-globe', label: t('ui.worldSettings') },
+    { id: 'episodes', icon: 'fa-list-ol', label: t('ui.episodeOutline') },
+  ];
+  
+  const currentSection = state.currentSettingsSection || 'storyGoal';
+  
   return `
-    <div class="h-full flex flex-col gap-4 overflow-y-auto">
-      <!-- Parent Library Reference Banner -->
-      <div class="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl p-4 text-white shadow-lg">
+    <div class="h-full flex flex-col">
+      <!-- Child Project Header Banner -->
+      <div class="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl p-4 text-white shadow-lg mb-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
             <i class="fas fa-file-alt text-xl"></i>
@@ -2272,171 +2488,69 @@ function renderChildProjectSettingsTab(allGenres, projectGenres, storyOutline, p
               <i class="fas fa-link mr-1"></i>「${parentLibrary.title}」${t('ui.partOfSeries')}
             </p>
           </div>
-          <button onclick="selectProject('${parentLibrary.id}')" 
-            class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm transition flex items-center gap-1">
-            <i class="fas fa-layer-group"></i>
-            ${t('ui.editSeriesSettings')}
-          </button>
+          <span class="px-3 py-1 bg-white/20 rounded-full text-sm">
+            <i class="fas fa-file-alt mr-1"></i>${t('ui.childMaterials')}
+          </span>
         </div>
       </div>
       
-      <!-- Parent Shared Settings Reference (Collapsed by default) -->
-      <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl border-2 border-purple-200 dark:border-purple-800">
-        <button onclick="toggleParentSettingsPreview()" class="w-full p-4 flex items-center justify-between text-left">
-          <div class="flex items-center gap-2">
-            <i class="fas fa-layer-group text-purple-500"></i>
-            <span class="font-medium text-purple-700 dark:text-purple-300">${t('ui.viewSeriesSettings')}</span>
-            <span class="text-xs px-2 py-0.5 bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-full">${t('ui.readOnly')}</span>
-          </div>
-          <i id="parent-settings-chevron" class="fas fa-chevron-down text-purple-500 transition-transform"></i>
+      <!-- 親資料へのリンク -->
+      <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3 mb-4 flex items-center gap-3 border border-purple-200 dark:border-purple-800">
+        <i class="fas fa-layer-group text-purple-500"></i>
+        <span class="text-sm font-medium text-purple-700 dark:text-purple-300">${t('ui.parentMaterials')}:</span>
+        <span class="text-sm text-purple-600 dark:text-purple-400">${parentLibrary.title}</span>
+        <button onclick="selectProject('${parentLibrary.id}')" 
+          class="ml-auto px-3 py-1 bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-lg text-sm hover:bg-purple-200 dark:hover:bg-purple-700 transition flex items-center gap-1">
+          <i class="fas fa-external-link-alt"></i>
+          ${t('ui.editSeriesSettings')}
         </button>
-        <div id="parent-settings-preview" class="hidden px-4 pb-4">
-          <div class="grid grid-cols-3 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
-              <h4 class="text-sm font-medium text-blue-500 mb-2"><i class="fas fa-users mr-1"></i>${t('ui.sharedCharacters')}</h4>
-              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_characters || '(' + t('ui.notSet') + ')'}</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
-              <h4 class="text-sm font-medium text-yellow-500 mb-2"><i class="fas fa-globe mr-1"></i>${t('ui.sharedWorldSetting')}</h4>
-              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_world_setting || '(' + t('ui.notSet') + ')'}</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-3">
-              <h4 class="text-sm font-medium text-green-500 mb-2"><i class="fas fa-book mr-1"></i>${t('ui.sharedTerminology')}</h4>
-              <p class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-32 overflow-y-auto">${parentSettings.shared_terminology || '(' + t('ui.notSet') + ')'}</p>
-            </div>
-          </div>
+      </div>
+      
+      <!-- 項目選択ボタン -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 mb-4">
+        <div class="flex flex-wrap gap-2">
+          ${settingsItems.map(item => `
+            <button onclick="switchSettingsSection('${item.id}')" 
+              class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${currentSection === item.id 
+                ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500' 
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+              <i class="fas ${item.icon}"></i>
+              <span class="hidden sm:inline">${item.label}</span>
+            </button>
+          `).join('')}
         </div>
       </div>
       
-      <!-- This Episode's Settings -->
-      <div class="flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1">
-        <!-- Left Column -->
-        <div class="w-full lg:w-1/3 flex flex-col gap-4">
-          <!-- Genre (inherited from series) -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-indigo-600">
-              <i class="fas fa-tags"></i>
-              ${t('ui.genreSettings')}
-              <span class="text-xs px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 rounded-full">${t('ui.inheritedFromSeries')}</span>
-            </h3>
-            <div class="flex flex-wrap gap-2">
-              ${projectGenres.length > 0 ? projectGenres.map(g => `
-                <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 rounded-full text-sm">${g}</span>
-              `).join('') : '<span class="text-gray-500 text-sm">' + t('ui.notSet') + '</span>'}
-            </div>
-          </div>
-          
-          <!-- Episode Goal -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-red-500">
-              <i class="fas fa-bullseye"></i>
-              ${t('ui.episodeGoal')}
-            </h3>
-            <p class="text-sm text-gray-500 mb-3">${t('ui.episodeGoalHint')}</p>
-            <div class="relative h-[calc(100%-80px)]">
-              <textarea id="settings-storyGoal" 
-                placeholder="${t('ui.episodeGoalPlaceholder')}"
-                class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-                oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal}</textarea>
-              <button onclick="expandTextarea('settings-storyGoal', 'ui.episodeGoal')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-                <i class="fas fa-expand text-xs"></i>
-              </button>
-            </div>
-          </div>
+      <!-- メインコンテンツ -->
+      <div class="flex-1 flex gap-4 min-h-0">
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+          ${renderChildSectionContent(currentSection, allGenres, projectGenres, storyOutline)}
         </div>
-        
-        <!-- Middle Column -->
-        <div class="w-full lg:w-1/3 flex flex-col gap-4">
-          <!-- Episode-specific Characters -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-blue-500">
-              <i class="fas fa-user-plus"></i>
-              ${t('ui.episodeCharacters')}
-            </h3>
-            <p class="text-sm text-gray-500 mb-3">${t('ui.episodeCharactersHint')}</p>
-            <div class="relative h-[calc(100%-80px)]">
-              <textarea id="settings-characters" 
-                placeholder="${t('ui.episodeCharactersPlaceholder')}"
-                class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-                oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters}</textarea>
-              <button onclick="expandTextarea('settings-characters', 'ui.episodeCharacters')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-                <i class="fas fa-expand text-xs"></i>
-              </button>
-            </div>
-          </div>
-          
-          <!-- Episode Terminology -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-green-500">
-              <i class="fas fa-book"></i>
-              ${t('ui.episodeTerminology')}
-            </h3>
-            <div class="relative">
-              <textarea id="settings-terminology" rows="5"
-                placeholder="${t('ui.episodeTerminologyPlaceholder')}"
-                class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-                oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology}</textarea>
-              <button onclick="expandTextarea('settings-terminology', 'ui.episodeTerminology')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-                <i class="fas fa-expand text-xs"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Right Column -->
-        <div class="w-full lg:w-1/3 flex flex-col gap-4">
-          <!-- Episode World/Scene -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-500">
-              <i class="fas fa-map-marker-alt"></i>
-              ${t('ui.episodeSetting')}
-            </h3>
-            <p class="text-sm text-gray-500 mb-3">${t('ui.episodeSettingHint')}</p>
-            <div class="relative">
-              <textarea id="settings-worldSetting" rows="5"
-                placeholder="【主な舞台】&#10;・〇〇城: 説明&#10;&#10;【シーン】&#10;..."
-                class="w-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-                oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting}</textarea>
-              <button onclick="expandTextarea('settings-worldSetting', 'ui.episodeSetting')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-                <i class="fas fa-expand text-xs"></i>
-              </button>
-            </div>
-          </div>
-          
-          <!-- Episode Outline -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex-1">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-500">
-              <i class="fas fa-list"></i>
-              ${t('ui.episodeStructure')}
-            </h3>
-            <div class="relative h-[calc(100%-60px)]">
-              <textarea id="settings-episodes"
-                placeholder="【起】&#10;・シーン1: &#10;&#10;【承】&#10;・シーン2: &#10;&#10;【転】&#10;..."
-                class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
-                oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes}</textarea>
-              <button onclick="expandTextarea('settings-episodes', 'ui.episodeStructure')" 
-                class="absolute bottom-2 right-2 p-1.5 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-600 rounded shadow-sm" title="${t("ui.expand")}">
-                <i class="fas fa-expand text-xs"></i>
-              </button>
-            </div>
-          </div>
-          
-          <!-- Settings AI Chat -->
+        <div class="w-80 xl:w-96 hidden lg:flex flex-col" style="min-height: 500px;">
           ${aiChatHtml}
-          
-          <button onclick="saveStoryOutline()" 
-            class="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
-            <i class="fas fa-save"></i>
-            ${t('ui.saveEpisodeSettings')}
-          </button>
         </div>
+      </div>
+      
+      <!-- 保存ボタン -->
+      <div class="mt-4 flex gap-3">
+        <button onclick="toggleSettingsAIChatModal()" 
+          class="lg:hidden px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl shadow-lg font-medium flex items-center gap-2">
+          <i class="fas fa-robot"></i><span>AI</span>
+        </button>
+        <button onclick="saveStoryOutline()" 
+          class="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
+          <i class="fas fa-save"></i>
+          ${t('ui.saveEpisodeSettings')}
+        </button>
       </div>
     </div>
   `;
+}
+
+// 子資料の各セクションコンテンツ（スタンドアロン版と同じ構造）
+function renderChildSectionContent(sectionId, allGenres, projectGenres, storyOutline) {
+  // スタンドアロン版と同じ関数を使用
+  return renderSettingsSectionContent(sectionId, allGenres, projectGenres, storyOutline);
 }
 
 // Render settings tab for a Standalone Project (not in a library)
