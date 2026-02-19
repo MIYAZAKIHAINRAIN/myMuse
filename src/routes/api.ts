@@ -1,10 +1,11 @@
 import { Hono } from 'hono';
 import { callGemini, calculateDailyTarget } from '../utils/gemini';
+import { callGrok, GrokRequest } from '../utils/grok';
 
 type Bindings = {
   DB: D1Database;
   GEMINI_API_KEY: string;
-  GROK_API_KEY?: string;      // For future Grok integration
+  GROK_API_KEY?: string;      // For Grok research integration
   OPENAI_API_KEY?: string;    // For future OpenAI integration
   AI_PROVIDER?: string;       // 'gemini' | 'grok' | 'openai' - defaults to 'gemini'
 };
@@ -925,6 +926,41 @@ api.post('/ai/chat', async (c) => {
     return c.json({ response: result });
   } catch (error: any) {
     console.error('AI Chat Error:', error);
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+// ============================================
+// Grok Research AI (リサーチ専用)
+// ============================================
+
+// Grok Research endpoint - 資料収集、トレンド調査、ファクトチェック
+api.post('/ai/research', async (c) => {
+  const { query, type, context } = await c.req.json();
+  
+  if (!c.env.GROK_API_KEY) {
+    return c.json({ error: 'Grok API key is not configured' }, 500);
+  }
+  
+  try {
+    const request: GrokRequest = {
+      query,
+      type: type || 'research',
+      context: context || {}
+    };
+    
+    const result = await callGrok(c.env.GROK_API_KEY, request);
+    
+    if (!result.success) {
+      return c.json({ error: result.error || 'Research failed' }, 500);
+    }
+    
+    return c.json({ 
+      response: result.content,
+      sources: result.sources 
+    });
+  } catch (error: any) {
+    console.error('Grok Research Error:', error);
     return c.json({ error: error.message }, 500);
   }
 });

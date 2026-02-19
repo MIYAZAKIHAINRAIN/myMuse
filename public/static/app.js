@@ -2113,6 +2113,7 @@ function renderPlotStructureSection(description = '物語の骨組みを構成�
 // Helper function to render Settings AI Chat panel
 function renderSettingsAIChat() {
   const messages = state.settingsChatMessages || [];
+  const isResearchMode = state.settingsAIMode === 'research';
   
   let messagesHtml = '';
   if (messages.length > 0) {
@@ -2120,12 +2121,15 @@ function renderSettingsAIChat() {
       const alignClass = msg.role === 'user' ? 'justify-end' : 'justify-start';
       const bgClass = msg.role === 'user' 
         ? 'bg-indigo-600 text-white' 
-        : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+        : msg.isResearch 
+          ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700'
+          : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
       const content = msg.content.replace(/\n/g, '<br>');
+      const icon = msg.isResearch ? '<i class="fas fa-search text-emerald-500 mr-1"></i>' : '';
       return `
         <div class="flex ${alignClass}">
           <div class="max-w-[90%] rounded-lg p-2 text-xs ${bgClass}">
-            ${content}
+            ${icon}${content}
           </div>
         </div>
       `;
@@ -2143,23 +2147,43 @@ function renderSettingsAIChat() {
   const charLabel = isJa ? 'キャラ深掘り' : 'Character';
   const checkLabel = isJa ? '設定チェック' : 'Check';
   const ideaLabel = isJa ? 'アイデア' : 'Ideas';
+  const researchLabel = isJa ? '資料調査' : 'Research';
   const charPrompt = isJa ? 'キャラクターの性格を深掘りしたい' : 'Help me develop character personality';
   const checkPrompt = isJa ? '世界観の矛盾点をチェックして' : 'Check world-building consistency';
   const ideaPrompt = isJa ? '新しい設定のアイデアが欲しい' : 'Suggest new setting ideas';
+  const researchPrompt = isJa ? '時代考証や専門知識を調べて' : 'Research historical or technical details';
   
   const buttonContent = state.aiGenerating 
     ? '<div class="spinner" style="width:14px;height:14px;border-width:2px;"></div>' 
     : '<i class="fas fa-paper-plane text-xs"></i>';
   const disabledAttr = state.aiGenerating ? 'disabled' : '';
   
+  // AI Mode toggle
+  const modeToggleClass = isResearchMode 
+    ? 'bg-emerald-500 text-white' 
+    : 'bg-indigo-500 text-white';
+  const modeName = isResearchMode 
+    ? (isJa ? '🔍 リサーチ (Grok)' : '🔍 Research (Grok)')
+    : (isJa ? '✨ 創作支援 (Gemini)' : '✨ Creative (Gemini)');
+  
   return `
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border-2 border-indigo-200 dark:border-indigo-800 flex flex-col h-full">
-      <div class="p-3 border-b dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
-        <h3 class="font-semibold flex items-center gap-2 text-sm">
-          <i class="fas fa-robot"></i>
-          ${t('ui.settingsAI')}
-        </h3>
-        <p class="text-xs text-indigo-100 mt-0.5">${t('ui.settingsAIHint')}</p>
+      <div class="p-3 border-b dark:border-gray-700 bg-gradient-to-r ${isResearchMode ? 'from-emerald-500 to-teal-600' : 'from-indigo-500 to-purple-600'} text-white">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold flex items-center gap-2 text-sm">
+            <i class="fas ${isResearchMode ? 'fa-search' : 'fa-robot'}"></i>
+            ${isResearchMode ? (isJa ? 'リサーチAI' : 'Research AI') : t('ui.settingsAI')}
+          </h3>
+          <button onclick="toggleSettingsAIMode()" 
+            class="px-2 py-0.5 text-xs rounded-full bg-white/20 hover:bg-white/30 transition">
+            ${isResearchMode ? (isJa ? '創作モードへ' : 'Creative') : (isJa ? 'リサーチへ' : 'Research')}
+          </button>
+        </div>
+        <p class="text-xs text-white/80 mt-0.5">
+          ${isResearchMode 
+            ? (isJa ? '資料収集・トレンド調査・ファクトチェック' : 'Research, trends, fact-check')
+            : t('ui.settingsAIHint')}
+        </p>
       </div>
       
       <!-- Chat Messages -->
@@ -2171,11 +2195,13 @@ function renderSettingsAIChat() {
       <div class="p-2 border-t dark:border-gray-700">
         <div class="flex gap-1">
           <input type="text" id="settings-chat-input" 
-            placeholder="${t('ui.settingsAIPlaceholder')}"
+            placeholder="${isResearchMode 
+              ? (isJa ? '調べたいことを入力...' : 'Enter research query...') 
+              : t('ui.settingsAIPlaceholder')}"
             class="flex-1 px-2 py-1.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-xs"
             onkeypress="if(event.key === 'Enter') sendSettingsChat()">
           <button onclick="sendSettingsChat()" 
-            class="px-2 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            class="px-2 py-1.5 ${isResearchMode ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white rounded-lg"
             ${disabledAttr}>
             ${buttonContent}
           </button>
@@ -2183,18 +2209,33 @@ function renderSettingsAIChat() {
         
         <!-- Quick prompts -->
         <div class="flex flex-wrap gap-1 mt-1.5">
-          <button onclick="sendSettingsChatQuick('${charPrompt}')" 
-            class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
-            ${charLabel}
-          </button>
-          <button onclick="sendSettingsChatQuick('${checkPrompt}')" 
-            class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
-            ${checkLabel}
-          </button>
-          <button onclick="sendSettingsChatQuick('${ideaPrompt}')" 
-            class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
-            ${ideaLabel}
-          </button>
+          ${isResearchMode ? `
+            <button onclick="sendSettingsChatQuick('${isJa ? '江戸時代の暮らしについて調べて' : 'Research daily life in Edo period'}')" 
+              class="px-1.5 py-0.5 text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded hover:bg-emerald-200 dark:hover:bg-emerald-800">
+              ${isJa ? '時代考証' : 'Historical'}
+            </button>
+            <button onclick="sendSettingsChatQuick('${isJa ? '今流行りのジャンルの傾向は？' : 'What are current genre trends?'}')" 
+              class="px-1.5 py-0.5 text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded hover:bg-emerald-200 dark:hover:bg-emerald-800">
+              ${isJa ? 'トレンド' : 'Trends'}
+            </button>
+            <button onclick="sendSettingsChatQuick('${isJa ? 'この設定に矛盾がないか確認して' : 'Check for inconsistencies'}')" 
+              class="px-1.5 py-0.5 text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded hover:bg-emerald-200 dark:hover:bg-emerald-800">
+              ${isJa ? 'ファクトチェック' : 'Fact-check'}
+            </button>
+          ` : `
+            <button onclick="sendSettingsChatQuick('${charPrompt}')" 
+              class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              ${charLabel}
+            </button>
+            <button onclick="sendSettingsChatQuick('${checkPrompt}')" 
+              class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              ${checkLabel}
+            </button>
+            <button onclick="sendSettingsChatQuick('${ideaPrompt}')" 
+              class="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              ${ideaLabel}
+            </button>
+          `}
         </div>
       </div>
     </div>
@@ -8597,10 +8638,18 @@ window.sendSettingsChatQuick = async (prompt) => {
   await sendSettingsChatMessage(prompt);
 };
 
+// Toggle between Creative (Gemini) and Research (Grok) modes
+window.toggleSettingsAIMode = () => {
+  state.settingsAIMode = state.settingsAIMode === 'research' ? 'creative' : 'research';
+  render();
+};
+
 async function sendSettingsChatMessage(message) {
   if (!state.settingsChatMessages) {
     state.settingsChatMessages = [];
   }
+  
+  const isResearchMode = state.settingsAIMode === 'research';
   
   // Add user message
   state.settingsChatMessages.push({ role: 'user', content: message });
@@ -8630,32 +8679,65 @@ async function sendSettingsChatMessage(message) {
       characters: state.characters || [],
       worldSettings: state.worldSettings || [],
       storyOutline: state.storyOutline,
-      plot: state.plot
+      plot: state.plot,
+      worldSetting: state.storyOutline?.worldSetting,
+      currentTopic: state.storyOutline?.storyGoal
     };
     
-    const response = await fetch('/api/ai/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'settings_chat',
-        content: message,
-        context,
-        sessionId: state.sessionId
-      })
-    });
+    let result;
     
-    if (!response.ok) throw new Error('Chat failed');
-    
-    const result = await response.json();
-    
-    // Add AI response
-    state.settingsChatMessages.push({ role: 'assistant', content: result.response });
+    if (isResearchMode) {
+      // Use Grok for research
+      const response = await fetch('/api/ai/research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: message,
+          type: 'research',
+          context: {
+            projectGenres: currentProject.genre,
+            characters: state.storyOutline?.characters,
+            worldSetting: state.storyOutline?.worldSetting,
+            currentTopic: state.storyOutline?.storyGoal
+          }
+        })
+      });
+      
+      if (!response.ok) throw new Error('Research failed');
+      result = await response.json();
+      
+      // Add AI response with research flag
+      state.settingsChatMessages.push({ 
+        role: 'assistant', 
+        content: result.response,
+        isResearch: true
+      });
+    } else {
+      // Use Gemini for creative assistance
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'settings_chat',
+          content: message,
+          context,
+          sessionId: state.sessionId
+        })
+      });
+      
+      if (!response.ok) throw new Error('Chat failed');
+      result = await response.json();
+      
+      // Add AI response
+      state.settingsChatMessages.push({ role: 'assistant', content: result.response });
+    }
     
   } catch (e) {
     console.error('Settings chat error:', e);
     state.settingsChatMessages.push({ 
       role: 'assistant', 
-      content: t('common.error') + ' ' + e.message
+      content: t('common.error') + ' ' + e.message,
+      isResearch: isResearchMode
     });
   }
   
