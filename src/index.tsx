@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { serveStatic } from 'hono/cloudflare-workers';
 import api from './routes/api';
+import { landingPageHtml } from './landing';
 
 type Bindings = {
   DB: D1Database;
@@ -19,8 +20,18 @@ app.route('/api', api);
 // Static files
 app.use('/static/*', serveStatic({ root: './public' }));
 
-// Main HTML
-app.get('*', (c) => {
+// Landing page (root)
+app.get('/', (c) => {
+  return c.html(landingPageHtml);
+});
+
+// Landing page explicit route
+app.get('/landing', (c) => {
+  return c.html(landingPageHtml);
+});
+
+// Main App HTML
+app.get('/app', (c) => {
   return c.html(`<!DOCTYPE html>
 <html lang="ja">
 <head>
