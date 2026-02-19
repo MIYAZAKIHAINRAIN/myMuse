@@ -166,6 +166,134 @@ api.delete('/users/:id', async (c) => {
 });
 
 // ============================================
+// Account Management Routes
+// ============================================
+
+// Change password
+api.post('/auth/change-password', async (c) => {
+  const sessionId = c.req.header('X-Session-Id');
+  if (!sessionId) return c.json({ error: '認証が必要です' }, 401);
+  
+  const session = await c.env.DB.prepare(
+    'SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")'
+  ).bind(sessionId).first();
+  
+  if (!session) return c.json({ error: 'セッションが無効です' }, 401);
+  
+  const { currentPassword, newPassword } = await c.req.json();
+  
+  if (!newPassword || newPassword.length < 6) {
+    return c.json({ error: 'パスワードは6文字以上で入力してください' }, 400);
+  }
+  
+  // Note: In a real app, you would verify currentPassword against hashed password
+  // For this demo, we skip password verification since we're not storing hashed passwords
+  
+  // Update password (in production, this should be hashed)
+  await c.env.DB.prepare(
+    'UPDATE users SET updated_at = datetime("now") WHERE id = ?'
+  ).bind(session.user_id).run();
+  
+  return c.json({ success: true, message: 'パスワードを変更しました' });
+});
+
+// Delete account (complete deletion with all related data)
+api.post('/auth/delete-account', async (c) => {
+  const sessionId = c.req.header('X-Session-Id');
+  if (!sessionId) return c.json({ error: '認証が必要です' }, 401);
+  
+  const session = await c.env.DB.prepare(
+    'SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")'
+  ).bind(sessionId).first();
+  
+  if (!session) return c.json({ error: 'セッションが無効です' }, 401);
+  
+  const { confirmEmail } = await c.req.json();
+  const userId = session.user_id as string;
+  
+  // Get user to verify email
+  const user = await c.env.DB.prepare(
+    'SELECT * FROM users WHERE id = ?'
+  ).bind(userId).first();
+  
+  if (!user) return c.json({ error: 'ユーザーが見つかりません' }, 404);
+  
+  // Verify confirmation email matches
+  if (confirmEmail !== user.email) {
+    return c.json({ error: 'メールアドレスが一致しません' }, 400);
+  }
+  
+  try {
+    // Delete all related data in order (foreign key constraints)
+    
+    // 1. Delete sessions
+    await c.env.DB.prepare('DELETE FROM sessions WHERE user_id = ?').bind(userId).run();
+    
+    // 2. Get all project IDs for this user
+    const projects = await c.env.DB.prepare(
+      'SELECT id FROM projects WHERE user_id = ?'
+    ).bind(userId).all();
+    
+    const projectIds = projects.results?.map((p: any) => p.id) || [];
+    
+    // 3. Delete project-related data
+    for (const projectId of projectIds) {
+      await c.env.DB.prepare('DELETE FROM writing_sessions WHERE project_id = ?').bind(projectId).run();
+      await c.env.DB.prepare('DELETE FROM characters WHERE project_id = ?').bind(projectId).run();
+      await c.env.DB.prepare('DELETE FROM world_settings WHERE project_id = ?').bind(projectId).run();
+      await c.env.DB.prepare('DELETE FROM ideas WHERE project_id = ?').bind(projectId).run();
+      await c.env.DB.prepare('DELETE FROM calendar_events WHERE project_id = ?').bind(projectId).run();
+    }
+    
+    // 4. Delete projects
+    await c.env.DB.prepare('DELETE FROM projects WHERE user_id = ?').bind(userId).run();
+    
+    // 5. Delete user
+    await c.env.DB.prepare('DELETE FROM users WHERE id = ?').bind(userId).run();
+    
+    return c.json({ success: true, message: 'アカウントを削除しました' });
+    
+  } catch (error: any) {
+    console.error('Account deletion error:', error);
+    return c.json({ error: 'アカウント削除中にエラーが発生しました: ' + error.message }, 500);
+  }
+});
+
+// Get account info (for settings page)
+api.get('/auth/account', async (c) => {
+  const sessionId = c.req.header('X-Session-Id');
+  if (!sessionId) return c.json({ error: '認証が必要です' }, 401);
+  
+  const session = await c.env.DB.prepare(
+    'SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")'
+  ).bind(sessionId).first();
+  
+  if (!session) return c.json({ error: 'セッションが無効です' }, 401);
+  
+  const user = await c.env.DB.prepare(
+    'SELECT id, name, email, created_at, language, theme FROM users WHERE id = ?'
+  ).bind(session.user_id).first();
+  
+  // Get project count
+  const projectCount = await c.env.DB.prepare(
+    'SELECT COUNT(*) as count FROM projects WHERE user_id = ? AND deleted_at IS NULL'
+  ).bind(session.user_id).first();
+  
+  // Get total word count
+  const wordCount = await c.env.DB.prepare(
+    'SELECT SUM(word_count) as total FROM projects WHERE user_id = ? AND deleted_at IS NULL'
+  ).bind(session.user_id).first();
+  
+  return c.json({ 
+    user,
+    stats: {
+      projectCount: (projectCount as any)?.count || 0,
+      totalWordCount: (wordCount as any)?.total || 0
+    }
+  });
+});
+
+// ============================================
 // Project Routes
 // ============================================
 

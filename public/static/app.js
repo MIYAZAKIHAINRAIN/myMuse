@@ -94,6 +94,43 @@ const i18n = {
     'settings.profile': 'プロフィール', 'settings.theme': 'テーマ', 'settings.lightMode': 'ライトモード',
     'settings.darkMode': 'ダークモード', 'settings.plan': 'プラン管理', 'settings.betaNote': 'ベータ版につき全機能無料',
     'settings.logout': 'ログアウト', 'settings.deleteAccount': 'アカウント削除',
+    'settings.account': 'アカウント管理', 'settings.changePassword': 'パスワード変更',
+    'settings.currentPassword': '現在のパスワード', 'settings.newPassword': '新しいパスワード',
+    'settings.confirmNewPassword': '新しいパスワード（確認）', 'settings.termsPrivacy': '利用規約・プライバシー',
+    'settings.deleteWarning': '注意：この操作は取り消せません',
+    'settings.deleteWarningDetail': 'アカウントを削除すると、すべてのプロジェクト、執筆データ、設定が完全に削除されます。',
+    'settings.confirmEmail': 'メールアドレスを入力して確認',
+    'settings.confirmEmailHint': '確認のため、登録メールアドレスを入力してください',
+    'settings.deleteAccountConfirm': '削除する', 'settings.passwordChanged': 'パスワードを変更しました',
+    'settings.passwordMismatch': 'パスワードが一致しません', 'settings.accountDeleted': 'アカウントを削除しました',
+    'legal.terms': '利用規約', 'legal.privacy': 'プライバシーポリシー', 'legal.lastUpdated': '最終更新日',
+    'legal.termsTitle': 'myMuse 利用規約', 'legal.termsAcceptance': '規約への同意',
+    'legal.termsAcceptanceText': '本サービスを利用することにより、本利用規約に同意したものとみなされます。',
+    'legal.termsService': 'サービスの内容',
+    'legal.termsServiceText': 'myMuseは創作活動を支援するためのAIアシスタントサービスです。執筆補助、プロット構成、キャラクター設定などの機能を提供します。',
+    'legal.termsUserContent': 'ユーザーコンテンツ',
+    'legal.termsUserContentText': 'ユーザーが作成したすべてのコンテンツ（小説、設定、キャラクターなど）の著作権はユーザーに帰属します。当社はユーザーコンテンツを第三者に提供・販売することはありません。',
+    'legal.termsAI': 'AI機能について',
+    'legal.termsAIText': 'AI機能はGoogle Gemini及びxAI Grokを使用しています。AI生成コンテンツはあくまで参考としてご利用ください。生成されたコンテンツの使用はユーザーの責任において行ってください。',
+    'legal.termsProhibited': '禁止事項',
+    'legal.termsProhibitedText': '違法なコンテンツの作成、他者の権利を侵害する行為、サービスの不正利用は禁止されています。',
+    'legal.termsTermination': 'サービスの終了',
+    'legal.termsTerminationText': 'ユーザーはいつでもアカウントを削除してサービスを終了できます。当社は事前通知の上、サービスを終了する権利を有します。',
+    'legal.privacyTitle': 'myMuse プライバシーポリシー',
+    'legal.privacyCollect': '収集する情報',
+    'legal.privacyCollectText': 'メールアドレス、ユーザー名、作成したコンテンツ（プロジェクト、設定など）、利用状況データを収集します。',
+    'legal.privacyUse': '情報の利用目的',
+    'legal.privacyUseText': 'サービスの提供・改善、ユーザーサポート、サービスに関する通知のために情報を利用します。',
+    'legal.privacyAI': 'AI処理について',
+    'legal.privacyAIText': 'AI機能を利用する際、入力されたテキストはAIプロバイダー（Google、xAI）に送信されます。これらのプロバイダーはユーザーデータをモデルの学習に使用しない設定で運用しています。',
+    'legal.privacyShare': '第三者への提供',
+    'legal.privacyShareText': '法的要請がある場合を除き、ユーザーの個人情報を第三者に提供・販売することはありません。',
+    'legal.privacySecurity': 'セキュリティ',
+    'legal.privacySecurityText': 'データは暗号化して保存され、不正アクセスから保護されています。ただし、インターネット上での完全なセキュリティを保証することはできません。',
+    'legal.privacyRights': 'ユーザーの権利',
+    'legal.privacyRightsText': 'ユーザーはいつでも自分のデータにアクセス、修正、削除する権利を有します。アカウント設定からこれらの操作を行えます。',
+    'legal.privacyContact': 'お問い合わせ',
+    'legal.privacyContactText': 'プライバシーに関するお問い合わせは、アプリ内のフィードバック機能よりご連絡ください。',
     'auth.login': 'ログイン', 'auth.signup': '新規登録', 'auth.email': 'メールアドレス',
     'auth.password': 'パスワード', 'auth.passwordConfirm': 'パスワード（確認）', 'auth.name': '名前',
     'common.save': '保存', 'common.cancel': 'キャンセル', 'common.delete': '削除',
@@ -203,6 +240,43 @@ const i18n = {
     'settings.profile': 'Profile', 'settings.theme': 'Theme', 'settings.lightMode': 'Light Mode',
     'settings.darkMode': 'Dark Mode', 'settings.plan': 'Plan', 'settings.betaNote': 'All features free during beta',
     'settings.logout': 'Logout', 'settings.deleteAccount': 'Delete Account',
+    'settings.account': 'Account', 'settings.changePassword': 'Change Password',
+    'settings.currentPassword': 'Current Password', 'settings.newPassword': 'New Password',
+    'settings.confirmNewPassword': 'Confirm New Password', 'settings.termsPrivacy': 'Terms & Privacy',
+    'settings.deleteWarning': 'Warning: This action cannot be undone',
+    'settings.deleteWarningDetail': 'Deleting your account will permanently remove all projects, writing data, and settings.',
+    'settings.confirmEmail': 'Enter email to confirm',
+    'settings.confirmEmailHint': 'Enter your registered email address to confirm',
+    'settings.deleteAccountConfirm': 'Delete', 'settings.passwordChanged': 'Password changed successfully',
+    'settings.passwordMismatch': 'Passwords do not match', 'settings.accountDeleted': 'Account deleted successfully',
+    'legal.terms': 'Terms of Service', 'legal.privacy': 'Privacy Policy', 'legal.lastUpdated': 'Last updated',
+    'legal.termsTitle': 'myMuse Terms of Service', 'legal.termsAcceptance': 'Acceptance of Terms',
+    'legal.termsAcceptanceText': 'By using this service, you agree to these terms of service.',
+    'legal.termsService': 'Service Description',
+    'legal.termsServiceText': 'myMuse is an AI assistant service for creative writing. It provides features for writing assistance, plot construction, and character development.',
+    'legal.termsUserContent': 'User Content',
+    'legal.termsUserContentText': 'All content created by users (novels, settings, characters, etc.) remains the property of the user. We do not share or sell user content to third parties.',
+    'legal.termsAI': 'AI Features',
+    'legal.termsAIText': 'AI features use Google Gemini and xAI Grok. AI-generated content should be used as reference only. Users are responsible for their use of generated content.',
+    'legal.termsProhibited': 'Prohibited Activities',
+    'legal.termsProhibitedText': 'Creating illegal content, infringing on others rights, and misusing the service are prohibited.',
+    'legal.termsTermination': 'Termination',
+    'legal.termsTerminationText': 'Users may delete their account at any time. We reserve the right to terminate the service with prior notice.',
+    'legal.privacyTitle': 'myMuse Privacy Policy',
+    'legal.privacyCollect': 'Information We Collect',
+    'legal.privacyCollectText': 'We collect email addresses, usernames, created content (projects, settings, etc.), and usage data.',
+    'legal.privacyUse': 'How We Use Information',
+    'legal.privacyUseText': 'We use information to provide and improve the service, user support, and service notifications.',
+    'legal.privacyAI': 'AI Processing',
+    'legal.privacyAIText': 'When using AI features, input text is sent to AI providers (Google, xAI). These providers are configured not to use user data for model training.',
+    'legal.privacyShare': 'Third Party Sharing',
+    'legal.privacyShareText': 'We do not share or sell personal information to third parties except when required by law.',
+    'legal.privacySecurity': 'Security',
+    'legal.privacySecurityText': 'Data is encrypted and protected against unauthorized access. However, complete security on the internet cannot be guaranteed.',
+    'legal.privacyRights': 'Your Rights',
+    'legal.privacyRightsText': 'Users have the right to access, modify, and delete their data at any time through account settings.',
+    'legal.privacyContact': 'Contact',
+    'legal.privacyContactText': 'For privacy inquiries, please use the feedback feature in the app.',
     'auth.login': 'Login', 'auth.signup': 'Sign Up', 'auth.email': 'Email',
     'auth.password': 'Password', 'auth.passwordConfirm': 'Confirm Password', 'auth.name': 'Name',
     'common.save': 'Save', 'common.cancel': 'Cancel', 'common.delete': 'Delete',
@@ -303,6 +377,28 @@ const i18n = {
     'analysis.analyze': '分析作品', 'analysis.noContent': '没有可分析的内容',
     'settings.profile': '个人资料', 'settings.theme': '主题', 'settings.lightMode': '浅色模式',
     'settings.darkMode': '深色模式', 'settings.logout': '登出', 'settings.betaNote': '测试期间所有功能免费',
+    'settings.account': '账户管理', 'settings.changePassword': '修改密码', 'settings.deleteAccount': '删除账户',
+    'settings.currentPassword': '当前密码', 'settings.newPassword': '新密码', 'settings.confirmNewPassword': '确认新密码',
+    'settings.termsPrivacy': '条款与隐私', 'settings.deleteWarning': '警告：此操作无法撤销',
+    'settings.deleteWarningDetail': '删除账户将永久删除所有项目、写作数据和设置。',
+    'settings.confirmEmail': '输入邮箱确认', 'settings.confirmEmailHint': '请输入您的注册邮箱以确认',
+    'settings.deleteAccountConfirm': '删除', 'settings.passwordChanged': '密码已更改',
+    'settings.passwordMismatch': '密码不匹配', 'settings.accountDeleted': '账户已删除',
+    'legal.terms': '服务条款', 'legal.privacy': '隐私政策', 'legal.lastUpdated': '最后更新',
+    'legal.termsTitle': 'myMuse 服务条款', 'legal.privacyTitle': 'myMuse 隐私政策',
+    'legal.termsAcceptance': '条款接受', 'legal.termsAcceptanceText': '使用本服务即表示您同意这些服务条款。',
+    'legal.termsService': '服务说明', 'legal.termsServiceText': 'myMuse是一款AI创作助手服务，提供写作辅助、情节构建和角色开发等功能。',
+    'legal.termsUserContent': '用户内容', 'legal.termsUserContentText': '用户创建的所有内容（小说、设置、角色等）归用户所有。我们不会向第三方分享或出售用户内容。',
+    'legal.termsAI': 'AI功能', 'legal.termsAIText': 'AI功能使用Google Gemini和xAI Grok。AI生成的内容仅供参考，用户对使用生成内容负责。',
+    'legal.termsProhibited': '禁止行为', 'legal.termsProhibitedText': '禁止创建非法内容、侵犯他人权利和滥用服务。',
+    'legal.termsTermination': '终止', 'legal.termsTerminationText': '用户可随时删除账户。我们保留提前通知后终止服务的权利。',
+    'legal.privacyCollect': '收集的信息', 'legal.privacyCollectText': '我们收集邮箱地址、用户名、创建的内容和使用数据。',
+    'legal.privacyUse': '信息使用', 'legal.privacyUseText': '我们使用信息来提供和改进服务、用户支持和服务通知。',
+    'legal.privacyAI': 'AI处理', 'legal.privacyAIText': '使用AI功能时，输入文本会发送给AI提供商（Google、xAI）。这些提供商配置为不使用用户数据进行模型训练。',
+    'legal.privacyShare': '第三方共享', 'legal.privacyShareText': '除法律要求外，我们不会向第三方分享或出售个人信息。',
+    'legal.privacySecurity': '安全', 'legal.privacySecurityText': '数据经过加密并受到保护。但无法保证互联网上的完全安全。',
+    'legal.privacyRights': '您的权利', 'legal.privacyRightsText': '用户有权随时通过账户设置访问、修改和删除其数据。',
+    'legal.privacyContact': '联系方式', 'legal.privacyContactText': '如有隐私问题，请使用应用内的反馈功能。',
     'auth.login': '登录', 'auth.signup': '注册', 'auth.email': '邮箱', 'auth.password': '密码', 'auth.name': '姓名',
     'common.save': '保存', 'common.cancel': '取消', 'common.delete': '删除', 'common.restore': '恢复',
     'common.loading': '加载中...', 'common.error': '发生错误', 'common.generate': '生成', 'common.close': '关闭',
@@ -389,6 +485,28 @@ const i18n = {
     'writing.export': '내보내기', 'writing.readAloud': '읽어주기', 'writing.characters': '글자 수',
     'analysis.analyze': '작품 분석', 'analysis.noContent': '분석할 내용이 없습니다',
     'settings.lightMode': '라이트 모드', 'settings.darkMode': '다크 모드', 'settings.logout': '로그아웃', 'settings.betaNote': '베타 기간 모든 기능 무료',
+    'settings.account': '계정 관리', 'settings.changePassword': '비밀번호 변경', 'settings.deleteAccount': '계정 삭제',
+    'settings.currentPassword': '현재 비밀번호', 'settings.newPassword': '새 비밀번호', 'settings.confirmNewPassword': '새 비밀번호 확인',
+    'settings.termsPrivacy': '이용약관 및 개인정보', 'settings.deleteWarning': '경고: 이 작업은 취소할 수 없습니다',
+    'settings.deleteWarningDetail': '계정을 삭제하면 모든 프로젝트, 작성 데이터 및 설정이 영구 삭제됩니다.',
+    'settings.confirmEmail': '이메일을 입력하여 확인', 'settings.confirmEmailHint': '확인을 위해 등록된 이메일 주소를 입력하세요',
+    'settings.deleteAccountConfirm': '삭제', 'settings.passwordChanged': '비밀번호가 변경되었습니다',
+    'settings.passwordMismatch': '비밀번호가 일치하지 않습니다', 'settings.accountDeleted': '계정이 삭제되었습니다',
+    'legal.terms': '이용약관', 'legal.privacy': '개인정보 처리방침', 'legal.lastUpdated': '최종 업데이트',
+    'legal.termsTitle': 'myMuse 이용약관', 'legal.privacyTitle': 'myMuse 개인정보 처리방침',
+    'legal.termsAcceptance': '약관 동의', 'legal.termsAcceptanceText': '본 서비스를 이용함으로써 이 이용약관에 동의하는 것입니다.',
+    'legal.termsService': '서비스 설명', 'legal.termsServiceText': 'myMuse는 창작 활동을 위한 AI 어시스턴트 서비스입니다. 글쓰기 지원, 플롯 구성, 캐릭터 개발 등의 기능을 제공합니다.',
+    'legal.termsUserContent': '사용자 콘텐츠', 'legal.termsUserContentText': '사용자가 만든 모든 콘텐츠(소설, 설정, 캐릭터 등)는 사용자의 소유입니다. 저희는 사용자 콘텐츠를 제3자에게 공유하거나 판매하지 않습니다.',
+    'legal.termsAI': 'AI 기능', 'legal.termsAIText': 'AI 기능은 Google Gemini와 xAI Grok을 사용합니다. AI 생성 콘텐츠는 참고용으로만 사용하세요. 생성된 콘텐츠의 사용에 대한 책임은 사용자에게 있습니다.',
+    'legal.termsProhibited': '금지 활동', 'legal.termsProhibitedText': '불법 콘텐츠 생성, 타인의 권리 침해, 서비스 남용은 금지됩니다.',
+    'legal.termsTermination': '종료', 'legal.termsTerminationText': '사용자는 언제든지 계정을 삭제할 수 있습니다. 저희는 사전 통지 후 서비스를 종료할 권리를 보유합니다.',
+    'legal.privacyCollect': '수집하는 정보', 'legal.privacyCollectText': '이메일 주소, 사용자 이름, 생성된 콘텐츠 및 사용 데이터를 수집합니다.',
+    'legal.privacyUse': '정보 사용 방법', 'legal.privacyUseText': '서비스 제공 및 개선, 사용자 지원, 서비스 알림을 위해 정보를 사용합니다.',
+    'legal.privacyAI': 'AI 처리', 'legal.privacyAIText': 'AI 기능 사용 시 입력 텍스트가 AI 제공업체(Google, xAI)에 전송됩니다. 이러한 제공업체는 모델 학습에 사용자 데이터를 사용하지 않도록 설정되어 있습니다.',
+    'legal.privacyShare': '제3자 공유', 'legal.privacyShareText': '법적 요청이 있는 경우를 제외하고 개인 정보를 제3자에게 공유하거나 판매하지 않습니다.',
+    'legal.privacySecurity': '보안', 'legal.privacySecurityText': '데이터는 암호화되어 무단 접근으로부터 보호됩니다. 그러나 인터넷에서 완전한 보안을 보장할 수 없습니다.',
+    'legal.privacyRights': '귀하의 권리', 'legal.privacyRightsText': '사용자는 계정 설정을 통해 언제든지 데이터에 접근, 수정, 삭제할 권리가 있습니다.',
+    'legal.privacyContact': '연락처', 'legal.privacyContactText': '개인정보 관련 문의는 앱 내 피드백 기능을 이용해 주세요.',
     'auth.login': '로그인', 'auth.signup': '회원가입', 'auth.email': '이메일', 'auth.password': '비밀번호', 'auth.name': '이름',
     'common.save': '저장', 'common.cancel': '취소', 'common.delete': '삭제', 'common.loading': '로딩 중...', 'common.error': '오류가 발생했습니다',
     'chat.placeholder': '질문을 입력하세요...', 'chat.empty': 'AI와 대화하기',
@@ -833,6 +951,117 @@ async function logout() {
   localStorage.removeItem('sessionId');
   render();
 }
+
+// Change password handler
+window.handleChangePassword = async (event) => {
+  event.preventDefault();
+  
+  const currentPassword = $('#current-password').value;
+  const newPassword = $('#new-password').value;
+  const confirmPassword = $('#confirm-new-password').value;
+  const errorDiv = $('#password-error');
+  
+  // Validate passwords match
+  if (newPassword !== confirmPassword) {
+    errorDiv.textContent = t('settings.passwordMismatch');
+    errorDiv.classList.remove('hidden');
+    return;
+  }
+  
+  try {
+    const res = await fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Session-Id': state.sessionId
+      },
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to change password');
+    }
+    
+    alert(t('settings.passwordChanged'));
+    closeModal('changePassword');
+    
+    // Clear form
+    $('#current-password').value = '';
+    $('#new-password').value = '';
+    $('#confirm-new-password').value = '';
+    errorDiv.classList.add('hidden');
+    
+  } catch (e) {
+    errorDiv.textContent = e.message;
+    errorDiv.classList.remove('hidden');
+  }
+};
+
+// Delete account handler
+window.handleDeleteAccount = async (event) => {
+  event.preventDefault();
+  
+  const confirmEmail = $('#delete-confirm-email').value;
+  const errorDiv = $('#delete-error');
+  
+  try {
+    const res = await fetch('/api/auth/delete-account', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Session-Id': state.sessionId
+      },
+      body: JSON.stringify({ confirmEmail })
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to delete account');
+    }
+    
+    alert(t('settings.accountDeleted'));
+    
+    // Clear local state and redirect to login
+    state.user = null;
+    state.sessionId = null;
+    state.currentProject = null;
+    localStorage.removeItem('sessionId');
+    closeModal('deleteAccount');
+    closeModal('settings');
+    render();
+    
+  } catch (e) {
+    errorDiv.textContent = e.message;
+    errorDiv.classList.remove('hidden');
+  }
+};
+
+// Legal tab switcher
+window.switchLegalTab = (tab) => {
+  const termsTab = $('#legal-tab-terms');
+  const privacyTab = $('#legal-tab-privacy');
+  const termsContent = $('#legal-content-terms');
+  const privacyContent = $('#legal-content-privacy');
+  
+  if (tab === 'terms') {
+    termsTab.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
+    termsTab.classList.remove('text-gray-500');
+    privacyTab.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
+    privacyTab.classList.add('text-gray-500');
+    termsContent.classList.remove('hidden');
+    privacyContent.classList.add('hidden');
+  } else {
+    privacyTab.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
+    privacyTab.classList.remove('text-gray-500');
+    termsTab.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
+    termsTab.classList.add('text-gray-500');
+    privacyContent.classList.remove('hidden');
+    termsContent.classList.add('hidden');
+  }
+};
 
 // Guest login - creates a temporary account for trying the app
 async function guestLogin() {
@@ -5881,12 +6110,13 @@ function renderModals() {
     
     <!-- Settings Modal -->
     <div id="modal-settings" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'settings')">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in relative" onclick="event.stopPropagation()">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
         <button type="button" onclick="closeModal('settings')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
           <i class="fas fa-times"></i>
         </button>
         <h3 class="text-lg font-semibold mb-4"><i class="fas fa-cog mr-2"></i>${t('nav.settings')}</h3>
         <div class="space-y-4">
+          <!-- Theme -->
           <div>
             <label class="block text-sm font-medium mb-2">${t('settings.theme')}</label>
             <div class="flex gap-2">
@@ -5907,9 +6137,181 @@ function renderModals() {
           
           <hr class="border-gray-200 dark:border-gray-700">
           
+          <!-- Account Section -->
+          <div>
+            <h4 class="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">
+              <i class="fas fa-user-cog mr-1"></i>${t('settings.account')}
+            </h4>
+            
+            <!-- Change Password -->
+            <button type="button" onclick="openModal('changePassword')" class="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2">
+              <i class="fas fa-key w-5"></i>
+              <span>${t('settings.changePassword')}</span>
+              <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
+            </button>
+            
+            <!-- Terms & Privacy -->
+            <button type="button" onclick="openModal('legal')" class="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2">
+              <i class="fas fa-file-contract w-5"></i>
+              <span>${t('settings.termsPrivacy')}</span>
+              <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
+            </button>
+          </div>
+          
+          <hr class="border-gray-200 dark:border-gray-700">
+          
           <button type="button" onclick="logout()" class="w-full px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
             <i class="fas fa-sign-out-alt mr-1"></i>${t('settings.logout')}
           </button>
+          
+          <!-- Delete Account -->
+          <button type="button" onclick="openModal('deleteAccount')" class="w-full px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm">
+            <i class="fas fa-trash-alt mr-1"></i>${t('settings.deleteAccount')}
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Change Password Modal -->
+    <div id="modal-changePassword" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'changePassword')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in relative" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('changePassword')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3 class="text-lg font-semibold mb-4"><i class="fas fa-key mr-2"></i>${t('settings.changePassword')}</h3>
+        <form onsubmit="handleChangePassword(event)" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">${t('settings.currentPassword')}</label>
+            <input type="password" id="current-password" required
+              class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              placeholder="••••••••">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">${t('settings.newPassword')}</label>
+            <input type="password" id="new-password" required minlength="6"
+              class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              placeholder="••••••••">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">${t('settings.confirmNewPassword')}</label>
+            <input type="password" id="confirm-new-password" required minlength="6"
+              class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              placeholder="••••••••">
+          </div>
+          <div id="password-error" class="hidden text-red-500 text-sm"></div>
+          <button type="submit" class="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            ${t('settings.changePassword')}
+          </button>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Delete Account Modal -->
+    <div id="modal-deleteAccount" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'deleteAccount')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in relative" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('deleteAccount')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="text-center mb-4">
+          <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-red-600">${t('settings.deleteAccount')}</h3>
+        </div>
+        <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 mb-4">
+          <p class="text-sm text-red-700 dark:text-red-300">
+            <strong>${t('settings.deleteWarning')}</strong><br>
+            ${t('settings.deleteWarningDetail')}
+          </p>
+        </div>
+        <form onsubmit="handleDeleteAccount(event)" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">${t('settings.confirmEmail')}</label>
+            <input type="email" id="delete-confirm-email" required
+              class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              placeholder="${state.user?.email || ''}">
+            <p class="text-xs text-gray-500 mt-1">${t('settings.confirmEmailHint')}</p>
+          </div>
+          <div id="delete-error" class="hidden text-red-500 text-sm"></div>
+          <div class="flex gap-3">
+            <button type="button" onclick="closeModal('deleteAccount')" class="flex-1 px-4 py-3 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">
+              ${t('common.cancel')}
+            </button>
+            <button type="submit" class="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700">
+              ${t('settings.deleteAccountConfirm')}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Legal (Terms & Privacy) Modal -->
+    <div id="modal-legal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'legal')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-2xl m-4 animate-fade-in relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('legal')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3 class="text-lg font-semibold mb-4"><i class="fas fa-file-contract mr-2"></i>${t('settings.termsPrivacy')}</h3>
+        
+        <!-- Tab buttons -->
+        <div class="flex gap-2 mb-4 border-b dark:border-gray-700 pb-2">
+          <button type="button" onclick="switchLegalTab('terms')" id="legal-tab-terms" class="px-4 py-2 rounded-t-lg font-medium text-indigo-600 border-b-2 border-indigo-600">
+            ${t('legal.terms')}
+          </button>
+          <button type="button" onclick="switchLegalTab('privacy')" id="legal-tab-privacy" class="px-4 py-2 rounded-t-lg font-medium text-gray-500 hover:text-gray-700">
+            ${t('legal.privacy')}
+          </button>
+        </div>
+        
+        <!-- Terms Content -->
+        <div id="legal-content-terms" class="prose dark:prose-invert max-w-none text-sm">
+          <h4>${t('legal.termsTitle')}</h4>
+          <p class="text-gray-500 text-xs mb-4">${t('legal.lastUpdated')}: 2024年2月19日</p>
+          
+          <h5>1. ${t('legal.termsAcceptance')}</h5>
+          <p>${t('legal.termsAcceptanceText')}</p>
+          
+          <h5>2. ${t('legal.termsService')}</h5>
+          <p>${t('legal.termsServiceText')}</p>
+          
+          <h5>3. ${t('legal.termsUserContent')}</h5>
+          <p>${t('legal.termsUserContentText')}</p>
+          
+          <h5>4. ${t('legal.termsAI')}</h5>
+          <p>${t('legal.termsAIText')}</p>
+          
+          <h5>5. ${t('legal.termsProhibited')}</h5>
+          <p>${t('legal.termsProhibitedText')}</p>
+          
+          <h5>6. ${t('legal.termsTermination')}</h5>
+          <p>${t('legal.termsTerminationText')}</p>
+        </div>
+        
+        <!-- Privacy Content -->
+        <div id="legal-content-privacy" class="prose dark:prose-invert max-w-none text-sm hidden">
+          <h4>${t('legal.privacyTitle')}</h4>
+          <p class="text-gray-500 text-xs mb-4">${t('legal.lastUpdated')}: 2024年2月19日</p>
+          
+          <h5>1. ${t('legal.privacyCollect')}</h5>
+          <p>${t('legal.privacyCollectText')}</p>
+          
+          <h5>2. ${t('legal.privacyUse')}</h5>
+          <p>${t('legal.privacyUseText')}</p>
+          
+          <h5>3. ${t('legal.privacyAI')}</h5>
+          <p>${t('legal.privacyAIText')}</p>
+          
+          <h5>4. ${t('legal.privacyShare')}</h5>
+          <p>${t('legal.privacyShareText')}</p>
+          
+          <h5>5. ${t('legal.privacySecurity')}</h5>
+          <p>${t('legal.privacySecurityText')}</p>
+          
+          <h5>6. ${t('legal.privacyRights')}</h5>
+          <p>${t('legal.privacyRightsText')}</p>
+          
+          <h5>7. ${t('legal.privacyContact')}</h5>
+          <p>${t('legal.privacyContactText')}</p>
         </div>
       </div>
     </div>
