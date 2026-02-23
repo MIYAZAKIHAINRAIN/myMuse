@@ -1739,15 +1739,13 @@ function render() {
   app.innerHTML = `
     <div class="${state.zenMode ? 'zen-mode' : ''}" id="main-container">
       ${!isMobile ? renderHeader() : renderMobileHeader()}
-      <div class="flex h-screen ${isMobile ? 'pt-12' : 'pt-14'}">
+      <div class="flex h-screen ${isMobile ? 'pt-12 pb-0' : 'pt-14'}">
         ${!isMobile ? renderLeftSidebar() : ''}
         <main class="flex-1 overflow-hidden ${!isMobile && state.sidebarOpen.left ? 'ml-64' : ''} transition-all duration-300">
           ${renderMainContent()}
         </main>
         ${!isMobile ? renderRightSidebar() : ''}
       </div>
-      ${isMobile ? renderMobileNav() : ''}
-      ${isMobile ? renderMobileFAB() : ''}
       ${isMobile ? renderMobileProjectDrawer() : ''}
       ${isMobile ? renderMobileAIModal() : ''}
     </div>
@@ -4788,11 +4786,33 @@ function renderMobileWritingTab(writing, isVertical) {
     <div class="h-full flex flex-col mobile-writing-container">
       <!-- モバイル専用フローティングツールバー -->
       <div id="mobile-writing-header" class="flex items-center justify-between px-2 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-2 transition-all duration-300">
-        <!-- 左: フォント選択 -->
-        <select id="font-select" onchange="changeFont(this.value)" class="px-2 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 rounded max-w-20">
-          <option value="Noto Sans JP">ゴシック</option>
-          <option value="Noto Serif JP">明朝</option>
-          <option value="Shippori Mincho">しっぽり</option>
+        <!-- 左: フォント選択（PC版と同じ全フォント） -->
+        <select id="font-select" onchange="changeFont(this.value)" class="px-2 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 rounded max-w-28">
+          <optgroup label="日本語">
+            <option value="Noto Sans JP">Noto Sans JP</option>
+            <option value="Noto Serif JP">Noto Serif JP</option>
+            <option value="Shippori Mincho">しっぽり明朝</option>
+            <option value="BIZ UDMincho">BIZ UD明朝</option>
+          </optgroup>
+          <optgroup label="英語">
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Arial">Arial</option>
+            <option value="Merriweather">Merriweather</option>
+            <option value="Roboto">Roboto</option>
+          </optgroup>
+          <optgroup label="中国語(簡体)">
+            <option value="Noto Sans SC">Noto Sans SC</option>
+            <option value="Noto Serif SC">Noto Serif SC</option>
+          </optgroup>
+          <optgroup label="中国語(繁体)">
+            <option value="Noto Sans TC">Noto Sans TC</option>
+            <option value="Noto Serif TC">Noto Serif TC</option>
+          </optgroup>
+          <optgroup label="韓国語">
+            <option value="Noto Sans KR">Noto Sans KR</option>
+            <option value="Noto Serif KR">Noto Serif KR</option>
+          </optgroup>
         </select>
         
         <!-- 中央: 文字数 -->
