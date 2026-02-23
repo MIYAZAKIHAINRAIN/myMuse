@@ -4846,11 +4846,128 @@ function renderMobileWritingTab(writing, isVertical) {
           onfocus="enterMobileImmersiveMode()"
           onblur="exitMobileImmersiveMode()">${writing?.content || ''}</textarea>
         
-        <!-- 保存ボタン（浮動） -->
-        <button onclick="manualSave()" 
-          class="absolute bottom-3 right-3 w-12 h-12 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-indigo-700 transition-all">
-          <i class="fas fa-save"></i>
-        </button>
+        <!-- フローティングボタン群 -->
+        <div class="absolute bottom-3 right-3 flex gap-2">
+          <!-- AIパートナーボタン -->
+          <button onclick="openMobileWritingAI()" 
+            class="w-12 h-12 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:from-purple-700 hover:to-indigo-700 transition-all">
+            <i class="fas fa-robot"></i>
+          </button>
+          <!-- 保存ボタン -->
+          <button onclick="manualSave()" 
+            class="w-12 h-12 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-indigo-700 transition-all">
+            <i class="fas fa-save"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- モバイル用AIアシスタントモーダル -->
+      <div id="mobile-writing-ai-modal" class="hidden fixed inset-0 z-[80]">
+        <div class="absolute inset-0 bg-black/50" onclick="closeMobileWritingAI()"></div>
+        <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col">
+          <!-- ハンドル -->
+          <div class="flex justify-center py-2">
+            <div class="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+          </div>
+          
+          <!-- ヘッダー -->
+          <div class="px-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-bold flex items-center gap-2">
+                <i class="fas fa-robot text-purple-500"></i>
+                AIパートナー
+              </h3>
+              <button onclick="closeMobileWritingAI()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-times text-gray-400"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- クイックアクション -->
+          <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+            <p class="text-xs text-gray-500 mb-2">クイックアクション</p>
+            <div class="grid grid-cols-4 gap-2">
+              ${[
+                { action: 'continue', icon: 'fa-forward', label: '続き' },
+                { action: 'rewrite', icon: 'fa-sync', label: '書直' },
+                { action: 'expand', icon: 'fa-expand-alt', label: '拡張' },
+                { action: 'proofread', icon: 'fa-spell-check', label: '校正' },
+              ].map(btn => `
+                <button onclick="handleMobileAIAction('${btn.action}')"
+                  class="flex flex-col items-center gap-1 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                  <i class="fas ${btn.icon} text-indigo-500"></i>
+                  <span class="text-xs">${btn.label}</span>
+                </button>
+              `).join('')}
+            </div>
+            <div class="grid grid-cols-3 gap-2 mt-2">
+              ${[
+                { action: 'summarize', icon: 'fa-compress-alt', label: '要約' },
+                { action: 'translate', icon: 'fa-language', label: '翻訳' },
+                { action: 'title', icon: 'fa-heading', label: 'タイトル案' },
+              ].map(btn => `
+                <button onclick="handleMobileAIAction('${btn.action}')"
+                  class="flex flex-col items-center gap-1 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                  <i class="fas ${btn.icon} text-purple-500"></i>
+                  <span class="text-xs">${btn.label}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+          
+          <!-- 文体変換 -->
+          <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <p class="text-xs text-gray-500 mb-2">文体変換</p>
+            <div class="flex gap-2">
+              <button onclick="handleMobileAIAction('style_formal')"
+                class="flex-1 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-sm">
+                敬語
+              </button>
+              <button onclick="handleMobileAIAction('style_casual')"
+                class="flex-1 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-sm">
+                カジュアル
+              </button>
+              <button onclick="handleMobileAIAction('style_literary')"
+                class="flex-1 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-sm">
+                文学的
+              </button>
+            </div>
+          </div>
+          
+          <!-- カスタム指示 -->
+          <div class="p-4 flex-1 overflow-y-auto">
+            <p class="text-xs text-gray-500 mb-2">カスタム指示</p>
+            <div class="flex gap-2">
+              <input type="text" id="mobile-ai-custom-prompt" 
+                placeholder="AIへの指示を入力..."
+                class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700">
+              <button onclick="handleMobileAICustom()" 
+                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+            
+            <!-- AI応答履歴 -->
+            <div class="mt-4">
+              <p class="text-xs text-gray-500 mb-2">AI応答履歴</p>
+              <div id="mobile-ai-history" class="space-y-2 max-h-40 overflow-y-auto">
+                <p class="text-sm text-gray-400 italic">AIからの応答がここに表示されます</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- ローディング表示 -->
+          <div id="mobile-ai-loading" class="hidden absolute inset-0 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center">
+            <div class="text-center">
+              <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+              <p class="text-sm text-gray-600 dark:text-gray-300">AIが考え中...</p>
+              <button onclick="cancelAIGeneration(); hideMobileAILoading();" 
+                class="mt-2 px-4 py-1 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded">
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
       
       <!-- モバイル用メニューモーダル -->
@@ -6983,6 +7100,196 @@ window.closeMobileOutline = () => {
   if (modal) {
     modal.classList.add('hidden');
   }
+};
+
+// ============================================
+// Mobile Writing AI Functions
+// ============================================
+
+// モバイル執筆AIモーダルを開く
+window.openMobileWritingAI = () => {
+  const modal = document.getElementById('mobile-writing-ai-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+  }
+};
+
+// モバイル執筆AIモーダルを閉じる
+window.closeMobileWritingAI = () => {
+  const modal = document.getElementById('mobile-writing-ai-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+};
+
+// モバイルAIローディング表示
+window.showMobileAILoading = () => {
+  const loading = document.getElementById('mobile-ai-loading');
+  if (loading) {
+    loading.classList.remove('hidden');
+  }
+};
+
+// モバイルAIローディング非表示
+window.hideMobileAILoading = () => {
+  const loading = document.getElementById('mobile-ai-loading');
+  if (loading) {
+    loading.classList.add('hidden');
+  }
+};
+
+// モバイルAIアクション実行
+window.handleMobileAIAction = async (action) => {
+  const content = state.currentWriting?.content || '';
+  
+  if (!content && !['title'].includes(action)) {
+    alert('テキストを入力してください');
+    return;
+  }
+  
+  // 翻訳の場合は言語選択ダイアログを表示
+  if (action === 'translate') {
+    closeMobileWritingAI();
+    showTranslationDialog(content);
+    return;
+  }
+  
+  showMobileAILoading();
+  
+  try {
+    let result;
+    if (action.startsWith('style_')) {
+      const style = action.replace('style_', '');
+      result = await callAI(`style_${style}`, content);
+    } else {
+      result = await callAI(action, content);
+    }
+    
+    if (result) {
+      showMobileAIResult(result);
+      addToAIHistory(action, result);
+    }
+  } catch (error) {
+    console.error('AI action error:', error);
+    alert('AIの処理中にエラーが発生しました');
+  } finally {
+    hideMobileAILoading();
+  }
+};
+
+// モバイルAIカスタム指示実行
+window.handleMobileAICustom = async () => {
+  const content = state.currentWriting?.content || '';
+  const customPrompt = document.getElementById('mobile-ai-custom-prompt')?.value || '';
+  
+  if (!customPrompt) {
+    alert('指示を入力してください');
+    return;
+  }
+  
+  showMobileAILoading();
+  
+  try {
+    const result = await callAI('custom', content, { customPrompt });
+    if (result) {
+      showMobileAIResult(result);
+      addToAIHistory('custom', result);
+      // 入力欄をクリア
+      const input = document.getElementById('mobile-ai-custom-prompt');
+      if (input) input.value = '';
+    }
+  } catch (error) {
+    console.error('AI custom action error:', error);
+    alert('AIの処理中にエラーが発生しました');
+  } finally {
+    hideMobileAILoading();
+  }
+};
+
+// モバイルAI結果表示
+window.showMobileAIResult = (result) => {
+  const historyContainer = document.getElementById('mobile-ai-history');
+  if (!historyContainer) return;
+  
+  // 結果をMarkdownからHTMLに変換
+  const htmlContent = typeof marked !== 'undefined' ? marked.parse(result) : result;
+  
+  const resultDiv = document.createElement('div');
+  resultDiv.className = 'p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg border border-indigo-200 dark:border-indigo-800';
+  resultDiv.innerHTML = `
+    <div class="prose prose-sm dark:prose-invert max-w-none text-sm">${htmlContent}</div>
+    <div class="flex gap-2 mt-2 pt-2 border-t border-indigo-200 dark:border-indigo-700">
+      <button onclick="copyMobileAIResult(this)" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
+        <i class="fas fa-copy mr-1"></i>コピー
+      </button>
+      <button onclick="insertMobileAIResult(this)" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
+        <i class="fas fa-plus mr-1"></i>挿入
+      </button>
+    </div>
+  `;
+  resultDiv.dataset.rawResult = result;
+  
+  // 古い「AIからの応答が〜」メッセージを削除
+  const placeholder = historyContainer.querySelector('.italic');
+  if (placeholder) placeholder.remove();
+  
+  // 先頭に追加
+  historyContainer.insertBefore(resultDiv, historyContainer.firstChild);
+  
+  // 最大5件まで保持
+  while (historyContainer.children.length > 5) {
+    historyContainer.removeChild(historyContainer.lastChild);
+  }
+};
+
+// モバイルAI結果をコピー
+window.copyMobileAIResult = (btn) => {
+  const container = btn.closest('[data-raw-result]');
+  if (!container) return;
+  
+  const text = container.dataset.rawResult;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.innerHTML = '<i class="fas fa-check mr-1"></i>コピー済み';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-copy mr-1"></i>コピー';
+    }, 2000);
+  });
+};
+
+// モバイルAI結果をエディタに挿入
+window.insertMobileAIResult = (btn) => {
+  const container = btn.closest('[data-raw-result]');
+  if (!container) return;
+  
+  const text = container.dataset.rawResult;
+  const editor = document.getElementById('editor');
+  if (!editor) return;
+  
+  // カーソル位置に挿入
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const content = editor.value;
+  
+  const newContent = content.substring(0, start) + text + content.substring(end);
+  editor.value = newContent;
+  
+  // カーソルを挿入テキストの後ろに移動
+  const newPos = start + text.length;
+  editor.setSelectionRange(newPos, newPos);
+  editor.focus();
+  
+  // 保存をトリガー
+  autoSave(newContent);
+  updateMobileWordCount();
+  
+  // フィードバック
+  btn.innerHTML = '<i class="fas fa-check mr-1"></i>挿入済み';
+  setTimeout(() => {
+    btn.innerHTML = '<i class="fas fa-plus mr-1"></i>挿入';
+  }, 2000);
+  
+  // モーダルを閉じる
+  closeMobileWritingAI();
 };
 
 // 見出し挿入
