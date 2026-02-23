@@ -145,6 +145,86 @@ app.get('/app', (c) => {
     /* Loading spinner */
     .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #6366f1; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    /* ============================================
+     * Mobile Immersive Mode Styles
+     * ============================================ */
+    @media (max-width: 767px) {
+      /* Mobile nav and FAB transitions */
+      #mobile-nav, #mobile-fab {
+        transition: transform 0.3s ease, opacity 0.3s ease;
+      }
+      
+      /* Mobile tabs header transition */
+      .mobile-tabs-header {
+        transition: transform 0.3s ease, opacity 0.3s ease;
+      }
+      
+      /* Writing toolbar transition */
+      .writing-toolbar {
+        transition: transform 0.3s ease, opacity 0.3s ease;
+      }
+      
+      /* Mobile writing container - full height */
+      .mobile-writing-container {
+        padding-bottom: 0 !important;
+      }
+      
+      /* Mobile editor - maximize space */
+      .mobile-editor-container {
+        gap: 0 !important;
+      }
+      
+      /* Mobile settings container */
+      .mobile-settings-container {
+        padding-bottom: 80px;
+      }
+      
+      /* Accordion animation */
+      .accordion-open {
+        animation: accordionOpen 0.3s ease-out;
+      }
+      
+      @keyframes accordionOpen {
+        from {
+          opacity: 0;
+          max-height: 0;
+        }
+        to {
+          opacity: 1;
+          max-height: 1000px;
+        }
+      }
+      
+      /* Hide scrollbar on mobile during immersive mode */
+      .mobile-immersive-mode ::-webkit-scrollbar {
+        display: none;
+      }
+      
+      /* Settings content in accordion */
+      .settings-content textarea,
+      .settings-content input {
+        font-size: 16px !important; /* Prevent iOS zoom */
+      }
+      
+      /* Mobile-optimized editor */
+      #editor {
+        font-size: 16px !important; /* Prevent iOS zoom */
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      /* FAB hidden state */
+      #mobile-fab.scale-0 {
+        transform: scale(0);
+        pointer-events: none;
+      }
+      
+      /* Nav hidden state */
+      #mobile-nav.translate-y-full {
+        transform: translateY(100%);
+        pointer-events: none;
+      }
+    }
   </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-gothic">

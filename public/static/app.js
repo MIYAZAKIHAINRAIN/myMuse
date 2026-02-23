@@ -19,6 +19,10 @@ const state = {
   sidebarOpen: { left: true, right: false },
   rightSidebarCollapsed: true, // 右サイドバー折りたたみ状態
   showOutline: false,
+  // Mobile UI states
+  mobileImmersiveMode: false, // モバイル没入モード
+  mobileKeyboardVisible: false, // キーボード表示状態
+  mobileAccordionSections: {}, // アコーディオン展開状態
   calendarDate: new Date(),
   calendarEvents: [],
   chatThreads: [],
@@ -2096,22 +2100,23 @@ function renderProjectItem(project) {
 function renderMainContent() {
   // 新タブ構成: 資料集 → 執筆 → 分析・相談
   const tabs = ['settings_materials', 'writing', 'analysis_chat'];
+  const isMobile = window.innerWidth < 768;
   
   return `
     <div class="h-full flex flex-col">
-      <!-- Tabs -->
-      <div class="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4">
+      <!-- Tabs - モバイルでは自動隠しの対象 -->
+      <div class="mobile-tabs-header flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 ${isMobile ? 'px-2' : 'px-4'} transition-all duration-300">
         ${tabs.map(tab => `
           <button onclick="switchTab('${tab}')" 
-            class="px-4 py-3 text-sm font-medium transition ${state.currentTab === tab ? 'tab-active' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}">
-            <i class="fas ${getTabIcon(tab)} mr-1"></i>
-            ${t(`tab.${tab}`)}
+            class="${isMobile ? 'px-3 py-2 text-xs' : 'px-4 py-3 text-sm'} font-medium transition ${state.currentTab === tab ? 'tab-active' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}">
+            <i class="fas ${getTabIcon(tab)} ${isMobile ? '' : 'mr-1'}"></i>
+            <span class="${isMobile ? 'hidden' : ''}">${t(`tab.${tab}`)}</span>
           </button>
         `).join('')}
       </div>
       
-      <!-- Tab Content -->
-      <div class="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
+      <!-- Tab Content - モバイルで余白削減 -->
+      <div class="flex-1 overflow-y-auto ${isMobile ? 'p-2' : 'p-4'} bg-gray-50 dark:bg-gray-900">
         ${renderTabContent()}
       </div>
     </div>
@@ -2826,6 +2831,7 @@ function renderChildSectionContent(sectionId, allGenres, projectGenres, storyOut
 // Render settings tab for a Standalone Project (not in a library)
 function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
   const aiChatHtml = renderSettingsAIChat();
+  const isMobile = window.innerWidth < 768;
   
   // 設定項目のリスト
   const settingsItems = [
@@ -2841,6 +2847,84 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
   // 現在選択中の設定項目（デフォルトはジャンル）
   const currentSettingsSection = state.currentSettingsSection || 'genre';
   
+  // モバイル: アコーディオンUI
+  if (isMobile) {
+    return `
+      <div class="h-full flex flex-col mobile-settings-container">
+        <!-- アコーディオン形式の設定リスト -->
+        <div class="flex-1 overflow-y-auto space-y-2 pb-20 mobile-accordion">
+          ${settingsItems.map(item => `
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+              <!-- アコーディオンヘッダー -->
+              <button onclick="toggleMobileAccordion('${item.id}')" 
+                class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-${item.color}-100 dark:bg-${item.color}-900/30 flex items-center justify-center">
+                    <i class="fas ${item.icon} text-${item.color}-600 dark:text-${item.color}-400"></i>
+                  </div>
+                  <span class="font-medium text-gray-900 dark:text-white">${item.label}</span>
+                </div>
+                <i id="accordion-icon-${item.id}" class="fas fa-chevron-down text-gray-400 transition-transform duration-300" 
+                   style="${state.mobileAccordionSections[item.id] ? 'transform: rotate(180deg);' : ''}"></i>
+              </button>
+              <!-- アコーディオンコンテンツ -->
+              <div id="accordion-content-${item.id}" 
+                   class="${state.mobileAccordionSections[item.id] ? '' : 'hidden'} border-t border-gray-100 dark:border-gray-700 p-4 settings-content">
+                ${renderSettingsSectionContent(item.id, allGenres, projectGenres, storyOutline)}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        
+        <!-- 保存ボタン（固定フッター） -->
+        <div class="fixed bottom-16 left-0 right-0 px-4 py-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 z-30">
+          <div class="flex gap-2">
+            <button onclick="toggleSettingsAIChatModal()" 
+              class="px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl shadow-lg font-medium flex items-center justify-center gap-2">
+              <i class="fas fa-robot"></i>
+              <span>AI</span>
+            </button>
+            <button onclick="saveStoryOutline()" 
+              class="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg font-medium flex items-center justify-center gap-2">
+              <i class="fas fa-save"></i>
+              ${t('ui.saveSettings')}
+            </button>
+          </div>
+        </div>
+        
+        <!-- モバイル用AIチャットモーダル -->
+        <div id="settings-ai-chat-modal" class="fixed inset-0 bg-black/50 z-50 hidden">
+          <div class="absolute inset-4 bottom-20 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-3 border-b dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex items-center justify-between">
+              <h3 class="font-semibold flex items-center gap-2 text-sm">
+                <i class="fas fa-robot"></i>
+                ${t('ui.settingsAI')}
+              </h3>
+              <button onclick="toggleSettingsAIChatModal()" class="p-1 hover:bg-white/20 rounded-lg">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div id="settings-chat-messages-mobile" class="flex-1 overflow-y-auto p-3 space-y-2">
+            </div>
+            <div class="p-3 border-t dark:border-gray-700">
+              <div class="flex gap-2">
+                <input type="text" id="settings-chat-input-mobile" 
+                  placeholder="${t('ui.settingsAIPlaceholder')}"
+                  class="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm"
+                  onkeypress="if(event.key === 'Enter') sendSettingsChatMobile()">
+                <button onclick="sendSettingsChatMobile()" 
+                  class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // PC: 従来のタブUI
   return `
     <div class="h-full flex flex-col">
       <!-- 上部: 項目選択ボタン -->
@@ -2865,7 +2949,6 @@ function renderStandaloneSettingsTab(allGenres, projectGenres, storyOutline) {
           ${renderSettingsSectionContent(currentSettingsSection, allGenres, projectGenres, storyOutline)}
         </div>
         
-        <!-- 右: AIチャット (レスポンシブ縦長デザイン) -->
         <!-- 右: AIチャット (レスポンシブ縦長デザイン) -->
         <div class="w-80 xl:w-96 hidden lg:flex flex-col" style="min-height: 500px;">
           ${aiChatHtml}
@@ -4400,12 +4483,13 @@ function renderIllustrationTab() {
 function renderWritingTab() {
   const writing = state.currentWriting;
   const isVertical = writing?.writing_direction === 'vertical';
+  const isMobile = window.innerWidth < 768;
   
   return `
-    <div class="h-full flex flex-col">
-      <!-- Pinned Plot (if exists) -->
+    <div class="h-full flex flex-col ${isMobile ? 'mobile-writing-container' : ''}">
+      <!-- Pinned Plot (if exists) - hidden on mobile by default -->
       ${state.currentProject?.pinned_plot ? `
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 mb-4">
+        <div class="${isMobile ? 'hidden' : ''} bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 mb-4">
           <div class="flex items-center gap-2 text-sm text-yellow-800 dark:text-yellow-200">
             <i class="fas fa-thumbtack"></i>
             <span class="font-medium">プロット参照:</span>
@@ -4414,8 +4498,16 @@ function renderWritingTab() {
         </div>
       ` : ''}
       
-      <!-- Toolbar -->
-      <div class="flex flex-wrap items-center gap-2 mb-4 bg-white dark:bg-gray-800 rounded-lg p-2 shadow-sm">
+      <!-- Toolbar - Compact on mobile -->
+      <div id="writing-toolbar" class="writing-toolbar flex flex-wrap items-center gap-2 ${isMobile ? 'mb-2 p-1.5' : 'mb-4 p-2'} bg-white dark:bg-gray-800 rounded-lg shadow-sm transition-all duration-300">
+        ${isMobile ? `
+        <!-- Mobile: Compact toolbar -->
+        <button onclick="toggleMobileWritingToolbar()" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded" title="ツールバー">
+          <i class="fas fa-ellipsis-h"></i>
+        </button>
+        <div id="mobile-toolbar-expanded" class="hidden flex-wrap items-center gap-2 w-full mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+        ` : ''}
+        
         ${['ja', 'zh', 'ko'].includes(state.language) ? `
         <button onclick="toggleWritingDirection()" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="${isVertical ? t('writing.switchToHorizontal') : t('writing.switchToVertical')}">
           <i class="fas ${isVertical ? 'fa-grip-lines' : 'fa-grip-lines-vertical'}"></i>
@@ -4425,11 +4517,11 @@ function renderWritingTab() {
         ${isVertical ? `
         <button onclick="toggleVerticalTextMode()" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" title="${t("writing.textModeTitle")}">
           <i class="fas fa-font mr-1"></i>
-          ${state.verticalTextMode === 'upright' ? t('writing.textUpright') : t('writing.textSideways')}
+          <span class="${isMobile ? 'hidden' : ''}">${state.verticalTextMode === 'upright' ? t('writing.textUpright') : t('writing.textSideways')}</span>
         </button>
         ` : ''}
         
-        <select id="font-select" onchange="changeFont(this.value)" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded">
+        <select id="font-select" onchange="changeFont(this.value)" class="px-2 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded ${isMobile ? 'max-w-24' : ''}">
           <optgroup label="日本語フォント">
             <option value="Noto Sans JP">Noto Sans JP</option>
             <option value="Noto Serif JP">Noto Serif JP</option>
@@ -4458,7 +4550,7 @@ function renderWritingTab() {
         </select>
         
         <!-- Text Style Selector (Google Docs style) -->
-        <div class="relative">
+        <div class="relative ${isMobile ? 'hidden' : ''}">
           <button onclick="toggleStyleMenu()" id="style-menu-btn" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2 min-w-28">
             <i class="fas fa-paragraph text-indigo-500"></i>
             <span id="current-style-label">${t('ui.standardText')}</span>
@@ -4498,21 +4590,21 @@ function renderWritingTab() {
         
         <!-- Save indicator and button -->
         <span id="save-indicator" class="text-sm text-green-600 dark:text-green-400 flex items-center">
-          <i class="fas fa-check mr-1"></i>${t('ui.saved')}
+          <i class="fas fa-check mr-1"></i><span class="${isMobile ? 'hidden' : ''}">${t('ui.saved')}</span>
         </span>
         
-        <button onclick="manualSave()" class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 flex items-center gap-1">
+        <button onclick="manualSave()" class="px-2 py-1.5 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 flex items-center gap-1">
           <i class="fas fa-save"></i>
           <span class="hidden sm:inline">${t('common.save')}</span>
         </button>
         
-        <span id="word-count" class="text-sm text-gray-500">${writing?.word_count || 0} ${getCountLabel()}</span>
+        <span id="word-count" class="text-sm text-gray-500 ${isMobile ? 'text-xs' : ''}">${writing?.word_count || 0} ${getCountLabel()}</span>
         
-        <button onclick="readAloud()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+        <button onclick="readAloud()" class="${isMobile ? 'hidden' : ''} px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
           <i class="fas fa-volume-up mr-1"></i>${t('writing.readAloud')}
         </button>
         
-        <div class="relative">
+        <div class="relative ${isMobile ? 'hidden' : ''}">
           <button onclick="toggleExportMenu()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
             <i class="fas fa-download mr-1"></i>${t('writing.export')}
           </button>
@@ -4558,12 +4650,14 @@ function renderWritingTab() {
             </button>
           </div>
         </div>
+        
+        ${isMobile ? '</div>' : ''}
       </div>
       
       <!-- Editor with Outline Panel -->
-      <div class="flex-1 flex gap-4 overflow-hidden">
-        <!-- Outline Panel -->
-        <div id="outline-panel" class="${state.showOutline ? '' : 'hidden'} w-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden flex-shrink-0">
+      <div class="flex-1 flex gap-4 overflow-hidden ${isMobile ? 'mobile-editor-container' : ''}">
+        <!-- Outline Panel - hidden on mobile -->
+        <div id="outline-panel" class="${state.showOutline && !isMobile ? '' : 'hidden'} w-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden flex-shrink-0">
           <div class="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h4 class="font-medium text-sm flex items-center gap-2">
               <i class="fas fa-list-ul text-indigo-500"></i>
@@ -4578,11 +4672,11 @@ function renderWritingTab() {
           </div>
         </div>
         
-        <!-- Editor -->
-        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden relative">
+        <!-- Editor - Full width on mobile -->
+        <div class="flex-1 bg-white dark:bg-gray-800 ${isMobile ? 'rounded-lg' : 'rounded-xl'} shadow-sm overflow-hidden relative">
           <textarea id="editor" 
-            class="w-full h-full p-6 resize-none focus:outline-none dark:bg-gray-800 ${isVertical ? (state.verticalTextMode === 'upright' ? 'writing-vertical-upright' : 'writing-vertical') : ''}"
-            style="font-family: '${writing?.font_family || 'Noto Sans JP'}', sans-serif; font-size: 16px; line-height: 2; ${isVertical ? `writing-mode: vertical-rl; text-orientation: ${state.verticalTextMode === 'upright' ? 'upright' : 'mixed'}; overflow-x: auto; overflow-y: hidden;` : ''}"
+            class="w-full h-full ${isMobile ? 'p-3 pb-16' : 'p-6'} resize-none focus:outline-none dark:bg-gray-800 ${isVertical ? (state.verticalTextMode === 'upright' ? 'writing-vertical-upright' : 'writing-vertical') : ''}"
+            style="font-family: '${writing?.font_family || 'Noto Sans JP'}', sans-serif; font-size: ${isMobile ? '15px' : '16px'}; line-height: ${isMobile ? '1.8' : '2'}; ${isVertical ? `writing-mode: vertical-rl; text-orientation: ${state.verticalTextMode === 'upright' ? 'upright' : 'mixed'}; overflow-x: auto; overflow-y: hidden;` : ''}"
             placeholder="ここに物語を紡いでください...
 
 【見出しの書き方】
@@ -6049,10 +6143,12 @@ function renderAISidebar() {
 }
 
 function renderMobileNav() {
+  // 没入モード時はナビを非表示
+  const hideClass = state.mobileImmersiveMode ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100';
   return `
-    <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex justify-around py-2 z-50 md:hidden">
+    <nav id="mobile-nav" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex justify-around py-2 z-50 md:hidden transition-all duration-300 ${hideClass}">
       ${['home', 'write', 'manage', 'settings'].map(nav => `
-        <button onclick="handleMobileNav('${nav}')" class="flex flex-col items-center p-2 text-gray-600 dark:text-gray-400">
+        <button onclick="handleMobileNav('${nav}')" class="flex flex-col items-center p-2 ${state.currentTab === (nav === 'home' ? 'settings_materials' : nav === 'write' ? 'writing' : nav === 'manage' ? 'settings_materials' : 'settings_materials') ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400'}">
           <i class="fas ${nav === 'home' ? 'fa-home' : nav === 'write' ? 'fa-pen' : nav === 'manage' ? 'fa-folder' : 'fa-cog'}"></i>
           <span class="text-xs mt-1">${t(`nav.${nav}`)}</span>
         </button>
@@ -6062,12 +6158,158 @@ function renderMobileNav() {
 }
 
 function renderMobileFAB() {
+  // 没入モード時またはキーボード表示時はFABを非表示
+  const hideClass = (state.mobileImmersiveMode || state.mobileKeyboardVisible) ? 'scale-0 opacity-0' : 'scale-100 opacity-100';
   return `
-    <button onclick="openMobileAI()" 
-      class="fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-lg flex items-center justify-center z-40 md:hidden">
+    <button id="mobile-fab" onclick="openMobileAI()" 
+      class="fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-lg flex items-center justify-center z-40 md:hidden transition-all duration-300 ${hideClass}">
       <i class="fas fa-robot text-xl"></i>
     </button>
   `;
+}
+
+// ============================================
+// Mobile Immersive Mode Functions
+// ============================================
+
+// 没入モード切り替え
+function toggleMobileImmersiveMode(enable) {
+  if (window.innerWidth >= 768) return; // PC時は無効
+  
+  state.mobileImmersiveMode = enable;
+  
+  const nav = document.getElementById('mobile-nav');
+  const fab = document.getElementById('mobile-fab');
+  const tabs = document.querySelector('.mobile-tabs-header');
+  
+  if (nav) {
+    nav.classList.toggle('translate-y-full', enable);
+    nav.classList.toggle('opacity-0', enable);
+  }
+  
+  if (fab) {
+    fab.classList.toggle('scale-0', enable);
+    fab.classList.toggle('opacity-0', enable);
+  }
+  
+  if (tabs) {
+    tabs.classList.toggle('-translate-y-full', enable);
+    tabs.classList.toggle('opacity-0', enable);
+  }
+}
+
+// キーボード表示検知
+function setupMobileKeyboardDetection() {
+  if (window.innerWidth >= 768) return;
+  
+  // visualViewport APIを使用してキーボード検知
+  if (window.visualViewport) {
+    let initialHeight = window.visualViewport.height;
+    
+    window.visualViewport.addEventListener('resize', () => {
+      const currentHeight = window.visualViewport.height;
+      const heightDiff = initialHeight - currentHeight;
+      
+      // 高さが150px以上減少したらキーボード表示と判定
+      if (heightDiff > 150) {
+        state.mobileKeyboardVisible = true;
+        toggleMobileImmersiveMode(true);
+        updateMobileFABVisibility();
+      } else if (heightDiff < 50) {
+        state.mobileKeyboardVisible = false;
+        // キーボードが閉じたら少し遅延して没入モード解除
+        setTimeout(() => {
+          if (!state.mobileKeyboardVisible) {
+            toggleMobileImmersiveMode(false);
+            updateMobileFABVisibility();
+          }
+        }, 100);
+      }
+    });
+  }
+  
+  // フォールバック: focus/blurイベント
+  document.addEventListener('focusin', (e) => {
+    if (window.innerWidth >= 768) return;
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.contentEditable === 'true') {
+      state.mobileKeyboardVisible = true;
+      toggleMobileImmersiveMode(true);
+      updateMobileFABVisibility();
+    }
+  });
+  
+  document.addEventListener('focusout', (e) => {
+    if (window.innerWidth >= 768) return;
+    setTimeout(() => {
+      const activeEl = document.activeElement;
+      if (activeEl.tagName !== 'TEXTAREA' && activeEl.tagName !== 'INPUT' && activeEl.contentEditable !== 'true') {
+        state.mobileKeyboardVisible = false;
+        toggleMobileImmersiveMode(false);
+        updateMobileFABVisibility();
+      }
+    }, 100);
+  });
+}
+
+// FABの表示状態を更新
+function updateMobileFABVisibility() {
+  const fab = document.getElementById('mobile-fab');
+  if (!fab) return;
+  
+  const shouldHide = state.mobileImmersiveMode || state.mobileKeyboardVisible;
+  fab.classList.toggle('scale-0', shouldHide);
+  fab.classList.toggle('opacity-0', shouldHide);
+}
+
+// スクロール時の没入モード制御
+function setupMobileScrollImmersion() {
+  let lastScrollY = 0;
+  let scrollTimeout;
+  
+  document.addEventListener('scroll', (e) => {
+    if (window.innerWidth >= 768) return;
+    if (state.mobileKeyboardVisible) return; // キーボード表示中は無視
+    
+    const target = e.target;
+    if (!target.closest || !target.closest('#editor, .settings-content, .mobile-accordion')) return;
+    
+    const currentScrollY = target.scrollTop || 0;
+    const scrollDiff = currentScrollY - lastScrollY;
+    
+    // 下スクロール時は没入モード
+    if (scrollDiff > 10) {
+      toggleMobileImmersiveMode(true);
+    }
+    
+    // 上スクロール時は解除（少し遅延）
+    if (scrollDiff < -10) {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        if (!state.mobileKeyboardVisible) {
+          toggleMobileImmersiveMode(false);
+        }
+      }, 150);
+    }
+    
+    lastScrollY = currentScrollY;
+  }, true);
+}
+
+// アコーディオンセクションの切り替え
+function toggleMobileAccordion(sectionId) {
+  state.mobileAccordionSections[sectionId] = !state.mobileAccordionSections[sectionId];
+  
+  const content = document.getElementById(`accordion-content-${sectionId}`);
+  const icon = document.getElementById(`accordion-icon-${sectionId}`);
+  
+  if (content) {
+    content.classList.toggle('hidden', !state.mobileAccordionSections[sectionId]);
+    content.classList.toggle('accordion-open', state.mobileAccordionSections[sectionId]);
+  }
+  
+  if (icon) {
+    icon.style.transform = state.mobileAccordionSections[sectionId] ? 'rotate(180deg)' : 'rotate(0deg)';
+  }
 }
 
 function renderModals() {
@@ -6491,6 +6733,12 @@ function renderModals() {
 // Event Handlers
 // ============================================
 function attachEventListeners() {
+  // Mobile UI Initialization
+  if (window.innerWidth < 768) {
+    setupMobileKeyboardDetection();
+    setupMobileScrollImmersion();
+  }
+  
   // Login form
   const loginForm = $('#login-form');
   if (loginForm) {
@@ -7866,6 +8114,15 @@ window.changeFont = (font) => {
 
 window.toggleExportMenu = () => {
   $('#export-menu')?.classList.toggle('hidden');
+};
+
+// Mobile Writing Toolbar Toggle
+window.toggleMobileWritingToolbar = () => {
+  const expandedToolbar = $('#mobile-toolbar-expanded');
+  if (expandedToolbar) {
+    expandedToolbar.classList.toggle('hidden');
+    expandedToolbar.classList.toggle('flex');
+  }
 };
 
 // ============================================
