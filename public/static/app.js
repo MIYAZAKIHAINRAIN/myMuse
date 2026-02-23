@@ -6696,11 +6696,16 @@ function renderMobileProjectDrawer() {
       </div>
       
       <!-- 新規作成ボタン -->
-      <div class="p-3 border-b border-gray-100 dark:border-gray-700">
-        <button onclick="openModal('newProject'); toggleMobileProjectDrawer();" 
-          class="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-indigo-700">
+      <div class="p-3 border-b border-gray-100 dark:border-gray-700 space-y-2">
+        <button onclick="handleMobileNewProject()" 
+          class="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-indigo-700 active:bg-indigo-800 transition">
           <i class="fas fa-plus"></i>
           新規プロジェクト
+        </button>
+        <button onclick="handleMobileNewSeries()" 
+          class="w-full px-4 py-2.5 bg-purple-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-purple-700 active:bg-purple-800 transition">
+          <i class="fas fa-layer-group"></i>
+          シリーズ作成
         </button>
       </div>
       
@@ -6718,7 +6723,7 @@ function renderMobileProjectDrawer() {
                 const isExpanded = state.expandedLibraries[lib.id];
                 return `
                   <div class="rounded-lg overflow-hidden">
-                    <button onclick="toggleLibraryExpand(${lib.id}); event.stopPropagation();"
+                    <button onclick="toggleLibraryExpand('${lib.id}'); event.stopPropagation();"
                       class="w-full px-3 py-2 flex items-center justify-between text-left hover:bg-gray-100 dark:hover:bg-gray-700 ${state.currentProject?.id === lib.id ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''}">
                       <div class="flex items-center gap-2 flex-1 min-w-0">
                         <i class="fas fa-book text-purple-500"></i>
@@ -6729,13 +6734,13 @@ function renderMobileProjectDrawer() {
                     </button>
                     ${isExpanded ? `
                       <div class="pl-6 pb-1">
-                        <button onclick="selectProjectMobile(${lib.id})"
+                        <button onclick="selectProjectMobile('${lib.id}')"
                           class="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-2 ${state.currentProject?.id === lib.id ? 'text-indigo-600 font-medium' : 'text-gray-600 dark:text-gray-400'}">
                           <i class="fas fa-cog"></i>
                           シリーズ設定
                         </button>
                         ${childProjects.map(child => `
-                          <button onclick="selectProjectMobile(${child.id})"
+                          <button onclick="selectProjectMobile('${child.id}')"
                             class="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-2 ${state.currentProject?.id === child.id ? 'text-indigo-600 font-medium' : 'text-gray-600 dark:text-gray-400'}">
                             <i class="fas fa-file-alt"></i>
                             <span class="truncate">${child.title}</span>
@@ -6758,7 +6763,7 @@ function renderMobileProjectDrawer() {
             </h3>
             <div class="space-y-1">
               ${standaloneProjects.map(p => `
-                <button onclick="selectProjectMobile(${p.id})"
+                <button onclick="selectProjectMobile('${p.id}')"
                   class="w-full px-3 py-2 flex items-center gap-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg ${state.currentProject?.id === p.id ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600' : ''}">
                   <i class="fas fa-file-alt ${state.currentProject?.id === p.id ? 'text-indigo-500' : 'text-gray-400'}"></i>
                   <span class="truncate text-sm">${p.title}</span>
@@ -7412,9 +7417,15 @@ window.closeMobileAIModal = () => {
 
 // プロジェクト選択（モバイル）
 window.selectProjectMobile = async (projectId) => {
-  await selectProject(projectId);
-  state.mobileProjectDrawerOpen = false;
-  render();
+  console.log('selectProjectMobile called with:', projectId);
+  
+  try {
+    await selectProject(projectId);
+    state.mobileProjectDrawerOpen = false;
+    render();
+  } catch (e) {
+    console.error('selectProjectMobile error:', e);
+  }
 };
 
 // テーマ切り替え（クイック）
@@ -7456,6 +7467,51 @@ function renderModals() {
               ${t('common.cancel')}
             </button>
             <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+              作成
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- New Library (Series) Modal -->
+    <div id="modal-newLibrary" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'newLibrary')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md m-4 animate-fade-in relative" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('newLibrary')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3 class="text-lg font-semibold mb-4">
+          <i class="fas fa-layer-group text-purple-500 mr-2"></i>新規シリーズ作成
+        </h3>
+        <form id="new-library-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">シリーズ名</label>
+            <input type="text" id="new-library-title" required
+              class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              placeholder="例：〇〇シリーズ">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">説明（任意）</label>
+            <textarea id="new-library-description" rows="2"
+              class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              placeholder="シリーズの概要や説明"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">ジャンル（複数選択可）</label>
+            <div class="grid grid-cols-2 gap-1 max-h-48 overflow-y-auto p-2 border rounded-lg dark:border-gray-600 text-sm">
+              ${getGenreOptions().map(g => `
+                <label class="flex items-center gap-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded">
+                  <input type="checkbox" name="new-library-genre" value="${g.value}" class="rounded">
+                  <span class="truncate">${g.label}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+          <div class="flex justify-end gap-2">
+            <button type="button" onclick="closeModal('newLibrary')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+              ${t('common.cancel')}
+            </button>
+            <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
               作成
             </button>
           </div>
@@ -8052,11 +8108,19 @@ window.switchTab = (tab) => {
 };
 
 window.selectProject = async (projectId) => {
+  console.log('selectProject called with:', projectId);
+  
   // Save current editor content before switching projects
   saveEditorContent();
   
-  await loadProjectData(projectId);
-  render();
+  try {
+    await loadProjectData(projectId);
+    console.log('Project loaded successfully:', state.currentProject);
+    render();
+  } catch (e) {
+    console.error('Failed to load project:', e);
+    alert('プロジェクトの読み込みに失敗しました: ' + e.message);
+  }
 };
 
 // Project Menu Functions
@@ -8594,6 +8658,30 @@ window.openModal = async (name) => {
 window.closeModal = (name) => {
   console.log('closeModal called:', name);
   $(`#modal-${name}`)?.classList.add('hidden');
+};
+
+// モバイル用：新規プロジェクト作成ハンドラ
+window.handleMobileNewProject = () => {
+  // ドロワーを閉じる
+  state.mobileProjectDrawerOpen = false;
+  render();
+  
+  // モーダルを開く
+  setTimeout(() => {
+    openModal('newProject');
+  }, 100);
+};
+
+// モバイル用：新規シリーズ作成ハンドラ
+window.handleMobileNewSeries = () => {
+  // ドロワーを閉じる
+  state.mobileProjectDrawerOpen = false;
+  render();
+  
+  // モーダルを開く
+  setTimeout(() => {
+    openModal('newLibrary');
+  }, 100);
 };
 
 // 実績モーダルを開く
