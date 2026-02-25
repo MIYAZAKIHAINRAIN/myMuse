@@ -352,52 +352,17 @@ export const landingPageHtml = `<!DOCTYPE html>
           2つのAIが、あなたの創作を支える
         </h2>
         <p class="text-indigo-200 text-lg max-w-2xl mx-auto">
-          創作支援に特化したGeminiと、リサーチに強いGrok。<br>
-          それぞれの得意分野で、あなたをサポートします。
+          メイン頭脳のGrokがあらゆる創作をサポート。<br>
+          Geminiは分析・評価で作品を客観視。
         </p>
       </div>
       
       <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-        <!-- Gemini -->
-        <div class="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20 scroll-reveal">
-          <div class="flex items-center gap-4 mb-6">
-            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center p-2">
-              <!-- Gemini-style 4-point star icon -->
-              <svg viewBox="0 0 32 32" class="w-10 h-10" fill="none">
-                <path d="M16 2L18 14L30 16L18 18L16 30L14 18L2 16L14 14L16 2Z" fill="white"/>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-2xl font-bold">Gemini</h3>
-              <p class="text-indigo-300">創作支援AI</p>
-            </div>
+        <!-- Grok - Main AI -->
+        <div class="bg-white/10 backdrop-blur rounded-2xl p-8 border-2 border-emerald-400/50 scroll-reveal relative">
+          <div class="absolute -top-3 left-6 px-3 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full">
+            メインAI
           </div>
-          <ul class="space-y-3">
-            <li class="flex items-start gap-3">
-              <i class="fas fa-check-circle text-green-400 mt-1"></i>
-              <span>続きの文章を自然に生成</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i class="fas fa-check-circle text-green-400 mt-1"></i>
-              <span>キャラクターの性格を深掘り</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i class="fas fa-check-circle text-green-400 mt-1"></i>
-              <span>プロットの相談・アドバイス</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i class="fas fa-check-circle text-green-400 mt-1"></i>
-              <span>文体変換（文語・口語・詩的）</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i class="fas fa-check-circle text-green-400 mt-1"></i>
-              <span>作品の客観的な分析・評価</span>
-            </li>
-          </ul>
-        </div>
-        
-        <!-- Grok -->
-        <div class="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20 scroll-reveal" style="animation-delay: 0.2s;">
           <div class="flex items-center gap-4 mb-6">
             <div class="w-16 h-16 bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl flex items-center justify-center border border-gray-600">
               <!-- Grok/xAI style X icon -->
@@ -407,29 +372,71 @@ export const landingPageHtml = `<!DOCTYPE html>
             </div>
             <div>
               <h3 class="text-2xl font-bold">Grok</h3>
-              <p class="text-emerald-300">リサーチAI</p>
+              <p class="text-emerald-300">執筆支援 & リサーチAI</p>
             </div>
           </div>
           <ul class="space-y-3">
             <li class="flex items-start gap-3">
-              <i class="fas fa-check-circle text-green-400 mt-1"></i>
-              <span>時代考証・歴史調査</span>
+              <i class="fas fa-check-circle text-emerald-400 mt-1"></i>
+              <span>続きの文章を自然に生成</span>
             </li>
             <li class="flex items-start gap-3">
-              <i class="fas fa-check-circle text-green-400 mt-1"></i>
-              <span>専門知識・用語の調べもの</span>
+              <i class="fas fa-check-circle text-emerald-400 mt-1"></i>
+              <span>キャラクターの性格を深掘り</span>
             </li>
             <li class="flex items-start gap-3">
-              <i class="fas fa-check-circle text-green-400 mt-1"></i>
-              <span>トレンド・市場動向の分析</span>
+              <i class="fas fa-check-circle text-emerald-400 mt-1"></i>
+              <span>プロットの相談・アドバイス</span>
             </li>
             <li class="flex items-start gap-3">
-              <i class="fas fa-check-circle text-green-400 mt-1"></i>
-              <span>設定の矛盾チェック</span>
+              <i class="fas fa-check-circle text-emerald-400 mt-1"></i>
+              <span><strong>センシティブな内容も対応可能</strong></span>
             </li>
             <li class="flex items-start gap-3">
-              <i class="fas fa-check-circle text-green-400 mt-1"></i>
-              <span>ファクトチェック・検証</span>
+              <i class="fas fa-check-circle text-emerald-400 mt-1"></i>
+              <span>X（旧Twitter）連携のトレンド調査</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <i class="fas fa-check-circle text-emerald-400 mt-1"></i>
+              <span>時代考証・ファクトチェック</span>
+            </li>
+          </ul>
+        </div>
+        
+        <!-- Gemini - Sub AI -->
+        <div class="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20 scroll-reveal" style="animation-delay: 0.2s;">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center p-2">
+              <!-- Gemini-style 4-point star icon -->
+              <svg viewBox="0 0 32 32" class="w-10 h-10" fill="none">
+                <path d="M16 2L18 14L30 16L18 18L16 30L14 18L2 16L14 14L16 2Z" fill="white"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold">Gemini</h3>
+              <p class="text-indigo-300">分析・評価AI</p>
+            </div>
+          </div>
+          <ul class="space-y-3">
+            <li class="flex items-start gap-3">
+              <i class="fas fa-check-circle text-blue-400 mt-1"></i>
+              <span>作品の感情曲線を可視化</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <i class="fas fa-check-circle text-blue-400 mt-1"></i>
+              <span>作品成分のレーダーチャート</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <i class="fas fa-check-circle text-blue-400 mt-1"></i>
+              <span>客観的な構成分析</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <i class="fas fa-check-circle text-blue-400 mt-1"></i>
+              <span>読者視点での評価</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <i class="fas fa-check-circle text-blue-400 mt-1"></i>
+              <span>改善ポイントの提案</span>
             </li>
           </ul>
         </div>

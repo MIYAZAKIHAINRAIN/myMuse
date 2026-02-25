@@ -1,13 +1,13 @@
 import { Hono } from 'hono';
 import { callGemini, calculateDailyTarget } from '../utils/gemini';
-import { callGrok, GrokRequest } from '../utils/grok';
+import { callGrok } from '../utils/grok';
 
 type Bindings = {
   DB: D1Database;
-  GEMINI_API_KEY: string;
-  GROK_API_KEY?: string;      // For Grok research integration
-  OPENAI_API_KEY?: string;    // For future OpenAI integration
-  AI_PROVIDER?: string;       // 'gemini' | 'grok' | 'openai' - defaults to 'gemini'
+  GEMINI_API_KEY?: string;     // For analysis (sub AI)
+  GROK_API_KEY: string;        // Main AI - required
+  OPENAI_API_KEY?: string;     // For future OpenAI integration
+  AI_PROVIDER?: string;        // 'grok' (default) | 'gemini' | 'openai'
 };
 
 const api = new Hono<{ Bindings: Bindings }>();
@@ -15,41 +15,45 @@ const api = new Hono<{ Bindings: Bindings }>();
 // Helper to generate UUID
 const generateId = () => crypto.randomUUID();
 
-// AI Provider helper - call appropriate AI based on environment config
-async function callAI(env: Bindings, params: {
+// Main AI call - Grok by default (handles sensitive content better)
+async function callMainAI(env: Bindings, params: {
   action: string;
   content: string;
   context?: any;
   options?: any;
 }): Promise<string> {
-  const provider = env.AI_PROVIDER || 'gemini';
-  
-  switch (provider) {
-    case 'grok':
-      // Placeholder for Grok integration
-      if (!env.GROK_API_KEY) {
-        throw new Error('GROK_API_KEY is not configured');
-      }
-      // TODO: Implement Grok API call when ready
-      // return await callGrok(env.GROK_API_KEY, params);
-      throw new Error('Grok integration is not yet implemented');
-      
-    case 'openai':
-      // Placeholder for OpenAI integration
-      if (!env.OPENAI_API_KEY) {
-        throw new Error('OPENAI_API_KEY is not configured');
-      }
-      // TODO: Implement OpenAI API call when ready
-      // return await callOpenAI(env.OPENAI_API_KEY, params);
-      throw new Error('OpenAI integration is not yet implemented');
-      
-    case 'gemini':
-    default:
-      if (!env.GEMINI_API_KEY) {
-        throw new Error('GEMINI_API_KEY is not configured');
-      }
+  // Grok is the main AI for all creative tasks
+  if (!env.GROK_API_KEY) {
+    // Fallback to Gemini if Grok not configured
+    if (env.GEMINI_API_KEY) {
+      console.log('Grok not configured, falling back to Gemini');
       return await callGemini(env.GEMINI_API_KEY, params);
+    }
+    throw new Error('AI APIキーが設定されていません（GROK_API_KEY）');
   }
+  
+  return await callGrok(env.GROK_API_KEY, params);
+}
+
+// Analysis AI call - Gemini specialized for charts/analysis
+async function callAnalysisAI(env: Bindings, params: {
+  action: string;
+  content: string;
+  context?: any;
+  options?: any;
+}): Promise<string> {
+  // Gemini is specialized for analysis (charts, emotion curve, etc.)
+  if (env.GEMINI_API_KEY) {
+    return await callGemini(env.GEMINI_API_KEY, params);
+  }
+  
+  // Fallback to Grok if Gemini not configured
+  if (env.GROK_API_KEY) {
+    console.log('Gemini not configured for analysis, using Grok');
+    return await callGrok(env.GROK_API_KEY, params);
+  }
+  
+  throw new Error('AI APIキーが設定されていません');
 }
 
 // ============================================
@@ -882,7 +886,7 @@ api.post('/ai/generate', async (c) => {
       };
     }
     
-    const result = await callAI(c.env, {
+    const result = await callMainAI(c.env, {
       action: data.action,
       content: data.content,
       context,
@@ -907,7 +911,8 @@ api.post('/ai/analyze', async (c) => {
   const data = await c.req.json();
   
   try {
-    const result = await callAI(c.env, {
+    // Use Gemini for analysis (better at structured JSON output)
+    const result = await callAnalysisAI(c.env, {
       action: 'analyze',
       content: data.content,
     });
@@ -930,7 +935,7 @@ api.post('/ai/generate-ideas', async (c) => {
   const data = await c.req.json();
   
   try {
-    const result = await callAI(c.env, {
+    const result = await callMainAI(c.env, {
       action: 'generate_ideas',
       content: data.keywords || '',
       options: {
@@ -980,7 +985,7 @@ api.post('/ai/generate-achievements', async (c) => {
   const data = await c.req.json();
   
   try {
-    const result = await callAI(c.env, {
+    const result = await callMainAI(c.env, {
       action: 'achievement',
       content: JSON.stringify(data.writingStats),
     });
@@ -1005,7 +1010,7 @@ api.post('/ai/chat', async (c) => {
   try {
     // Handle analysis_chat action
     if (action === 'analysis_chat') {
-      const result = await callAI(c.env, {
+      const result = await callMainAI(c.env, {
         action: 'analysis_chat',
         content: message || content,
         context: {
@@ -1042,7 +1047,7 @@ api.post('/ai/chat', async (c) => {
       }
     }
     
-    const result = await callAI(c.env, {
+    const result = await callMainAI(c.env, {
       action: action || 'ideas_chat',
       content: content,
       context: {
@@ -1059,7 +1064,7 @@ api.post('/ai/chat', async (c) => {
 });
 
 // ============================================
-// Grok Research AI (リサーチ専用)
+// Grok Research AI (リサーチ専用 - X/Twitter連携)
 // ============================================
 
 // Grok Research endpoint - 資料収集、トレンド調査、ファクトチェック
@@ -1071,22 +1076,13 @@ api.post('/ai/research', async (c) => {
   }
   
   try {
-    const request: GrokRequest = {
-      query,
-      type: type || 'research',
+    const result = await callGrok(c.env.GROK_API_KEY, {
+      action: type || 'research',
+      content: query,
       context: context || {}
-    };
-    
-    const result = await callGrok(c.env.GROK_API_KEY, request);
-    
-    if (!result.success) {
-      return c.json({ error: result.error || 'Research failed' }, 500);
-    }
-    
-    return c.json({ 
-      response: result.content,
-      sources: result.sources 
     });
+    
+    return c.json({ response: result });
   } catch (error: any) {
     console.error('Grok Research Error:', error);
     return c.json({ error: error.message }, 500);
