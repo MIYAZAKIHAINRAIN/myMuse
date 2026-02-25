@@ -1330,36 +1330,47 @@ api.post('/payment/create-session', async (c) => {
   // Get KOMOJU secret key from environment
   const komojuSecretKey = (c.env as any).KOMOJU_SECRET_KEY;
   if (!komojuSecretKey) {
-    return c.json({ error: '決済機能が設定されていません' }, 500);
+    console.error('KOMOJU_SECRET_KEY not configured');
+    return c.json({ error: '決済機能が設定されていません。管理者にお問い合わせください。' }, 500);
   }
   
   try {
+    // Create Basic Auth header
+    const authHeader = 'Basic ' + btoa(komojuSecretKey + ':');
+    
     // Create KOMOJU session
+    const requestBody = {
+      amount: plan.amount,
+      currency: 'JPY',
+      return_url: returnUrl,
+      external_order_num: paymentId,
+      metadata: {
+        user_id: String(session.user_id),
+        plan_type: String(planType),
+        credits: String(plan.credits),
+      },
+      payment_types: ['credit_card', 'paypay', 'linepay', 'konbini'],
+      default_locale: 'ja',
+    };
+    
+    console.log('Creating KOMOJU session:', { amount: plan.amount, returnUrl, paymentId });
+    
     const komojuResponse = await fetch(`${KOMOJU_API_BASE}/sessions`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Basic ' + btoa(komojuSecretKey + ':'),
+        'Authorization': authHeader,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        amount: plan.amount,
-        currency: 'JPY',
-        return_url: returnUrl,
-        external_order_num: paymentId,
-        metadata: {
-          user_id: session.user_id,
-          plan_type: planType,
-          credits: plan.credits,
-        },
-        payment_types: ['credit_card', 'paypay', 'linepay', 'konbini'],
-        default_locale: 'ja',
-      }),
+      body: JSON.stringify(requestBody),
     });
     
     if (!komojuResponse.ok) {
-      const error = await komojuResponse.text();
-      console.error('KOMOJU session error:', error);
-      return c.json({ error: '決済セッションの作成に失敗しました' }, 500);
+      const errorText = await komojuResponse.text();
+      console.error('KOMOJU session error:', komojuResponse.status, errorText);
+      return c.json({ 
+        error: '決済セッションの作成に失敗しました',
+        details: `Status: ${komojuResponse.status}`,
+      }, 500);
     }
     
     const komojuData = await komojuResponse.json() as any;

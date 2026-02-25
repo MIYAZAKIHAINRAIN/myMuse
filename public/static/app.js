@@ -2106,15 +2106,25 @@ function renderLeftSidebar() {
           <span>${t('sidebar.trash')}</span>
         </button>
         
-        <!-- AI Credits -->
-        <div class="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-          <div class="flex items-center justify-between text-sm mb-1">
-            <span>${t('sidebar.aiCredits')}</span>
-            <span class="font-medium">${state.user?.ai_credits || 0}</span>
+        <!-- AI Credits & Purchase -->
+        <div class="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700">
+          <div class="flex items-center justify-between text-sm mb-2">
+            <span class="font-medium text-gray-700 dark:text-gray-300">
+              <i class="fas fa-coins text-yellow-500 mr-1"></i>${t('sidebar.aiCredits')}
+            </span>
+            <span class="font-bold text-indigo-600 dark:text-indigo-400">${(state.user?.ai_credits || 0).toLocaleString()}</span>
           </div>
-          <div class="h-2 bg-gray-300 dark:bg-gray-600 rounded-full overflow-hidden">
-            <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500" style="width: ${Math.min(100, (state.user?.ai_credits || 0) / 100)}%"></div>
+          <div class="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden mb-2">
+            <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500" style="width: ${Math.min(100, (state.user?.ai_credits || 0) / 4000)}%"></div>
           </div>
+          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
+            <span>${state.user?.is_premium ? '📖 スタンダード' : '🆓 無料プラン'}</span>
+            <span>約${Math.floor((state.user?.ai_credits || 0) / 100000)}冊分</span>
+          </div>
+          <button onclick="openModal('payment')" class="w-full py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg text-xs font-medium hover:shadow-lg transition flex items-center justify-center gap-1">
+            <i class="fas fa-plus-circle"></i>
+            トークン購入
+          </button>
         </div>
         
         <!-- Language Selector -->
