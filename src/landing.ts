@@ -233,10 +233,10 @@ export const landingPageHtml = `<!DOCTYPE html>
           </div>
           
           <!-- Floating badges -->
-          <div class="absolute -top-4 -right-4 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full text-sm font-medium shadow-lg animate-float" style="animation-delay: -2s;">
+          <div class="absolute -top-4 -right-4 z-20 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full text-sm font-medium shadow-lg animate-float" style="animation-delay: -2s;">
             <i class="fas fa-check mr-1"></i>買い切り1,600円
           </div>
-          <div class="absolute -bottom-4 -left-4 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-sm font-medium shadow-lg animate-float" style="animation-delay: -4s;">
+          <div class="absolute -bottom-4 -left-4 z-20 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-sm font-medium shadow-lg animate-float" style="animation-delay: -4s;">
             <i class="fas fa-brain mr-1"></i>Gemini + Grok搭載
           </div>
         </div>
