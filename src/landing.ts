@@ -173,7 +173,7 @@ export const landingPageHtml = `<!DOCTYPE html>
               <div class="text-indigo-300 text-sm">AIエンジン搭載</div>
             </div>
             <div class="text-center">
-              <div class="text-3xl font-bold text-white">4言語</div>
+              <div class="text-3xl font-bold text-white">8言語</div>
               <div class="text-indigo-300 text-sm">多言語対応</div>
             </div>
           </div>
