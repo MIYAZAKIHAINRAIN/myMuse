@@ -956,6 +956,156 @@ async function logout() {
   render();
 }
 
+// ============================================
+// Payment Functions (KOMOJU Integration)
+// ============================================
+
+// Purchase a plan
+window.purchasePlan = async (planType) => {
+  if (!state.sessionId || !state.user) {
+    alert('ログインが必要です');
+    return;
+  }
+  
+  // Show loading state
+  const buttons = document.querySelectorAll('#modal-payment button');
+  buttons.forEach(btn => btn.disabled = true);
+  
+  try {
+    const res = await fetch('/api/payment/create-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Session-Id': state.sessionId
+      },
+      body: JSON.stringify({ planType })
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+      throw new Error(data.error || '決済セッションの作成に失敗しました');
+    }
+    
+    // Store payment ID for callback check
+    localStorage.setItem('pendingPaymentId', data.paymentId);
+    
+    // Redirect to KOMOJU payment page
+    window.location.href = data.sessionUrl;
+    
+  } catch (e) {
+    alert(e.message);
+    buttons.forEach(btn => btn.disabled = false);
+  }
+};
+
+// Check payment status (called on app load)
+window.checkPendingPayment = async () => {
+  const paymentId = localStorage.getItem('pendingPaymentId');
+  if (!paymentId || !state.sessionId) return;
+  
+  try {
+    const res = await fetch(`/api/payment/status/${paymentId}`, {
+      headers: { 'X-Session-Id': state.sessionId }
+    });
+    
+    const data = await res.json();
+    
+    if (data.payment?.status === 'completed') {
+      // Update user credits
+      await refreshUserCredits();
+      alert('決済が完了しました！クレジットが追加されました。');
+      localStorage.removeItem('pendingPaymentId');
+      render();
+    } else if (data.payment?.status === 'cancelled') {
+      alert('決済がキャンセルされました。');
+      localStorage.removeItem('pendingPaymentId');
+    }
+  } catch (e) {
+    console.error('Payment check error:', e);
+  }
+};
+
+// Refresh user credits info
+window.refreshUserCredits = async () => {
+  if (!state.sessionId) return;
+  
+  try {
+    const res = await fetch('/api/payment/credits', {
+      headers: { 'X-Session-Id': state.sessionId }
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok && state.user) {
+      state.user.ai_credits = data.credits;
+      state.user.is_premium = data.isPremium;
+      state.user.plan_type = data.planType;
+    }
+  } catch (e) {
+    console.error('Credits refresh error:', e);
+  }
+};
+
+// ============================================
+// Invite Code Functions
+// ============================================
+
+// Apply invite code
+window.applyInviteCode = async () => {
+  const input = document.getElementById('invite-code-input');
+  const code = input?.value?.trim();
+  
+  if (!code) {
+    alert('招待コードを入力してください');
+    return;
+  }
+  
+  if (!state.sessionId || !state.user) {
+    alert('ログインが必要です');
+    return;
+  }
+  
+  try {
+    const res = await fetch('/api/invite/apply', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Session-Id': state.sessionId
+      },
+      body: JSON.stringify({ code })
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+      throw new Error(data.error || '招待コードの適用に失敗しました');
+    }
+    
+    // Update user state
+    if (data.user) {
+      state.user.ai_credits = data.user.ai_credits;
+      state.user.is_premium = data.user.is_premium;
+      state.user.plan_type = data.user.plan_type;
+      state.user.invite_code_used = code.toUpperCase();
+    }
+    
+    let message = data.message;
+    if (data.creditsAdded > 0) {
+      message += `\\n${data.creditsAdded.toLocaleString()}文字分のクレジットが追加されました！`;
+    }
+    if (data.premiumGranted) {
+      message += '\\nプレミアム機能が有効になりました！';
+    }
+    
+    alert(message);
+    render();
+    
+  } catch (e) {
+    alert(e.message);
+  }
+};
+
 // Change password handler
 window.handleChangePassword = async (event) => {
   event.preventDefault();
@@ -7540,10 +7690,44 @@ function renderModals() {
             </div>
           </div>
           
-          <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <p class="text-sm text-green-700 dark:text-green-300">
-              <i class="fas fa-gift mr-1"></i>${t('settings.betaNote')}
-            </p>
+          <!-- Credits & Plan Section -->
+          <div class="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <i class="fas fa-coins mr-1 text-yellow-500"></i>AI利用残高
+              </span>
+              <span id="credits-display" class="text-lg font-bold text-indigo-600 dark:text-indigo-400">
+                ${(state.user?.ai_credits || 5000).toLocaleString()}文字
+              </span>
+            </div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs text-gray-500 dark:text-gray-400">プラン</span>
+              <span id="plan-display" class="text-xs px-2 py-0.5 rounded-full ${state.user?.is_premium ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}">
+                ${state.user?.is_premium ? 'スタンダード' : '無料プラン'}
+              </span>
+            </div>
+            <button type="button" onclick="openModal('payment')" class="w-full py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition">
+              <i class="fas fa-credit-card mr-1"></i>プラン・トークン購入
+            </button>
+          </div>
+          
+          <!-- Invite Code Section -->
+          <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+            <h4 class="text-sm font-semibold mb-2 text-amber-800 dark:text-amber-300">
+              <i class="fas fa-ticket-alt mr-1"></i>招待コード
+            </h4>
+            <div class="flex gap-2">
+              <input type="text" id="invite-code-input" 
+                placeholder="コードを入力" 
+                class="flex-1 px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 uppercase"
+                ${state.user?.invite_code_used ? 'disabled' : ''}>
+              <button type="button" onclick="applyInviteCode()" 
+                class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600 disabled:opacity-50"
+                ${state.user?.invite_code_used ? 'disabled' : ''}>
+                適用
+              </button>
+            </div>
+            ${state.user?.invite_code_used ? `<p class="text-xs text-amber-600 dark:text-amber-400 mt-2"><i class="fas fa-check-circle mr-1"></i>適用済み: ${state.user.invite_code_used}</p>` : ''}
           </div>
           
           <hr class="border-gray-200 dark:border-gray-700">
@@ -7653,6 +7837,94 @@ function renderModals() {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+    
+    <!-- Payment Modal -->
+    <div id="modal-payment" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 modal-backdrop" onclick="handleModalBackdropClick(event, 'payment')">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-lg m-4 animate-fade-in relative max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeModal('payment')" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3 class="text-lg font-semibold mb-4"><i class="fas fa-credit-card mr-2"></i>プラン・トークン購入</h3>
+        
+        <!-- Current Status -->
+        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">現在の残高</span>
+            <span class="font-bold text-indigo-600 dark:text-indigo-400">${(state.user?.ai_credits || 5000).toLocaleString()}文字</span>
+          </div>
+        </div>
+        
+        <!-- Standard Plan (if not premium) -->
+        ${!state.user?.is_premium ? `
+        <div class="mb-4">
+          <h4 class="text-sm font-semibold mb-2 flex items-center gap-2">
+            <i class="fas fa-crown text-yellow-500"></i>スタンダードプラン
+          </h4>
+          <div class="border-2 border-indigo-500 rounded-lg p-4 bg-indigo-50 dark:bg-indigo-900/20">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="text-2xl font-bold text-indigo-600">¥1,600</span>
+                <span class="text-sm text-gray-500">（税込）</span>
+              </div>
+              <span class="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">約40万文字</span>
+            </div>
+            <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-3">
+              <li><i class="fas fa-check text-green-500 mr-1"></i>すべての機能が利用可能</li>
+              <li><i class="fas fa-check text-green-500 mr-1"></i>Grok + Gemini デュアルAI</li>
+              <li><i class="fas fa-check text-green-500 mr-1"></i>プロジェクト数無制限</li>
+              <li><i class="fas fa-check text-green-500 mr-1"></i>シリーズ機能</li>
+            </ul>
+            <button type="button" onclick="purchasePlan('standard')" class="w-full py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition">
+              購入する
+            </button>
+          </div>
+        </div>
+        ` : `
+        <div class="mb-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+          <p class="text-sm text-green-700 dark:text-green-300">
+            <i class="fas fa-check-circle mr-1"></i>スタンダードプランをご利用中です
+          </p>
+        </div>
+        `}
+        
+        <!-- Add-on Tokens (only for premium users) -->
+        <div class="${!state.user?.is_premium ? 'opacity-50 pointer-events-none' : ''}">
+          <h4 class="text-sm font-semibold mb-2 flex items-center gap-2">
+            <i class="fas fa-plus-circle text-purple-500"></i>追加トークン
+            ${!state.user?.is_premium ? '<span class="text-xs text-gray-500">（スタンダードプラン購入後に利用可能）</span>' : ''}
+          </h4>
+          <div class="space-y-2">
+            <button type="button" onclick="purchasePlan('addon_100k')" class="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+              <div class="flex items-center gap-2">
+                <span class="font-medium">10万文字</span>
+              </div>
+              <span class="font-bold">¥500</span>
+            </button>
+            <button type="button" onclick="purchasePlan('addon_300k')" class="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition border border-green-300 dark:border-green-700">
+              <div class="flex items-center gap-2">
+                <span class="font-medium">30万文字</span>
+                <span class="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs">人気</span>
+              </div>
+              <span class="font-bold">¥1,000</span>
+            </button>
+            <button type="button" onclick="purchasePlan('addon_1m')" class="w-full flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition border border-indigo-300 dark:border-indigo-700">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-indigo-700 dark:text-indigo-300">100万文字</span>
+                <span class="px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs">お得</span>
+              </div>
+              <span class="font-bold text-indigo-700 dark:text-indigo-300">¥2,500</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Payment Note -->
+        <div class="mt-4 p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            <i class="fas fa-info-circle mr-1"></i>決済は安全なKOMOJUを通じて処理されます。クレジットカード、PayPay、LINE Pay、コンビニ払いに対応。
+          </p>
+        </div>
       </div>
     </div>
     
@@ -11337,6 +11609,12 @@ async function init() {
   // Track login for achievements
   if (state.user && typeof trackActivity === 'function') {
     trackActivity('login');
+  }
+  
+  // Check for pending payment callback
+  if (state.user && state.sessionId) {
+    await checkPendingPayment();
+    await refreshUserCredits();
   }
   
   render();

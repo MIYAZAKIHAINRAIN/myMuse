@@ -480,103 +480,205 @@ export const landingPageHtml = `<!DOCTYPE html>
           <span>シンプルな料金体系</span>
         </div>
         <h2 class="text-3xl sm:text-4xl font-bold mb-4 font-mincho">
-          <span class="gradient-text">買い切り</span>で、ずっと使える
+          まずは<span class="gradient-text">無料</span>で試して、<span class="gradient-text">買い切り</span>でずっと使える
         </h2>
         <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-          サブスク疲れにさよなら。一度の購入で、基本機能がずっと使えます。
+          サブスク疲れにさよなら。無料で始めて、気に入ったら一度の購入で本格利用。
         </p>
       </div>
       
-      <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <!-- Main Plan -->
-        <div class="bg-white rounded-3xl p-8 border-2 border-indigo-500 shadow-xl relative scroll-reveal">
-          <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full text-sm font-medium">
-            おすすめ
+      <!-- Pricing Flow -->
+      <div class="max-w-5xl mx-auto mb-12">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 text-center">
+          <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow">
+            <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
+            <span>無料で始める</span>
           </div>
-          <div class="text-center mb-8">
-            <h3 class="text-2xl font-bold mb-2">myMuse 買い切りプラン</h3>
-            <div class="flex items-baseline justify-center gap-1">
-              <span class="text-5xl font-bold gradient-text">¥1,600</span>
-              <span class="text-gray-500">（税込）</span>
+          <i class="fas fa-arrow-right text-gray-300 hidden md:block"></i>
+          <i class="fas fa-arrow-down text-gray-300 md:hidden"></i>
+          <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow">
+            <span class="w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
+            <span>気に入ったら買い切り</span>
+          </div>
+          <i class="fas fa-arrow-right text-gray-300 hidden md:block"></i>
+          <i class="fas fa-arrow-down text-gray-300 md:hidden"></i>
+          <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow">
+            <span class="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
+            <span>足りなくなったら追加</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <!-- Free Plan -->
+        <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm scroll-reveal">
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm mb-3">
+              <i class="fas fa-gift"></i>
+              <span>無料</span>
             </div>
-            <p class="text-gray-500 mt-2">約40万文字分のAI利用付き</p>
+            <h3 class="text-xl font-bold mb-2">お試しプラン</h3>
+            <div class="flex items-baseline justify-center gap-1">
+              <span class="text-4xl font-bold">¥0</span>
+            </div>
+            <p class="text-gray-500 mt-2 text-sm">5,000文字分のAI利用付き</p>
           </div>
           
-          <ul class="space-y-4 mb-8">
-            <li class="flex items-center gap-3">
-              <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-check text-green-600 text-sm"></i>
-              </div>
-              <span>すべての基本機能が使い放題</span>
+          <ul class="space-y-3 mb-6 text-sm">
+            <li class="flex items-center gap-2">
+              <i class="fas fa-check text-green-500"></i>
+              <span>基本的な執筆支援AI</span>
             </li>
-            <li class="flex items-center gap-3">
-              <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-check text-green-600 text-sm"></i>
-              </div>
-              <span>Gemini + Grok デュアルAI</span>
+            <li class="flex items-center gap-2">
+              <i class="fas fa-check text-green-500"></i>
+              <span>プロジェクト1個まで</span>
             </li>
-            <li class="flex items-center gap-3">
-              <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-check text-green-600 text-sm"></i>
-              </div>
-              <span>プロジェクト数無制限</span>
+            <li class="flex items-center gap-2">
+              <i class="fas fa-check text-green-500"></i>
+              <span>TXTエクスポート</span>
             </li>
-            <li class="flex items-center gap-3">
-              <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-check text-green-600 text-sm"></i>
-              </div>
-              <span>クラウド同期・バックアップ</span>
+            <li class="flex items-center gap-2 text-gray-400">
+              <i class="fas fa-times"></i>
+              <span>シリーズ機能</span>
             </li>
-            <li class="flex items-center gap-3">
-              <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-check text-green-600 text-sm"></i>
-              </div>
-              <span>今後のアップデート無料</span>
+            <li class="flex items-center gap-2 text-gray-400">
+              <i class="fas fa-times"></i>
+              <span>分析・相談AI</span>
+            </li>
+            <li class="flex items-center gap-2 text-gray-400">
+              <i class="fas fa-times"></i>
+              <span>リサーチ（Xトレンド）</span>
             </li>
           </ul>
           
-          <a href="/app" class="block w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold text-center hover:shadow-lg hover:shadow-indigo-300/50 transition-all">
-            今すぐ始める
+          <a href="/app" class="block w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-medium text-center hover:bg-gray-200 transition-all">
+            無料で始める
           </a>
         </div>
         
-        <!-- Token Plans -->
-        <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm scroll-reveal" style="animation-delay: 0.2s;">
-          <div class="text-center mb-8">
-            <h3 class="text-2xl font-bold mb-2">追加トークン</h3>
-            <p class="text-gray-500">AI利用分が足りなくなったら</p>
+        <!-- Main Plan -->
+        <div class="bg-white rounded-3xl p-6 border-2 border-indigo-500 shadow-xl relative scroll-reveal" style="animation-delay: 0.1s;">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full text-sm font-medium">
+            おすすめ
+          </div>
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm mb-3">
+              <i class="fas fa-crown"></i>
+              <span>買い切り</span>
+            </div>
+            <h3 class="text-xl font-bold mb-2">スタンダードプラン</h3>
+            <div class="flex items-baseline justify-center gap-1">
+              <span class="text-4xl font-bold gradient-text">¥1,600</span>
+              <span class="text-gray-500 text-sm">（税込）</span>
+            </div>
+            <p class="text-gray-500 mt-2 text-sm">約40万文字分のAI利用付き</p>
+            <p class="text-indigo-600 text-xs mt-1">📚 本約4冊分の執筆が可能</p>
           </div>
           
-          <div class="space-y-4 mb-8">
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-              <div>
-                <span class="font-bold">ライト</span>
-                <span class="text-gray-500 text-sm ml-2">30万文字</span>
-              </div>
-              <span class="text-xl font-bold">¥500</span>
+          <ul class="space-y-3 mb-6 text-sm">
+            <li class="flex items-center gap-2">
+              <i class="fas fa-check text-green-500"></i>
+              <span><strong>すべての機能が利用可能</strong></span>
+            </li>
+            <li class="flex items-center gap-2">
+              <i class="fas fa-check text-green-500"></i>
+              <span>Grok + Gemini デュアルAI</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <i class="fas fa-check text-green-500"></i>
+              <span>プロジェクト数無制限</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <i class="fas fa-check text-green-500"></i>
+              <span>シリーズ機能</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <i class="fas fa-check text-green-500"></i>
+              <span>分析・相談AI</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <i class="fas fa-check text-green-500"></i>
+              <span>リサーチ（Xトレンド）</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <i class="fas fa-check text-green-500"></i>
+              <span>全形式エクスポート</span>
+            </li>
+          </ul>
+          
+          <a href="/app" class="block w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold text-center hover:shadow-lg hover:shadow-indigo-300/50 transition-all">
+            購入して始める
+          </a>
+        </div>
+        
+        <!-- Token Add-on -->
+        <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm scroll-reveal" style="animation-delay: 0.2s;">
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-sm mb-3">
+              <i class="fas fa-plus-circle"></i>
+              <span>追加購入</span>
             </div>
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+            <h3 class="text-xl font-bold mb-2">追加トークン</h3>
+            <p class="text-gray-500 text-sm">AI利用分が足りなくなったら</p>
+          </div>
+          
+          <div class="space-y-3 mb-6">
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl text-sm">
               <div>
-                <span class="font-bold">スタンダード</span>
-                <span class="text-gray-500 text-sm ml-2">70万文字</span>
+                <span class="font-bold">10万文字</span>
               </div>
-              <span class="text-xl font-bold">¥1,000</span>
+              <span class="font-bold">¥500</span>
             </div>
-            <div class="flex items-center justify-between p-4 bg-indigo-50 rounded-xl border border-indigo-200">
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl text-sm">
               <div>
-                <span class="font-bold text-indigo-600">プロ</span>
-                <span class="text-indigo-500 text-sm ml-2">1,200万文字</span>
-                <span class="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded text-xs">お得</span>
+                <span class="font-bold">30万文字</span>
+                <span class="ml-1 px-1.5 py-0.5 bg-green-100 text-green-600 rounded text-xs">人気</span>
               </div>
-              <span class="text-xl font-bold text-indigo-600">¥10,000</span>
+              <span class="font-bold">¥1,000</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-xl border border-indigo-200 text-sm">
+              <div>
+                <span class="font-bold text-indigo-600">100万文字</span>
+                <span class="ml-1 px-1.5 py-0.5 bg-indigo-100 text-indigo-600 rounded text-xs">お得</span>
+              </div>
+              <span class="font-bold text-indigo-600">¥2,500</span>
             </div>
           </div>
           
-          <div class="p-4 bg-amber-50 rounded-xl border border-amber-200">
-            <p class="text-amber-700 text-sm flex items-start gap-2">
+          <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-sm">
+            <p class="text-amber-700 flex items-start gap-2">
               <i class="fas fa-info-circle mt-0.5"></i>
-              <span>ベータ期間中は全機能無料でお試しいただけます！</span>
+              <span>購入済みユーザーのみ追加購入可能です</span>
             </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Important Notes -->
+      <div class="max-w-3xl mx-auto mt-12 p-6 bg-white rounded-2xl border border-gray-200 scroll-reveal">
+        <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+          <i class="fas fa-exclamation-circle text-indigo-500"></i>
+          ご利用にあたって
+        </h4>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-start gap-2">
+            <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+            <span><strong>「文字数」はAIが生成する文字数</strong>です。ご自身で入力する文字数はカウントされません。</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+            <span><strong>買い切りプランは一度購入すれば永久に有効</strong>です。トークンが無くなるまでご利用いただけます。</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+            <span><strong>トークンに有効期限はありません</strong>。ご自身のペースで執筆をお楽しみください。</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+            <span><strong>決済はKOMOJUを使用</strong>しています。クレジットカード、コンビニ払いなど各種支払い方法に対応。</span>
+          </li>
+        </ul>
+      </div>
           </div>
         </div>
       </div>

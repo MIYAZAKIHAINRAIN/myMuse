@@ -8,6 +8,8 @@ type Bindings = {
   GROK_API_KEY: string;        // Main AI - required
   OPENAI_API_KEY?: string;     // For future OpenAI integration
   AI_PROVIDER?: string;        // 'grok' (default) | 'gemini' | 'openai'
+  KOMOJU_SECRET_KEY?: string;  // KOMOJU payment API secret key
+  KOMOJU_PUBLIC_KEY?: string;  // KOMOJU payment API public key
 };
 
 const api = new Hono<{ Bindings: Bindings }>();
@@ -73,11 +75,11 @@ api.post('/auth/signup', async (c) => {
     return c.json({ error: 'このメールアドレスは既に登録されています' }, 400);
   }
   
-  // Create new user
+  // Create new user (Free plan: 5,000 credits)
   const userId = generateId();
   await c.env.DB.prepare(
-    'INSERT INTO users (id, email, name, ai_credits) VALUES (?, ?, ?, ?)'
-  ).bind(userId, email, name, 10000).run();
+    'INSERT INTO users (id, email, name, ai_credits, plan_type, is_premium) VALUES (?, ?, ?, ?, ?, ?)'
+  ).bind(userId, email, name, 5000, 'free', 0).run();
   
   const user = await c.env.DB.prepare(
     'SELECT * FROM users WHERE id = ?'
@@ -1277,6 +1279,319 @@ api.post('/novelai/generate', async (c) => {
     console.error('NovelAI Generation Error:', error);
     return c.json({ error: error.message }, 500);
   }
+});
+
+// ============================================
+// Payment Routes (KOMOJU Integration)
+// ============================================
+
+const KOMOJU_API_BASE = 'https://komoju.com/api/v1';
+
+// Payment plans configuration
+const PAYMENT_PLANS = {
+  standard: { amount: 1600, credits: 400000, label: 'スタンダードプラン' },
+  addon_100k: { amount: 500, credits: 100000, label: '追加10万文字' },
+  addon_300k: { amount: 1000, credits: 300000, label: '追加30万文字' },
+  addon_1m: { amount: 2500, credits: 1000000, label: '追加100万文字' },
+};
+
+// Create KOMOJU payment session
+api.post('/payment/create-session', async (c) => {
+  const sessionId = c.req.header('X-Session-Id');
+  if (!sessionId) return c.json({ error: '認証が必要です' }, 401);
+  
+  const session = await c.env.DB.prepare(
+    'SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")'
+  ).bind(sessionId).first();
+  
+  if (!session) return c.json({ error: 'セッションが無効です' }, 401);
+  
+  const { planType } = await c.req.json();
+  const plan = PAYMENT_PLANS[planType as keyof typeof PAYMENT_PLANS];
+  
+  if (!plan) {
+    return c.json({ error: '無効なプランです' }, 400);
+  }
+  
+  // Check if addon requires premium for standard plan
+  if (planType !== 'standard') {
+    const user = await c.env.DB.prepare(
+      'SELECT is_premium FROM users WHERE id = ?'
+    ).bind(session.user_id).first();
+    
+    if (!(user as any)?.is_premium) {
+      return c.json({ error: '追加トークンはスタンダードプラン購入後に利用可能です' }, 400);
+    }
+  }
+  
+  const paymentId = generateId();
+  const returnUrl = new URL(c.req.url).origin + '/app?payment=' + paymentId;
+  
+  // Get KOMOJU secret key from environment
+  const komojuSecretKey = (c.env as any).KOMOJU_SECRET_KEY;
+  if (!komojuSecretKey) {
+    return c.json({ error: '決済機能が設定されていません' }, 500);
+  }
+  
+  try {
+    // Create KOMOJU session
+    const komojuResponse = await fetch(`${KOMOJU_API_BASE}/sessions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + btoa(komojuSecretKey + ':'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: plan.amount,
+        currency: 'JPY',
+        return_url: returnUrl,
+        external_order_num: paymentId,
+        metadata: {
+          user_id: session.user_id,
+          plan_type: planType,
+          credits: plan.credits,
+        },
+        payment_types: ['credit_card', 'paypay', 'linepay', 'konbini'],
+        default_locale: 'ja',
+      }),
+    });
+    
+    if (!komojuResponse.ok) {
+      const error = await komojuResponse.text();
+      console.error('KOMOJU session error:', error);
+      return c.json({ error: '決済セッションの作成に失敗しました' }, 500);
+    }
+    
+    const komojuData = await komojuResponse.json() as any;
+    
+    // Store payment record
+    await c.env.DB.prepare(
+      `INSERT INTO payments (id, user_id, komoju_session_id, amount, credits_purchased, payment_type, status)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending')`
+    ).bind(paymentId, session.user_id, komojuData.id, plan.amount, plan.credits, planType).run();
+    
+    return c.json({
+      sessionUrl: komojuData.session_url,
+      sessionId: komojuData.id,
+      paymentId,
+    });
+  } catch (error: any) {
+    console.error('Payment session error:', error);
+    return c.json({ error: '決済処理中にエラーが発生しました: ' + error.message }, 500);
+  }
+});
+
+// Check payment status
+api.get('/payment/status/:paymentId', async (c) => {
+  const paymentId = c.req.param('paymentId');
+  
+  const payment = await c.env.DB.prepare(
+    'SELECT * FROM payments WHERE id = ?'
+  ).bind(paymentId).first() as any;
+  
+  if (!payment) {
+    return c.json({ error: '決済情報が見つかりません' }, 404);
+  }
+  
+  // If still pending, check with KOMOJU
+  if (payment.status === 'pending' && payment.komoju_session_id) {
+    const komojuSecretKey = (c.env as any).KOMOJU_SECRET_KEY;
+    if (komojuSecretKey) {
+      try {
+        const komojuResponse = await fetch(`${KOMOJU_API_BASE}/sessions/${payment.komoju_session_id}`, {
+          headers: {
+            'Authorization': 'Basic ' + btoa(komojuSecretKey + ':'),
+          },
+        });
+      
+      if (komojuResponse.ok) {
+        const komojuData = await komojuResponse.json() as any;
+        
+        if (komojuData.status === 'completed') {
+          // Update payment status
+          await c.env.DB.prepare(
+            `UPDATE payments SET status = 'completed', komoju_payment_id = ?, completed_at = datetime('now') WHERE id = ?`
+          ).bind(komojuData.payment?.id || '', paymentId).run();
+          
+          // Add credits to user
+          await c.env.DB.prepare(
+            `UPDATE users SET 
+              ai_credits = ai_credits + ?,
+              is_premium = 1,
+              plan_type = 'premium',
+              total_purchased_credits = total_purchased_credits + ?
+            WHERE id = ?`
+          ).bind(payment.credits_purchased, payment.credits_purchased, payment.user_id).run();
+          
+          payment.status = 'completed';
+        } else if (komojuData.status === 'cancelled') {
+          await c.env.DB.prepare(
+            `UPDATE payments SET status = 'cancelled' WHERE id = ?`
+          ).bind(paymentId).run();
+          payment.status = 'cancelled';
+        }
+      }
+    } catch (error) {
+      console.error('KOMOJU status check error:', error);
+    }
+    }
+  }
+  
+  return c.json({ payment });
+});
+
+// Get user credits info
+api.get('/payment/credits', async (c) => {
+  const sessionId = c.req.header('X-Session-Id');
+  if (!sessionId) return c.json({ error: '認証が必要です' }, 401);
+  
+  const session = await c.env.DB.prepare(
+    'SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")'
+  ).bind(sessionId).first();
+  
+  if (!session) return c.json({ error: 'セッションが無効です' }, 401);
+  
+  const user = await c.env.DB.prepare(
+    'SELECT ai_credits, is_premium, plan_type, total_purchased_credits FROM users WHERE id = ?'
+  ).bind(session.user_id).first() as any;
+  
+  const payments = await c.env.DB.prepare(
+    `SELECT * FROM payments WHERE user_id = ? AND status = 'completed' ORDER BY completed_at DESC LIMIT 10`
+  ).bind(session.user_id).all();
+  
+  return c.json({
+    credits: user?.ai_credits || 0,
+    isPremium: !!user?.is_premium,
+    planType: user?.plan_type || 'free',
+    totalPurchased: user?.total_purchased_credits || 0,
+    recentPayments: payments.results || [],
+  });
+});
+
+// ============================================
+// Invite Code Routes
+// ============================================
+
+const DEVELOPER_INVITE_CODE = 'MYMUSE-DEV-2025';
+
+// Apply invite code
+api.post('/invite/apply', async (c) => {
+  const sessionId = c.req.header('X-Session-Id');
+  if (!sessionId) return c.json({ error: '認証が必要です' }, 401);
+  
+  const session = await c.env.DB.prepare(
+    'SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")'
+  ).bind(sessionId).first();
+  
+  if (!session) return c.json({ error: 'セッションが無効です' }, 401);
+  
+  const { code } = await c.req.json();
+  
+  if (!code || typeof code !== 'string') {
+    return c.json({ error: '招待コードを入力してください' }, 400);
+  }
+  
+  const trimmedCode = code.trim().toUpperCase();
+  
+  // Check if user already used an invite code
+  const user = await c.env.DB.prepare(
+    'SELECT invite_code_used FROM users WHERE id = ?'
+  ).bind(session.user_id).first() as any;
+  
+  if (user?.invite_code_used) {
+    return c.json({ error: '既に招待コードを使用済みです' }, 400);
+  }
+  
+  // Find invite code
+  const inviteCode = await c.env.DB.prepare(
+    `SELECT * FROM invite_codes WHERE code = ? AND is_active = 1 
+     AND (expires_at IS NULL OR expires_at > datetime('now'))
+     AND (max_uses IS NULL OR current_uses < max_uses)`
+  ).bind(trimmedCode).first() as any;
+  
+  if (!inviteCode) {
+    return c.json({ error: '無効または期限切れの招待コードです' }, 400);
+  }
+  
+  try {
+    // Apply invite code benefits
+    const updates: string[] = [];
+    const values: any[] = [];
+    
+    updates.push('invite_code_used = ?');
+    values.push(trimmedCode);
+    
+    if (inviteCode.credits_bonus > 0) {
+      updates.push('ai_credits = ai_credits + ?');
+      values.push(inviteCode.credits_bonus);
+    }
+    
+    if (inviteCode.grants_premium) {
+      updates.push('is_premium = 1');
+      updates.push("plan_type = 'premium'");
+    }
+    
+    values.push(session.user_id);
+    
+    await c.env.DB.prepare(
+      `UPDATE users SET ${updates.join(', ')} WHERE id = ?`
+    ).bind(...values).run();
+    
+    // Increment usage count
+    await c.env.DB.prepare(
+      'UPDATE invite_codes SET current_uses = current_uses + 1 WHERE id = ?'
+    ).bind(inviteCode.id).run();
+    
+    // Record usage
+    await c.env.DB.prepare(
+      'INSERT INTO invite_code_usage (id, code_id, user_id) VALUES (?, ?, ?)'
+    ).bind(generateId(), inviteCode.id, session.user_id).run();
+    
+    // Get updated user info
+    const updatedUser = await c.env.DB.prepare(
+      'SELECT ai_credits, is_premium, plan_type FROM users WHERE id = ?'
+    ).bind(session.user_id).first();
+    
+    return c.json({
+      success: true,
+      message: '招待コードが適用されました！',
+      creditsAdded: inviteCode.credits_bonus,
+      premiumGranted: !!inviteCode.grants_premium,
+      user: updatedUser,
+    });
+  } catch (error: any) {
+    console.error('Invite code error:', error);
+    return c.json({ error: '招待コードの適用中にエラーが発生しました' }, 500);
+  }
+});
+
+// Check invite code (preview without applying)
+api.post('/invite/check', async (c) => {
+  const { code } = await c.req.json();
+  
+  if (!code || typeof code !== 'string') {
+    return c.json({ valid: false, error: '招待コードを入力してください' });
+  }
+  
+  const trimmedCode = code.trim().toUpperCase();
+  
+  const inviteCode = await c.env.DB.prepare(
+    `SELECT description, credits_bonus, grants_premium FROM invite_codes 
+     WHERE code = ? AND is_active = 1 
+     AND (expires_at IS NULL OR expires_at > datetime('now'))
+     AND (max_uses IS NULL OR current_uses < max_uses)`
+  ).bind(trimmedCode).first() as any;
+  
+  if (!inviteCode) {
+    return c.json({ valid: false, error: '無効または期限切れの招待コードです' });
+  }
+  
+  return c.json({
+    valid: true,
+    description: inviteCode.description,
+    creditsBonus: inviteCode.credits_bonus,
+    grantsPremium: !!inviteCode.grants_premium,
+  });
 });
 
 export default api;
