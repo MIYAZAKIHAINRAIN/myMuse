@@ -626,23 +626,34 @@ export const landingPageHtml = `<!DOCTYPE html>
             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl text-sm">
               <div>
                 <span class="font-bold">10万文字</span>
+                <span class="text-xs text-gray-500 ml-1">📖 約1冊分</span>
               </div>
               <span class="font-bold">¥500</span>
             </div>
             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl text-sm">
               <div>
                 <span class="font-bold">30万文字</span>
+                <span class="text-xs text-gray-500 ml-1">📚 約3冊分</span>
                 <span class="ml-1 px-1.5 py-0.5 bg-green-100 text-green-600 rounded text-xs">人気</span>
               </div>
               <span class="font-bold">¥1,000</span>
             </div>
             <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-xl border border-indigo-200 text-sm">
               <div>
-                <span class="font-bold text-indigo-600">100万文字</span>
-                <span class="ml-1 px-1.5 py-0.5 bg-indigo-100 text-indigo-600 rounded text-xs">お得</span>
+                <span class="font-bold text-indigo-600">1200万文字</span>
+                <span class="text-xs text-indigo-500 ml-1">📚 約120冊分</span>
+                <span class="ml-1 px-1.5 py-0.5 bg-indigo-100 text-indigo-600 rounded text-xs">超お得</span>
               </div>
-              <span class="font-bold text-indigo-600">¥2,500</span>
+              <span class="font-bold text-indigo-600">¥10,000</span>
             </div>
+          </div>
+          
+          <!-- 目安説明 -->
+          <div class="p-3 bg-blue-50 rounded-xl border border-blue-200 text-sm mb-4">
+            <p class="text-blue-700 flex items-start gap-2">
+              <i class="fas fa-book mt-0.5"></i>
+              <span>📖 1冊 ≒ 約10万文字（文庫本1冊分の目安）</span>
+            </p>
           </div>
           
           <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-sm">

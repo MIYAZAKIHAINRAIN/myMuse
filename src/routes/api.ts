@@ -1292,7 +1292,7 @@ const PAYMENT_PLANS = {
   standard: { amount: 1600, credits: 400000, label: 'スタンダードプラン' },
   addon_100k: { amount: 500, credits: 100000, label: '追加10万文字' },
   addon_300k: { amount: 1000, credits: 300000, label: '追加30万文字' },
-  addon_1m: { amount: 2500, credits: 1000000, label: '追加100万文字' },
+  addon_12m: { amount: 10000, credits: 12000000, label: '追加1200万文字' },
 };
 
 // Create KOMOJU payment session

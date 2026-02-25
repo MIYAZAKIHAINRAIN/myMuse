@@ -7895,26 +7895,30 @@ function renderModals() {
             <i class="fas fa-plus-circle text-purple-500"></i>追加トークン
             ${!state.user?.is_premium ? '<span class="text-xs text-gray-500">（スタンダードプラン購入後に利用可能）</span>' : ''}
           </h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">📖 1冊 ≒ 約10万文字（文庫本1冊分の目安）</p>
           <div class="space-y-2">
             <button type="button" onclick="purchasePlan('addon_100k')" class="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
               <div class="flex items-center gap-2">
                 <span class="font-medium">10万文字</span>
+                <span class="text-xs text-gray-500">📖 約1冊分</span>
               </div>
               <span class="font-bold">¥500</span>
             </button>
             <button type="button" onclick="purchasePlan('addon_300k')" class="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition border border-green-300 dark:border-green-700">
               <div class="flex items-center gap-2">
                 <span class="font-medium">30万文字</span>
+                <span class="text-xs text-gray-500">📚 約3冊分</span>
                 <span class="px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs">人気</span>
               </div>
               <span class="font-bold">¥1,000</span>
             </button>
-            <button type="button" onclick="purchasePlan('addon_1m')" class="w-full flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition border border-indigo-300 dark:border-indigo-700">
+            <button type="button" onclick="purchasePlan('addon_12m')" class="w-full flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition border border-indigo-300 dark:border-indigo-700">
               <div class="flex items-center gap-2">
-                <span class="font-medium text-indigo-700 dark:text-indigo-300">100万文字</span>
-                <span class="px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs">お得</span>
+                <span class="font-medium text-indigo-700 dark:text-indigo-300">1200万文字</span>
+                <span class="text-xs text-indigo-500">📚 約120冊分</span>
+                <span class="px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs">超お得</span>
               </div>
-              <span class="font-bold text-indigo-700 dark:text-indigo-300">¥2,500</span>
+              <span class="font-bold text-indigo-700 dark:text-indigo-300">¥10,000</span>
             </button>
           </div>
         </div>
