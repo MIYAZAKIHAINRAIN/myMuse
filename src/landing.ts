@@ -361,8 +361,11 @@ export const landingPageHtml = `<!DOCTYPE html>
         <!-- Gemini -->
         <div class="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20 scroll-reveal">
           <div class="flex items-center gap-4 mb-6">
-            <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center">
-              <i class="fas fa-sparkles text-white text-2xl"></i>
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center p-2">
+              <!-- Gemini-style 4-point star icon -->
+              <svg viewBox="0 0 32 32" class="w-10 h-10" fill="none">
+                <path d="M16 2L18 14L30 16L18 18L16 30L14 18L2 16L14 14L16 2Z" fill="white"/>
+              </svg>
             </div>
             <div>
               <h3 class="text-2xl font-bold">Gemini</h3>
@@ -396,8 +399,11 @@ export const landingPageHtml = `<!DOCTYPE html>
         <!-- Grok -->
         <div class="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20 scroll-reveal" style="animation-delay: 0.2s;">
           <div class="flex items-center gap-4 mb-6">
-            <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center">
-              <i class="fas fa-search text-white text-2xl"></i>
+            <div class="w-16 h-16 bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl flex items-center justify-center border border-gray-600">
+              <!-- Grok/xAI style X icon -->
+              <svg viewBox="0 0 32 32" class="w-9 h-9" fill="none">
+                <path d="M6 6L26 26M26 6L6 26" stroke="white" stroke-width="4" stroke-linecap="round"/>
+              </svg>
             </div>
             <div>
               <h3 class="text-2xl font-bold">Grok</h3>
