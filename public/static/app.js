@@ -7952,53 +7952,89 @@ function renderModals() {
         
         <!-- Terms Content -->
         <div id="legal-content-terms" class="prose dark:prose-invert max-w-none text-sm">
-          <h4>${t('legal.termsTitle')}</h4>
-          <p class="text-gray-500 text-xs mb-4">${t('legal.lastUpdated')}: 2024年2月19日</p>
+          <h4 class="text-lg font-bold">利用規約 / Terms of Service</h4>
+          <p class="text-gray-500 text-xs mb-4">最終更新日: 2026年1月17日</p>
           
-          <h5>1. ${t('legal.termsAcceptance')}</h5>
-          <p>${t('legal.termsAcceptanceText')}</p>
+          <h5 class="font-semibold mt-4">第1条（適用）</h5>
+          <p>本規約は、合同会社RATIO Lab.（以下「当社」）が提供するAI統合ライティングエディター「myMuse」（以下「本サービス」）の利用に関する条件を定めるものです。</p>
           
-          <h5>2. ${t('legal.termsService')}</h5>
-          <p>${t('legal.termsServiceText')}</p>
+          <h5 class="font-semibold mt-4">第2条（利用登録）</h5>
+          <p>利用者は、本規約に同意の上、当社所定の方法により利用登録を行うものとします。</p>
           
-          <h5>3. ${t('legal.termsUserContent')}</h5>
-          <p>${t('legal.termsUserContentText')}</p>
+          <h5 class="font-semibold mt-4">第3条（料金）</h5>
+          <ul class="list-disc pl-5 space-y-1">
+            <li><strong>無料プラン</strong>：5,000文字まで（登録時に付与）</li>
+            <li><strong>スタンダードプラン</strong>：1,600円で400,000文字</li>
+            <li><strong>追加トークン</strong>：
+              <ul class="list-circle pl-5 mt-1">
+                <li>10万文字 / 500円</li>
+                <li>30万文字 / 1,000円</li>
+                <li>1,200万文字 / 10,000円</li>
+              </ul>
+            </li>
+          </ul>
           
-          <h5>4. ${t('legal.termsAI')}</h5>
-          <p>${t('legal.termsAIText')}</p>
+          <h5 class="font-semibold mt-4">第4条（禁止事項）</h5>
+          <p>利用者は、以下の行為を行ってはなりません：</p>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>法令または公序良俗に違反する行為</li>
+            <li>当社または第三者の権利を侵害する行為</li>
+            <li>本サービスの運営を妨害する行為</li>
+            <li>不正アクセスまたはその試み</li>
+          </ul>
           
-          <h5>5. ${t('legal.termsProhibited')}</h5>
-          <p>${t('legal.termsProhibitedText')}</p>
+          <h5 class="font-semibold mt-4">第5条（免責事項）</h5>
+          <p>当社は、本サービスにより生成されたコンテンツの正確性、完全性、有用性について保証しません。</p>
           
-          <h5>6. ${t('legal.termsTermination')}</h5>
-          <p>${t('legal.termsTerminationText')}</p>
+          <h5 class="font-semibold mt-4">第6条（準拠法・管轄）</h5>
+          <p>本規約の解釈および適用は日本法に準拠し、本サービスに関する紛争については、水戸地方裁判所土浦支部を第一審の専属的合意管轄裁判所とします。</p>
+          
+          <h5 class="font-semibold mt-4">第7条（お問い合わせ先）</h5>
+          <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg mt-2">
+            <p class="font-medium">合同会社RATIO Lab.</p>
+            <p class="text-sm">〒305-0051 茨城県つくば市二の宮2-7-20-3階</p>
+            <p class="text-sm">Email: <a href="mailto:info@ratio-lab.com" class="text-indigo-600 hover:underline">info@ratio-lab.com</a></p>
+          </div>
         </div>
         
         <!-- Privacy Content -->
         <div id="legal-content-privacy" class="prose dark:prose-invert max-w-none text-sm hidden">
-          <h4>${t('legal.privacyTitle')}</h4>
-          <p class="text-gray-500 text-xs mb-4">${t('legal.lastUpdated')}: 2024年2月19日</p>
+          <h4 class="text-lg font-bold">プライバシーポリシー / Privacy Policy</h4>
+          <p class="text-gray-500 text-xs mb-4">最終更新日: 2026年1月17日</p>
           
-          <h5>1. ${t('legal.privacyCollect')}</h5>
-          <p>${t('legal.privacyCollectText')}</p>
+          <h5 class="font-semibold mt-4">1. 収集する情報</h5>
+          <p>当社は、以下の情報を収集します：</p>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>メールアドレス、ユーザー名（アカウント登録時）</li>
+            <li>作成されたコンテンツ（プロジェクト、文章）</li>
+            <li>利用履歴（AI生成履歴、使用文字数）</li>
+            <li>決済情報（決済代行サービス経由）</li>
+          </ul>
           
-          <h5>2. ${t('legal.privacyUse')}</h5>
-          <p>${t('legal.privacyUseText')}</p>
+          <h5 class="font-semibold mt-4">2. 情報の利用目的</h5>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>本サービスの提供・運営</li>
+            <li>ユーザーサポート</li>
+            <li>サービス改善</li>
+            <li>料金請求・決済処理</li>
+          </ul>
           
-          <h5>3. ${t('legal.privacyAI')}</h5>
-          <p>${t('legal.privacyAIText')}</p>
+          <h5 class="font-semibold mt-4">3. 情報の第三者提供</h5>
+          <p>当社は、法令に基づく場合を除き、利用者の同意なく個人情報を第三者に提供しません。</p>
           
-          <h5>4. ${t('legal.privacyShare')}</h5>
-          <p>${t('legal.privacyShareText')}</p>
+          <h5 class="font-semibold mt-4">4. セキュリティ</h5>
+          <p>当社は、個人情報の漏洩、滅失、毀損を防止するため、適切なセキュリティ対策を講じます。</p>
           
-          <h5>5. ${t('legal.privacySecurity')}</h5>
-          <p>${t('legal.privacySecurityText')}</p>
+          <h5 class="font-semibold mt-4">5. Cookieの使用</h5>
+          <p>本サービスは、セッション管理のためにCookieを使用します。</p>
           
-          <h5>6. ${t('legal.privacyRights')}</h5>
-          <p>${t('legal.privacyRightsText')}</p>
-          
-          <h5>7. ${t('legal.privacyContact')}</h5>
-          <p>${t('legal.privacyContactText')}</p>
+          <h5 class="font-semibold mt-4">6. お問い合わせ</h5>
+          <p>個人情報に関するお問い合わせは、下記までご連絡ください。</p>
+          <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg mt-2">
+            <p class="font-medium">合同会社RATIO Lab.</p>
+            <p class="text-sm">〒305-0051 茨城県つくば市二の宮2-7-20-3階</p>
+            <p class="text-sm">Email: <a href="mailto:info@ratio-lab.com" class="text-indigo-600 hover:underline">info@ratio-lab.com</a></p>
+          </div>
         </div>
       </div>
     </div>
