@@ -12,7 +12,9 @@
     "db:migrate:local": "wrangler d1 migrations apply mymuse-db --local",
     "db:migrate:prod": "wrangler d1 migrations apply mymuse-db",
     "db:seed": "wrangler d1 execute mymuse-db --local --file=./seed.sql",
-    "db:reset": "rm -rf .wrangler/state/v3/d1 && npm run db:migrate:local && npm run db:seed"
+    "db:reset:local": "echo '⚠️  WARNING: This will DELETE ALL LOCAL DATA!' && echo 'Press Ctrl+C within 5 seconds to cancel...' && sleep 5 && rm -rf .wrangler/state/v3/d1 && npm run db:migrate:local && npm run db:seed && echo '✅ Local database reset complete'",
+    "db:backup:local": "mkdir -p backups && cp -r .wrangler/state/v3/d1 backups/d1-backup-$(date +%Y%m%d-%H%M%S) && echo '✅ Backup saved to backups/'",
+    "db:export": "wrangler d1 export mymuse-db --local --output=backups/mymuse-export-$(date +%Y%m%d-%H%M%S).sql"
   },
   "dependencies": {
     "hono": "^4.11.7"

@@ -7761,6 +7761,15 @@ function renderModals() {
               <span>${t('settings.termsPrivacy')}</span>
               <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
             </button>
+            
+            <!-- Admin Page Link (only shown for admins) -->
+            <div id="admin-link-container" class="hidden">
+              <a href="/admin" class="w-full px-4 py-2 text-left text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg flex items-center gap-2">
+                <i class="fas fa-cog w-5"></i>
+                <span>管理者ダッシュボード</span>
+                <i class="fas fa-external-link-alt ml-auto text-indigo-400"></i>
+              </a>
+            </div>
           </div>
           
           <hr class="border-gray-200 dark:border-gray-700">
@@ -11667,7 +11676,30 @@ async function init() {
     await refreshUserCredits();
   }
   
+  // Check if user is admin
+  if (state.user && state.sessionId) {
+    checkAdminAccess();
+  }
+  
   render();
+}
+
+// Check if current user has admin access
+async function checkAdminAccess() {
+  try {
+    const response = await api.get('/admin/check');
+    if (response.data.isAdmin) {
+      // Show admin link in settings
+      setTimeout(() => {
+        const adminLinkContainer = document.getElementById('admin-link-container');
+        if (adminLinkContainer) {
+          adminLinkContainer.classList.remove('hidden');
+        }
+      }, 100);
+    }
+  } catch (error) {
+    // Silently fail - user is not admin
+  }
 }
 
 init();

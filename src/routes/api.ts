@@ -1605,4 +1605,416 @@ api.post('/invite/check', async (c) => {
   });
 });
 
+// ============================================
+// Admin Routes (管理者専用API)
+// ============================================
+
+// Admin email list - add your admin emails here
+const ADMIN_EMAILS = [
+  'admin@ratio-lab.com',
+  'info@ratio-lab.com',
+  // Add more admin emails as needed
+];
+
+// Middleware to check admin access
+async function checkAdminAccess(c: any): Promise<{ isAdmin: boolean; user: any; error?: string }> {
+  const sessionId = c.req.header('X-Session-Id');
+  if (!sessionId) {
+    return { isAdmin: false, user: null, error: '認証が必要です' };
+  }
+  
+  const session = await c.env.DB.prepare(
+    'SELECT user_id FROM sessions WHERE id = ? AND expires_at > datetime("now")'
+  ).bind(sessionId).first() as any;
+  
+  if (!session) {
+    return { isAdmin: false, user: null, error: 'セッションが無効です' };
+  }
+  
+  const user = await c.env.DB.prepare(
+    'SELECT * FROM users WHERE id = ?'
+  ).bind(session.user_id).first() as any;
+  
+  if (!user) {
+    return { isAdmin: false, user: null, error: 'ユーザーが見つかりません' };
+  }
+  
+  // Check if user is admin
+  const isAdmin = ADMIN_EMAILS.includes(user.email) || user.is_admin === 1;
+  
+  return { isAdmin, user };
+}
+
+// Get admin dashboard stats
+api.get('/admin/stats', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  try {
+    // Get total users
+    const totalUsers = await c.env.DB.prepare(
+      'SELECT COUNT(*) as count FROM users'
+    ).first() as any;
+    
+    // Get premium users
+    const premiumUsers = await c.env.DB.prepare(
+      'SELECT COUNT(*) as count FROM users WHERE is_premium = 1'
+    ).first() as any;
+    
+    // Get today's new users
+    const todayUsers = await c.env.DB.prepare(
+      `SELECT COUNT(*) as count FROM users WHERE date(created_at) = date('now')`
+    ).first() as any;
+    
+    // Get this week's new users
+    const weekUsers = await c.env.DB.prepare(
+      `SELECT COUNT(*) as count FROM users WHERE created_at >= datetime('now', '-7 days')`
+    ).first() as any;
+    
+    // Get total projects
+    const totalProjects = await c.env.DB.prepare(
+      'SELECT COUNT(*) as count FROM projects WHERE deleted_at IS NULL'
+    ).first() as any;
+    
+    // Get total word count
+    const totalWords = await c.env.DB.prepare(
+      'SELECT COALESCE(SUM(word_count), 0) as count FROM writings'
+    ).first() as any;
+    
+    // Get total AI credits consumed (initial credits - remaining)
+    const creditsData = await c.env.DB.prepare(
+      'SELECT COALESCE(SUM(ai_credits), 0) as remaining, COALESCE(SUM(total_purchased_credits), 0) as purchased, COUNT(*) as user_count FROM users'
+    ).first() as any;
+    
+    // Get payments stats
+    const paymentsToday = await c.env.DB.prepare(
+      `SELECT COALESCE(SUM(amount), 0) as amount, COUNT(*) as count FROM payments 
+       WHERE status = 'completed' AND date(completed_at) = date('now')`
+    ).first() as any;
+    
+    const paymentsWeek = await c.env.DB.prepare(
+      `SELECT COALESCE(SUM(amount), 0) as amount, COUNT(*) as count FROM payments 
+       WHERE status = 'completed' AND completed_at >= datetime('now', '-7 days')`
+    ).first() as any;
+    
+    const paymentsMonth = await c.env.DB.prepare(
+      `SELECT COALESCE(SUM(amount), 0) as amount, COUNT(*) as count FROM payments 
+       WHERE status = 'completed' AND completed_at >= datetime('now', '-30 days')`
+    ).first() as any;
+    
+    const paymentsTotal = await c.env.DB.prepare(
+      `SELECT COALESCE(SUM(amount), 0) as amount, COUNT(*) as count FROM payments 
+       WHERE status = 'completed'`
+    ).first() as any;
+    
+    return c.json({
+      users: {
+        total: totalUsers?.count || 0,
+        premium: premiumUsers?.count || 0,
+        today: todayUsers?.count || 0,
+        thisWeek: weekUsers?.count || 0,
+      },
+      projects: {
+        total: totalProjects?.count || 0,
+      },
+      content: {
+        totalWords: totalWords?.count || 0,
+      },
+      credits: {
+        totalRemaining: creditsData?.remaining || 0,
+        totalPurchased: creditsData?.purchased || 0,
+        // Estimate consumed: (initial 5000 per user + purchased) - remaining
+        estimatedConsumed: ((creditsData?.user_count || 0) * 5000 + (creditsData?.purchased || 0)) - (creditsData?.remaining || 0),
+      },
+      revenue: {
+        today: { amount: paymentsToday?.amount || 0, count: paymentsToday?.count || 0 },
+        thisWeek: { amount: paymentsWeek?.amount || 0, count: paymentsWeek?.count || 0 },
+        thisMonth: { amount: paymentsMonth?.amount || 0, count: paymentsMonth?.count || 0 },
+        total: { amount: paymentsTotal?.amount || 0, count: paymentsTotal?.count || 0 },
+      },
+    });
+  } catch (error: any) {
+    console.error('Admin stats error:', error);
+    return c.json({ error: '統計データの取得に失敗しました' }, 500);
+  }
+});
+
+// Get recent payments
+api.get('/admin/payments', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  try {
+    const payments = await c.env.DB.prepare(
+      `SELECT p.*, u.email, u.name as user_name 
+       FROM payments p
+       LEFT JOIN users u ON p.user_id = u.id
+       ORDER BY p.created_at DESC
+       LIMIT 50`
+    ).all();
+    
+    return c.json({ payments: payments.results || [] });
+  } catch (error: any) {
+    console.error('Admin payments error:', error);
+    return c.json({ error: '決済履歴の取得に失敗しました' }, 500);
+  }
+});
+
+// Get all users
+api.get('/admin/users', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  try {
+    const search = c.req.query('search') || '';
+    let query = `SELECT id, email, name, ai_credits, plan_type, is_premium, total_purchased_credits, created_at 
+                 FROM users ORDER BY created_at DESC LIMIT 100`;
+    
+    if (search) {
+      query = `SELECT id, email, name, ai_credits, plan_type, is_premium, total_purchased_credits, created_at 
+               FROM users WHERE email LIKE ? OR name LIKE ? ORDER BY created_at DESC LIMIT 100`;
+      const users = await c.env.DB.prepare(query).bind(`%${search}%`, `%${search}%`).all();
+      return c.json({ users: users.results || [] });
+    }
+    
+    const users = await c.env.DB.prepare(query).all();
+    return c.json({ users: users.results || [] });
+  } catch (error: any) {
+    console.error('Admin users error:', error);
+    return c.json({ error: 'ユーザー一覧の取得に失敗しました' }, 500);
+  }
+});
+
+// Grant credits to user
+api.post('/admin/users/:userId/credits', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  const userId = c.req.param('userId');
+  const { amount, reason } = await c.req.json();
+  
+  if (!amount || amount <= 0) {
+    return c.json({ error: '付与するクレジット数を指定してください' }, 400);
+  }
+  
+  try {
+    await c.env.DB.prepare(
+      'UPDATE users SET ai_credits = ai_credits + ?, updated_at = datetime("now") WHERE id = ?'
+    ).bind(amount, userId).run();
+    
+    const user = await c.env.DB.prepare(
+      'SELECT id, email, name, ai_credits FROM users WHERE id = ?'
+    ).bind(userId).first();
+    
+    console.log(`Admin granted ${amount} credits to user ${userId}. Reason: ${reason || 'N/A'}`);
+    
+    return c.json({ success: true, user });
+  } catch (error: any) {
+    console.error('Admin grant credits error:', error);
+    return c.json({ error: 'クレジット付与に失敗しました' }, 500);
+  }
+});
+
+// Toggle premium status
+api.post('/admin/users/:userId/premium', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  const userId = c.req.param('userId');
+  const { isPremium } = await c.req.json();
+  
+  try {
+    await c.env.DB.prepare(
+      'UPDATE users SET is_premium = ?, plan_type = ?, updated_at = datetime("now") WHERE id = ?'
+    ).bind(isPremium ? 1 : 0, isPremium ? 'premium' : 'free', userId).run();
+    
+    const user = await c.env.DB.prepare(
+      'SELECT id, email, name, is_premium, plan_type FROM users WHERE id = ?'
+    ).bind(userId).first();
+    
+    return c.json({ success: true, user });
+  } catch (error: any) {
+    console.error('Admin toggle premium error:', error);
+    return c.json({ error: 'プレミアム設定の変更に失敗しました' }, 500);
+  }
+});
+
+// Get invite codes
+api.get('/admin/invite-codes', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  try {
+    const codes = await c.env.DB.prepare(
+      `SELECT * FROM invite_codes ORDER BY created_at DESC`
+    ).all();
+    
+    return c.json({ codes: codes.results || [] });
+  } catch (error: any) {
+    console.error('Admin invite codes error:', error);
+    return c.json({ error: '招待コード一覧の取得に失敗しました' }, 500);
+  }
+});
+
+// Create invite code
+api.post('/admin/invite-codes', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  const { code, description, creditsBonus, grantsPremium, maxUses, expiresAt } = await c.req.json();
+  
+  if (!code) {
+    return c.json({ error: 'コードを入力してください' }, 400);
+  }
+  
+  try {
+    const codeId = generateId();
+    await c.env.DB.prepare(
+      `INSERT INTO invite_codes (id, code, description, credits_bonus, grants_premium, max_uses, expires_at) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      codeId,
+      code.toUpperCase(),
+      description || '',
+      creditsBonus || 0,
+      grantsPremium ? 1 : 0,
+      maxUses || null,
+      expiresAt || null
+    ).run();
+    
+    const newCode = await c.env.DB.prepare(
+      'SELECT * FROM invite_codes WHERE id = ?'
+    ).bind(codeId).first();
+    
+    return c.json({ success: true, code: newCode });
+  } catch (error: any) {
+    console.error('Admin create invite code error:', error);
+    if (error.message?.includes('UNIQUE')) {
+      return c.json({ error: 'このコードは既に存在します' }, 400);
+    }
+    return c.json({ error: '招待コードの作成に失敗しました' }, 500);
+  }
+});
+
+// Toggle invite code active status
+api.post('/admin/invite-codes/:codeId/toggle', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  const codeId = c.req.param('codeId');
+  
+  try {
+    const current = await c.env.DB.prepare(
+      'SELECT is_active FROM invite_codes WHERE id = ?'
+    ).bind(codeId).first() as any;
+    
+    if (!current) {
+      return c.json({ error: '招待コードが見つかりません' }, 404);
+    }
+    
+    await c.env.DB.prepare(
+      'UPDATE invite_codes SET is_active = ? WHERE id = ?'
+    ).bind(current.is_active ? 0 : 1, codeId).run();
+    
+    const updatedCode = await c.env.DB.prepare(
+      'SELECT * FROM invite_codes WHERE id = ?'
+    ).bind(codeId).first();
+    
+    return c.json({ success: true, code: updatedCode });
+  } catch (error: any) {
+    console.error('Admin toggle invite code error:', error);
+    return c.json({ error: '招待コードの更新に失敗しました' }, 500);
+  }
+});
+
+// Export user data (for individual user)
+api.get('/admin/export/user/:userId', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  const userId = c.req.param('userId');
+  
+  try {
+    const user = await c.env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first();
+    const projects = await c.env.DB.prepare('SELECT * FROM projects WHERE user_id = ?').bind(userId).all();
+    const writings = await c.env.DB.prepare(
+      `SELECT w.* FROM writings w 
+       JOIN projects p ON w.project_id = p.id 
+       WHERE p.user_id = ?`
+    ).bind(userId).all();
+    const characters = await c.env.DB.prepare(
+      `SELECT c.* FROM characters c 
+       JOIN projects p ON c.project_id = p.id 
+       WHERE p.user_id = ?`
+    ).bind(userId).all();
+    
+    return c.json({
+      exportedAt: new Date().toISOString(),
+      user,
+      projects: projects.results || [],
+      writings: writings.results || [],
+      characters: characters.results || [],
+    });
+  } catch (error: any) {
+    console.error('Admin export user data error:', error);
+    return c.json({ error: 'ユーザーデータのエクスポートに失敗しました' }, 500);
+  }
+});
+
+// Export all data (admin only)
+api.get('/admin/export/all', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  try {
+    const users = await c.env.DB.prepare('SELECT id, email, name, ai_credits, plan_type, is_premium, created_at FROM users').all();
+    const projects = await c.env.DB.prepare('SELECT id, user_id, title, genre, status, created_at FROM projects WHERE deleted_at IS NULL').all();
+    const payments = await c.env.DB.prepare('SELECT * FROM payments WHERE status = "completed"').all();
+    const inviteCodes = await c.env.DB.prepare('SELECT * FROM invite_codes').all();
+    
+    return c.json({
+      exportedAt: new Date().toISOString(),
+      summary: {
+        totalUsers: users.results?.length || 0,
+        totalProjects: projects.results?.length || 0,
+        totalPayments: payments.results?.length || 0,
+        totalInviteCodes: inviteCodes.results?.length || 0,
+      },
+      users: users.results || [],
+      projects: projects.results || [],
+      payments: payments.results || [],
+      inviteCodes: inviteCodes.results || [],
+    });
+  } catch (error: any) {
+    console.error('Admin export all data error:', error);
+    return c.json({ error: '全データのエクスポートに失敗しました' }, 500);
+  }
+});
+
+// Check admin status
+api.get('/admin/check', async (c) => {
+  const { isAdmin, user, error } = await checkAdminAccess(c);
+  return c.json({ isAdmin, user: user ? { id: user.id, email: user.email, name: user.name } : null, error });
+});
+
 export default api;

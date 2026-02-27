@@ -15,3 +15,11 @@
     }
   ]
 }
+// ============================================
+// 本番環境のD1設定手順
+// ============================================
+// 1. Cloudflareダッシュボードでログイン
+// 2. npx wrangler d1 create mymuse-db-production
+// 3. 出力されたdatabase_idを上の"local-dev-db"と置き換え
+// 4. npx wrangler d1 migrations apply mymuse-db-production
+// 5. 本番デプロイ: npm run deploy:prod

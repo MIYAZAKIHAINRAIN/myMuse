@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { serveStatic } from 'hono/cloudflare-workers';
 import api from './routes/api';
 import { landingPageHtml } from './landing';
+import { adminPageHtml } from './admin';
 
 type Bindings = {
   DB: D1Database;
@@ -28,6 +29,11 @@ app.get('/', (c) => {
 // Landing page explicit route
 app.get('/landing', (c) => {
   return c.html(landingPageHtml);
+});
+
+// Admin page route (選択肢B: URL直接アクセス)
+app.get('/admin', (c) => {
+  return c.html(adminPageHtml);
 });
 
 // Main App HTML
