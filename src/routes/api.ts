@@ -17,6 +17,87 @@ const api = new Hono<{ Bindings: Bindings }>();
 // Helper to generate UUID
 const generateId = () => crypto.randomUUID();
 
+// ============================================
+// Password Hashing (using Web Crypto API)
+// ============================================
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
+async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  const passwordHash = await hashPassword(password);
+  return passwordHash === hash;
+}
+
+// ============================================
+// Admin Operation Logging
+// ============================================
+async function logAdminAction(
+  db: D1Database,
+  adminUserId: string,
+  adminEmail: string,
+  action: string,
+  targetType?: string,
+  targetId?: string,
+  details?: any,
+  ipAddress?: string
+): Promise<void> {
+  try {
+    const logId = generateId();
+    await db.prepare(
+      `INSERT INTO admin_logs (id, admin_user_id, admin_email, action, target_type, target_id, details, ip_address)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      logId,
+      adminUserId,
+      adminEmail,
+      action,
+      targetType || null,
+      targetId || null,
+      details ? JSON.stringify(details) : null,
+      ipAddress || null
+    ).run();
+  } catch (error) {
+    console.error('Failed to log admin action:', error);
+  }
+}
+
+// ============================================
+// Error Logging
+// ============================================
+async function logError(
+  db: D1Database,
+  errorType: string,
+  errorMessage: string,
+  endpoint?: string,
+  userId?: string,
+  requestData?: any,
+  stackTrace?: string
+): Promise<void> {
+  try {
+    const logId = generateId();
+    await db.prepare(
+      `INSERT INTO error_logs (id, error_type, error_message, endpoint, user_id, request_data, stack_trace)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      logId,
+      errorType,
+      errorMessage,
+      endpoint || null,
+      userId || null,
+      requestData ? JSON.stringify(requestData) : null,
+      stackTrace || null
+    ).run();
+  } catch (logError) {
+    console.error('Failed to log error:', logError);
+  }
+}
+
 // Main AI call - Grok by default (handles sensitive content better)
 async function callMainAI(env: Bindings, params: {
   action: string;
@@ -64,58 +145,88 @@ async function callAnalysisAI(env: Bindings, params: {
 
 // Signup - Create new account
 api.post('/auth/signup', async (c) => {
-  const { name, email, password } = await c.req.json();
+  try {
+    const { name, email, password } = await c.req.json();
+    
+    // Check if email already exists
+    const existingUser = await c.env.DB.prepare(
+      'SELECT id FROM users WHERE email = ?'
+    ).bind(email).first();
+    
+    if (existingUser) {
+      return c.json({ error: 'このメールアドレスは既に登録されています' }, 400);
+    }
+    
+    // Hash the password
+    const passwordHash = await hashPassword(password);
+    
+    // Create new user (Free plan: 5,000 credits)
+    const userId = generateId();
+    await c.env.DB.prepare(
+      'INSERT INTO users (id, email, name, password_hash, ai_credits, plan_type, is_premium) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    ).bind(userId, email, name, passwordHash, 5000, 'free', 0).run();
+    
+    const user = await c.env.DB.prepare(
+      'SELECT * FROM users WHERE id = ?'
+    ).bind(userId).first();
+    
+    // Create session
+    const sessionId = generateId();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    await c.env.DB.prepare(
+      'INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)'
+    ).bind(sessionId, user!.id, expiresAt).run();
   
-  // Check if email already exists
-  const existingUser = await c.env.DB.prepare(
-    'SELECT id FROM users WHERE email = ?'
-  ).bind(email).first();
-  
-  if (existingUser) {
-    return c.json({ error: 'このメールアドレスは既に登録されています' }, 400);
+    return c.json({ user, sessionId });
+  } catch (error: any) {
+    await logError(c.env.DB, 'AUTH_SIGNUP', error.message, '/auth/signup', undefined, undefined, error.stack);
+    return c.json({ error: '登録中にエラーが発生しました' }, 500);
   }
-  
-  // Create new user (Free plan: 5,000 credits)
-  const userId = generateId();
-  await c.env.DB.prepare(
-    'INSERT INTO users (id, email, name, ai_credits, plan_type, is_premium) VALUES (?, ?, ?, ?, ?, ?)'
-  ).bind(userId, email, name, 5000, 'free', 0).run();
-  
-  const user = await c.env.DB.prepare(
-    'SELECT * FROM users WHERE id = ?'
-  ).bind(userId).first();
-  
-  // Create session
-  const sessionId = generateId();
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-  await c.env.DB.prepare(
-    'INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)'
-  ).bind(sessionId, user!.id, expiresAt).run();
-  
-  return c.json({ user, sessionId });
 });
 
 // Login - Existing user login
 api.post('/auth/login', async (c) => {
-  const { email, password } = await c.req.json();
-  
-  // Check if user exists
-  let user = await c.env.DB.prepare(
-    'SELECT * FROM users WHERE email = ?'
-  ).bind(email).first();
-  
-  if (!user) {
-    return c.json({ error: 'メールアドレスまたはパスワードが正しくありません' }, 401);
+  try {
+    const { email, password } = await c.req.json();
+    
+    // Check if user exists
+    let user = await c.env.DB.prepare(
+      'SELECT * FROM users WHERE email = ?'
+    ).bind(email).first() as any;
+    
+    if (!user) {
+      return c.json({ error: 'メールアドレスまたはパスワードが正しくありません' }, 401);
+    }
+    
+    // Verify password
+    if (user.password_hash) {
+      // User has hashed password - verify it
+      const isValid = await verifyPassword(password, user.password_hash);
+      if (!isValid) {
+        return c.json({ error: 'メールアドレスまたはパスワードが正しくありません' }, 401);
+      }
+    } else {
+      // Legacy user without hashed password - migrate them
+      // For now, we'll hash their password on first login
+      const passwordHash = await hashPassword(password);
+      await c.env.DB.prepare(
+        'UPDATE users SET password_hash = ? WHERE id = ?'
+      ).bind(passwordHash, user.id).run();
+      console.log(`Migrated password hash for user: ${user.email}`);
+    }
+    
+    // Create session
+    const sessionId = generateId();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    await c.env.DB.prepare(
+      'INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)'
+    ).bind(sessionId, user!.id, expiresAt).run();
+    
+    return c.json({ user, sessionId });
+  } catch (error: any) {
+    await logError(c.env.DB, 'AUTH_LOGIN', error.message, '/auth/login', undefined, undefined, error.stack);
+    return c.json({ error: 'ログイン中にエラーが発生しました' }, 500);
   }
-  
-  // Create session
-  const sessionId = generateId();
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-  await c.env.DB.prepare(
-    'INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)'
-  ).bind(sessionId, user!.id, expiresAt).run();
-  
-  return c.json({ user, sessionId });
 });
 
 api.post('/auth/logout', async (c) => {
@@ -1793,7 +1904,7 @@ api.get('/admin/users', async (c) => {
 
 // Grant credits to user
 api.post('/admin/users/:userId/credits', async (c) => {
-  const { isAdmin, error } = await checkAdminAccess(c);
+  const { isAdmin, user: adminUser, error } = await checkAdminAccess(c);
   if (!isAdmin) {
     return c.json({ error: error || '管理者権限がありません' }, 403);
   }
@@ -1806,6 +1917,11 @@ api.post('/admin/users/:userId/credits', async (c) => {
   }
   
   try {
+    // Get user before update for logging
+    const targetUser = await c.env.DB.prepare(
+      'SELECT id, email, ai_credits FROM users WHERE id = ?'
+    ).bind(userId).first() as any;
+    
     await c.env.DB.prepare(
       'UPDATE users SET ai_credits = ai_credits + ?, updated_at = datetime("now") WHERE id = ?'
     ).bind(amount, userId).run();
@@ -1814,18 +1930,34 @@ api.post('/admin/users/:userId/credits', async (c) => {
       'SELECT id, email, name, ai_credits FROM users WHERE id = ?'
     ).bind(userId).first();
     
-    console.log(`Admin granted ${amount} credits to user ${userId}. Reason: ${reason || 'N/A'}`);
+    // Log admin action
+    await logAdminAction(
+      c.env.DB,
+      adminUser.id,
+      adminUser.email,
+      'GRANT_CREDITS',
+      'user',
+      userId,
+      { 
+        amount, 
+        reason: reason || null, 
+        targetEmail: targetUser?.email,
+        previousCredits: targetUser?.ai_credits,
+        newCredits: (user as any)?.ai_credits
+      }
+    );
     
     return c.json({ success: true, user });
   } catch (error: any) {
     console.error('Admin grant credits error:', error);
+    await logError(c.env.DB, 'ADMIN_GRANT_CREDITS', error.message, '/admin/users/:userId/credits', adminUser?.id);
     return c.json({ error: 'クレジット付与に失敗しました' }, 500);
   }
 });
 
 // Toggle premium status
 api.post('/admin/users/:userId/premium', async (c) => {
-  const { isAdmin, error } = await checkAdminAccess(c);
+  const { isAdmin, user: adminUser, error } = await checkAdminAccess(c);
   if (!isAdmin) {
     return c.json({ error: error || '管理者権限がありません' }, 403);
   }
@@ -1834,6 +1966,11 @@ api.post('/admin/users/:userId/premium', async (c) => {
   const { isPremium } = await c.req.json();
   
   try {
+    // Get user before update for logging
+    const targetUser = await c.env.DB.prepare(
+      'SELECT id, email, is_premium FROM users WHERE id = ?'
+    ).bind(userId).first() as any;
+    
     await c.env.DB.prepare(
       'UPDATE users SET is_premium = ?, plan_type = ?, updated_at = datetime("now") WHERE id = ?'
     ).bind(isPremium ? 1 : 0, isPremium ? 'premium' : 'free', userId).run();
@@ -1842,9 +1979,25 @@ api.post('/admin/users/:userId/premium', async (c) => {
       'SELECT id, email, name, is_premium, plan_type FROM users WHERE id = ?'
     ).bind(userId).first();
     
+    // Log admin action
+    await logAdminAction(
+      c.env.DB,
+      adminUser.id,
+      adminUser.email,
+      isPremium ? 'GRANT_PREMIUM' : 'REVOKE_PREMIUM',
+      'user',
+      userId,
+      { 
+        targetEmail: targetUser?.email,
+        previousPremium: !!targetUser?.is_premium,
+        newPremium: isPremium
+      }
+    );
+    
     return c.json({ success: true, user });
   } catch (error: any) {
     console.error('Admin toggle premium error:', error);
+    await logError(c.env.DB, 'ADMIN_TOGGLE_PREMIUM', error.message, '/admin/users/:userId/premium', adminUser?.id);
     return c.json({ error: 'プレミアム設定の変更に失敗しました' }, 500);
   }
 });
@@ -1870,7 +2023,7 @@ api.get('/admin/invite-codes', async (c) => {
 
 // Create invite code
 api.post('/admin/invite-codes', async (c) => {
-  const { isAdmin, error } = await checkAdminAccess(c);
+  const { isAdmin, user: adminUser, error } = await checkAdminAccess(c);
   if (!isAdmin) {
     return c.json({ error: error || '管理者権限がありません' }, 403);
   }
@@ -1900,19 +2053,37 @@ api.post('/admin/invite-codes', async (c) => {
       'SELECT * FROM invite_codes WHERE id = ?'
     ).bind(codeId).first();
     
+    // Log admin action
+    await logAdminAction(
+      c.env.DB,
+      adminUser.id,
+      adminUser.email,
+      'CREATE_INVITE_CODE',
+      'invite_code',
+      codeId,
+      { 
+        code: code.toUpperCase(),
+        description,
+        creditsBonus,
+        grantsPremium,
+        maxUses
+      }
+    );
+    
     return c.json({ success: true, code: newCode });
   } catch (error: any) {
     console.error('Admin create invite code error:', error);
     if (error.message?.includes('UNIQUE')) {
       return c.json({ error: 'このコードは既に存在します' }, 400);
     }
+    await logError(c.env.DB, 'ADMIN_CREATE_INVITE_CODE', error.message, '/admin/invite-codes', adminUser?.id);
     return c.json({ error: '招待コードの作成に失敗しました' }, 500);
   }
 });
 
 // Toggle invite code active status
 api.post('/admin/invite-codes/:codeId/toggle', async (c) => {
-  const { isAdmin, error } = await checkAdminAccess(c);
+  const { isAdmin, user: adminUser, error } = await checkAdminAccess(c);
   if (!isAdmin) {
     return c.json({ error: error || '管理者権限がありません' }, 403);
   }
@@ -1921,31 +2092,48 @@ api.post('/admin/invite-codes/:codeId/toggle', async (c) => {
   
   try {
     const current = await c.env.DB.prepare(
-      'SELECT is_active FROM invite_codes WHERE id = ?'
+      'SELECT * FROM invite_codes WHERE id = ?'
     ).bind(codeId).first() as any;
     
     if (!current) {
       return c.json({ error: '招待コードが見つかりません' }, 404);
     }
     
+    const newStatus = current.is_active ? 0 : 1;
     await c.env.DB.prepare(
       'UPDATE invite_codes SET is_active = ? WHERE id = ?'
-    ).bind(current.is_active ? 0 : 1, codeId).run();
+    ).bind(newStatus, codeId).run();
     
     const updatedCode = await c.env.DB.prepare(
       'SELECT * FROM invite_codes WHERE id = ?'
     ).bind(codeId).first();
     
+    // Log admin action
+    await logAdminAction(
+      c.env.DB,
+      adminUser.id,
+      adminUser.email,
+      newStatus ? 'ENABLE_INVITE_CODE' : 'DISABLE_INVITE_CODE',
+      'invite_code',
+      codeId,
+      { 
+        code: current.code,
+        previousStatus: !!current.is_active,
+        newStatus: !!newStatus
+      }
+    );
+    
     return c.json({ success: true, code: updatedCode });
   } catch (error: any) {
     console.error('Admin toggle invite code error:', error);
+    await logError(c.env.DB, 'ADMIN_TOGGLE_INVITE_CODE', error.message, '/admin/invite-codes/:codeId/toggle', adminUser?.id);
     return c.json({ error: '招待コードの更新に失敗しました' }, 500);
   }
 });
 
 // Export user data (for individual user)
 api.get('/admin/export/user/:userId', async (c) => {
-  const { isAdmin, error } = await checkAdminAccess(c);
+  const { isAdmin, user: adminUser, error } = await checkAdminAccess(c);
   if (!isAdmin) {
     return c.json({ error: error || '管理者権限がありません' }, 403);
   }
@@ -1966,6 +2154,17 @@ api.get('/admin/export/user/:userId', async (c) => {
        WHERE p.user_id = ?`
     ).bind(userId).all();
     
+    // Log admin action
+    await logAdminAction(
+      c.env.DB,
+      adminUser.id,
+      adminUser.email,
+      'EXPORT_USER_DATA',
+      'user',
+      userId,
+      { targetEmail: (user as any)?.email }
+    );
+    
     return c.json({
       exportedAt: new Date().toISOString(),
       user,
@@ -1981,7 +2180,7 @@ api.get('/admin/export/user/:userId', async (c) => {
 
 // Export all data (admin only)
 api.get('/admin/export/all', async (c) => {
-  const { isAdmin, error } = await checkAdminAccess(c);
+  const { isAdmin, user: adminUser, error } = await checkAdminAccess(c);
   if (!isAdmin) {
     return c.json({ error: error || '管理者権限がありません' }, 403);
   }
@@ -1991,6 +2190,20 @@ api.get('/admin/export/all', async (c) => {
     const projects = await c.env.DB.prepare('SELECT id, user_id, title, genre, status, created_at FROM projects WHERE deleted_at IS NULL').all();
     const payments = await c.env.DB.prepare('SELECT * FROM payments WHERE status = "completed"').all();
     const inviteCodes = await c.env.DB.prepare('SELECT * FROM invite_codes').all();
+    
+    // Log admin action
+    await logAdminAction(
+      c.env.DB,
+      adminUser.id,
+      adminUser.email,
+      'EXPORT_ALL_DATA',
+      'system',
+      null,
+      { 
+        userCount: users.results?.length || 0,
+        projectCount: projects.results?.length || 0
+      }
+    );
     
     return c.json({
       exportedAt: new Date().toISOString(),
@@ -2015,6 +2228,207 @@ api.get('/admin/export/all', async (c) => {
 api.get('/admin/check', async (c) => {
   const { isAdmin, user, error } = await checkAdminAccess(c);
   return c.json({ isAdmin, user: user ? { id: user.id, email: user.email, name: user.name } : null, error });
+});
+
+// Get admin operation logs (with pagination and filtering)
+api.get('/admin/logs/admin', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  try {
+    const page = parseInt(c.req.query('page') || '1');
+    const limit = parseInt(c.req.query('limit') || '20');
+    const actionFilter = c.req.query('action') || '';
+    const offset = (page - 1) * limit;
+    
+    // Map frontend action names to database action names
+    const actionMap: Record<string, string[]> = {
+      'credit_grant': ['CREDIT_GRANT', 'GRANT_CREDITS'],
+      'premium_change': ['PREMIUM_CHANGE', 'TOGGLE_PREMIUM', 'GRANT_PREMIUM', 'REVOKE_PREMIUM'],
+      'invite_create': ['CREATE_INVITE_CODE'],
+      'invite_toggle': ['ENABLE_INVITE_CODE', 'DISABLE_INVITE_CODE'],
+      'data_export': ['EXPORT_USER_DATA', 'EXPORT_ALL_DATA']
+    };
+    
+    let whereClause = '';
+    if (actionFilter && actionMap[actionFilter]) {
+      const actions = actionMap[actionFilter].map(a => `'${a}'`).join(',');
+      whereClause = `WHERE action IN (${actions})`;
+    }
+    
+    // Get total count
+    const countResult = await c.env.DB.prepare(
+      `SELECT COUNT(*) as count FROM admin_logs ${whereClause}`
+    ).first() as any;
+    const totalCount = countResult?.count || 0;
+    const totalPages = Math.ceil(totalCount / limit);
+    
+    // Get logs with pagination
+    const logs = await c.env.DB.prepare(
+      `SELECT * FROM admin_logs ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`
+    ).bind(limit, offset).all();
+    
+    // Format logs for frontend
+    const formattedLogs = (logs.results || []).map((log: any) => {
+      // Map database action to frontend action type
+      let frontendAction = 'unknown';
+      for (const [key, actions] of Object.entries(actionMap)) {
+        if (actions.includes(log.action)) {
+          frontendAction = key;
+          break;
+        }
+      }
+      
+      return {
+        ...log,
+        action: frontendAction
+      };
+    });
+    
+    return c.json({ 
+      logs: formattedLogs,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages
+      }
+    });
+  } catch (error: any) {
+    console.error('Admin get operation logs error:', error);
+    return c.json({ error: '操作ログの取得に失敗しました' }, 500);
+  }
+});
+
+// Legacy endpoint for backward compatibility
+api.get('/admin/logs/operations', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  try {
+    const logs = await c.env.DB.prepare(
+      `SELECT * FROM admin_logs ORDER BY created_at DESC LIMIT 100`
+    ).all();
+    
+    return c.json({ logs: logs.results || [] });
+  } catch (error: any) {
+    console.error('Admin get operation logs error:', error);
+    return c.json({ error: '操作ログの取得に失敗しました' }, 500);
+  }
+});
+
+// Get error logs (with pagination and filtering)
+api.get('/admin/logs/errors', async (c) => {
+  const { isAdmin, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  try {
+    const page = parseInt(c.req.query('page') || '1');
+    const limit = parseInt(c.req.query('limit') || '20');
+    const categoryFilter = c.req.query('category') || '';
+    const offset = (page - 1) * limit;
+    
+    // Map category to error_type patterns
+    let whereClause = '';
+    if (categoryFilter) {
+      const categoryMap: Record<string, string[]> = {
+        'api': ['API_ERROR', 'AI_CALL_ERROR', 'ADMIN_'],
+        'auth': ['AUTH_', 'LOGIN_', 'SIGNUP_', 'SESSION_'],
+        'payment': ['PAYMENT_', 'KOMOJU_'],
+        'database': ['DB_', 'DATABASE_', 'QUERY_']
+      };
+      
+      if (categoryMap[categoryFilter]) {
+        const patterns = categoryMap[categoryFilter].map(p => `error_type LIKE '${p}%'`).join(' OR ');
+        whereClause = `WHERE (${patterns})`;
+      }
+    }
+    
+    // Get total count
+    const countResult = await c.env.DB.prepare(
+      `SELECT COUNT(*) as count FROM error_logs ${whereClause}`
+    ).first() as any;
+    const totalCount = countResult?.count || 0;
+    const totalPages = Math.ceil(totalCount / limit);
+    
+    // Get logs with pagination
+    const logs = await c.env.DB.prepare(
+      `SELECT * FROM error_logs ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`
+    ).bind(limit, offset).all();
+    
+    // Add category field based on error_type
+    const formattedLogs = (logs.results || []).map((log: any) => {
+      let category = 'unknown';
+      const errorType = log.error_type || '';
+      
+      if (errorType.startsWith('AUTH_') || errorType.startsWith('LOGIN_') || errorType.startsWith('SIGNUP_') || errorType.startsWith('SESSION_')) {
+        category = 'auth';
+      } else if (errorType.startsWith('PAYMENT_') || errorType.startsWith('KOMOJU_')) {
+        category = 'payment';
+      } else if (errorType.startsWith('DB_') || errorType.startsWith('DATABASE_') || errorType.startsWith('QUERY_')) {
+        category = 'database';
+      } else {
+        category = 'api';
+      }
+      
+      return {
+        ...log,
+        category
+      };
+    });
+    
+    return c.json({ 
+      logs: formattedLogs,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages
+      }
+    });
+  } catch (error: any) {
+    console.error('Admin get error logs error:', error);
+    return c.json({ error: 'エラーログの取得に失敗しました' }, 500);
+  }
+});
+
+// Clear old logs (older than 30 days)
+api.post('/admin/logs/clear', async (c) => {
+  const { isAdmin, user: adminUser, error } = await checkAdminAccess(c);
+  if (!isAdmin) {
+    return c.json({ error: error || '管理者権限がありません' }, 403);
+  }
+  
+  try {
+    await c.env.DB.prepare(
+      `DELETE FROM admin_logs WHERE created_at < datetime('now', '-30 days')`
+    ).run();
+    await c.env.DB.prepare(
+      `DELETE FROM error_logs WHERE created_at < datetime('now', '-30 days')`
+    ).run();
+    
+    // Log this action too
+    await logAdminAction(
+      c.env.DB,
+      adminUser.id,
+      adminUser.email,
+      'CLEAR_OLD_LOGS',
+      'system',
+      null,
+      { olderThan: '30 days' }
+    );
+    
+    return c.json({ success: true, message: '30日以上前のログを削除しました' });
+  } catch (error: any) {
+    console.error('Admin clear logs error:', error);
+    return c.json({ error: 'ログの削除に失敗しました' }, 500);
+  }
 });
 
 export default api;

@@ -142,7 +142,7 @@ export const adminPageHtml = `<!DOCTYPE html>
         <!-- Tabs -->
         <div class="bg-white rounded-xl shadow-sm mb-8">
           <div class="border-b border-gray-200">
-            <nav class="flex -mb-px">
+            <nav class="flex -mb-px flex-wrap">
               <button onclick="switchTab('payments')" id="tab-payments" class="tab-btn px-6 py-4 text-sm font-medium text-muse-primary border-b-2 border-muse-primary">
                 <i class="fas fa-credit-card mr-2"></i>決済履歴
               </button>
@@ -154,6 +154,9 @@ export const adminPageHtml = `<!DOCTYPE html>
               </button>
               <button onclick="switchTab('export')" id="tab-export" class="tab-btn px-6 py-4 text-sm font-medium text-gray-500 hover:text-gray-700">
                 <i class="fas fa-download mr-2"></i>エクスポート
+              </button>
+              <button onclick="switchTab('logs')" id="tab-logs" class="tab-btn px-6 py-4 text-sm font-medium text-gray-500 hover:text-gray-700">
+                <i class="fas fa-history mr-2"></i>ログ
               </button>
             </nav>
           </div>
@@ -233,6 +236,76 @@ export const adminPageHtml = `<!DOCTYPE html>
                   <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">読み込み中...</td></tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+          
+          <!-- Logs Tab -->
+          <div id="content-logs" class="p-6 hidden">
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold mb-4">操作ログ</h3>
+              <div class="flex items-center gap-4 mb-4">
+                <select id="log-filter-type" class="px-3 py-2 border border-gray-300 rounded-lg" onchange="loadLogs()">
+                  <option value="">すべてのアクション</option>
+                  <option value="credit_grant">クレジット付与</option>
+                  <option value="premium_change">プレミアム変更</option>
+                  <option value="invite_create">招待コード作成</option>
+                  <option value="invite_toggle">招待コード切替</option>
+                  <option value="data_export">データエクスポート</option>
+                </select>
+                <button onclick="loadLogs()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                  <i class="fas fa-sync-alt mr-2"></i>更新
+                </button>
+              </div>
+              <div class="overflow-x-auto bg-gray-50 rounded-lg">
+                <table class="w-full text-sm">
+                  <thead class="bg-gray-100">
+                    <tr>
+                      <th class="px-4 py-3 text-left font-medium text-gray-600">日時</th>
+                      <th class="px-4 py-3 text-left font-medium text-gray-600">管理者</th>
+                      <th class="px-4 py-3 text-left font-medium text-gray-600">アクション</th>
+                      <th class="px-4 py-3 text-left font-medium text-gray-600">対象</th>
+                      <th class="px-4 py-3 text-left font-medium text-gray-600">詳細</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-logs-table" class="divide-y divide-gray-200">
+                    <tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">読み込み中...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div id="admin-logs-pagination" class="flex justify-center mt-4 gap-2"></div>
+            </div>
+            
+            <div class="border-t border-gray-200 pt-6">
+              <h3 class="text-lg font-semibold mb-4">エラーログ</h3>
+              <div class="flex items-center gap-4 mb-4">
+                <select id="error-log-filter" class="px-3 py-2 border border-gray-300 rounded-lg" onchange="loadErrorLogs()">
+                  <option value="">すべてのエラー</option>
+                  <option value="api">API エラー</option>
+                  <option value="auth">認証エラー</option>
+                  <option value="payment">決済エラー</option>
+                  <option value="database">データベースエラー</option>
+                </select>
+                <button onclick="loadErrorLogs()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                  <i class="fas fa-sync-alt mr-2"></i>更新
+                </button>
+              </div>
+              <div class="overflow-x-auto bg-red-50 rounded-lg">
+                <table class="w-full text-sm">
+                  <thead class="bg-red-100">
+                    <tr>
+                      <th class="px-4 py-3 text-left font-medium text-red-700">日時</th>
+                      <th class="px-4 py-3 text-left font-medium text-red-700">カテゴリ</th>
+                      <th class="px-4 py-3 text-left font-medium text-red-700">エンドポイント</th>
+                      <th class="px-4 py-3 text-left font-medium text-red-700">ユーザー</th>
+                      <th class="px-4 py-3 text-left font-medium text-red-700">エラー内容</th>
+                    </tr>
+                  </thead>
+                  <tbody id="error-logs-table" class="divide-y divide-red-200">
+                    <tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">読み込み中...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div id="error-logs-pagination" class="flex justify-center mt-4 gap-2"></div>
             </div>
           </div>
           
@@ -407,7 +480,9 @@ export const adminPageHtml = `<!DOCTYPE html>
           loadStats(),
           loadPayments(),
           loadUsers(),
-          loadInviteCodes()
+          loadInviteCodes(),
+          loadLogs(),
+          loadErrorLogs()
         ]);
       } catch (error) {
         console.error('Init error:', error);
@@ -727,6 +802,143 @@ export const adminPageHtml = `<!DOCTYPE html>
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
+    }
+    
+    // Load admin logs
+    let currentLogPage = 1;
+    async function loadLogs(page = 1) {
+      currentLogPage = page;
+      const filter = document.getElementById('log-filter-type').value;
+      try {
+        const { data } = await api.get('/admin/logs/admin' + '?page=' + page + '&limit=20' + (filter ? '&action=' + filter : ''));
+        const tbody = document.getElementById('admin-logs-table');
+        
+        if (!data.logs || data.logs.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">操作ログがありません</td></tr>';
+          document.getElementById('admin-logs-pagination').innerHTML = '';
+          return;
+        }
+        
+        tbody.innerHTML = data.logs.map(log => \`
+          <tr class="hover:bg-gray-100">
+            <td class="px-4 py-3 text-gray-600 whitespace-nowrap">\${new Date(log.created_at).toLocaleString('ja-JP')}</td>
+            <td class="px-4 py-3 text-gray-800">\${log.admin_email}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-1 text-xs rounded-full \${getActionClass(log.action)}">\${getActionText(log.action)}</span>
+            </td>
+            <td class="px-4 py-3 text-gray-600">\${log.target_type ? log.target_type + ': ' + (log.target_id || '-') : '-'}</td>
+            <td class="px-4 py-3 text-gray-600 max-w-xs truncate" title="\${log.details || ''}">\${log.details || '-'}</td>
+          </tr>
+        \`).join('');
+        
+        // Pagination
+        renderPagination('admin-logs-pagination', data.pagination, loadLogs);
+      } catch (error) {
+        console.error('Load admin logs error:', error);
+        document.getElementById('admin-logs-table').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">ログの読み込みに失敗しました</td></tr>';
+      }
+    }
+    
+    function getActionClass(action) {
+      const classes = {
+        'credit_grant': 'bg-green-100 text-green-700',
+        'premium_change': 'bg-purple-100 text-purple-700',
+        'invite_create': 'bg-blue-100 text-blue-700',
+        'invite_toggle': 'bg-yellow-100 text-yellow-700',
+        'data_export': 'bg-gray-100 text-gray-700'
+      };
+      return classes[action] || 'bg-gray-100 text-gray-700';
+    }
+    
+    function getActionText(action) {
+      const texts = {
+        'credit_grant': 'クレジット付与',
+        'premium_change': 'プレミアム変更',
+        'invite_create': '招待コード作成',
+        'invite_toggle': '招待コード切替',
+        'data_export': 'データエクスポート'
+      };
+      return texts[action] || action;
+    }
+    
+    // Load error logs
+    let currentErrorPage = 1;
+    async function loadErrorLogs(page = 1) {
+      currentErrorPage = page;
+      const filter = document.getElementById('error-log-filter').value;
+      try {
+        const { data } = await api.get('/admin/logs/errors' + '?page=' + page + '&limit=20' + (filter ? '&category=' + filter : ''));
+        const tbody = document.getElementById('error-logs-table');
+        
+        if (!data.logs || data.logs.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">エラーログがありません</td></tr>';
+          document.getElementById('error-logs-pagination').innerHTML = '';
+          return;
+        }
+        
+        tbody.innerHTML = data.logs.map(log => \`
+          <tr class="hover:bg-red-100">
+            <td class="px-4 py-3 text-gray-600 whitespace-nowrap">\${new Date(log.created_at).toLocaleString('ja-JP')}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-1 text-xs rounded-full \${getErrorCategoryClass(log.category)}">\${getErrorCategoryText(log.category)}</span>
+            </td>
+            <td class="px-4 py-3 text-gray-600 font-mono text-xs">\${log.endpoint || '-'}</td>
+            <td class="px-4 py-3 text-gray-600">\${log.user_email || '匿名'}</td>
+            <td class="px-4 py-3 text-red-700 max-w-xs truncate" title="\${log.error_message || ''}">\${log.error_message || '-'}</td>
+          </tr>
+        \`).join('');
+        
+        // Pagination
+        renderPagination('error-logs-pagination', data.pagination, loadErrorLogs);
+      } catch (error) {
+        console.error('Load error logs error:', error);
+        document.getElementById('error-logs-table').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">エラーログの読み込みに失敗しました</td></tr>';
+      }
+    }
+    
+    function getErrorCategoryClass(category) {
+      const classes = {
+        'api': 'bg-orange-100 text-orange-700',
+        'auth': 'bg-red-100 text-red-700',
+        'payment': 'bg-pink-100 text-pink-700',
+        'database': 'bg-purple-100 text-purple-700'
+      };
+      return classes[category] || 'bg-gray-100 text-gray-700';
+    }
+    
+    function getErrorCategoryText(category) {
+      const texts = {
+        'api': 'API',
+        'auth': '認証',
+        'payment': '決済',
+        'database': 'DB'
+      };
+      return texts[category] || category || '不明';
+    }
+    
+    // Pagination helper
+    function renderPagination(elementId, pagination, loadFunc) {
+      if (!pagination || pagination.totalPages <= 1) {
+        document.getElementById(elementId).innerHTML = '';
+        return;
+      }
+      
+      let html = '';
+      const { page, totalPages } = pagination;
+      
+      if (page > 1) {
+        html += \`<button onclick="\${loadFunc.name}(\${page - 1})" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">前へ</button>\`;
+      }
+      
+      for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) {
+        html += \`<button onclick="\${loadFunc.name}(\${i})" class="px-3 py-1 \${i === page ? 'bg-muse-primary text-white' : 'bg-gray-200 hover:bg-gray-300'} rounded">\${i}</button>\`;
+      }
+      
+      if (page < totalPages) {
+        html += \`<button onclick="\${loadFunc.name}(\${page + 1})" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">次へ</button>\`;
+      }
+      
+      document.getElementById(elementId).innerHTML = html;
     }
     
     // Initialize on load
