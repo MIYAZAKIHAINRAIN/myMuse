@@ -1959,6 +1959,13 @@ function renderLoginPage() {
               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700"
               placeholder="パスワードを再入力">
           </div>
+          <div class="flex items-start gap-2">
+            <input type="checkbox" id="signup-terms-agree" required
+              class="mt-1 w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+            <label for="signup-terms-agree" class="text-sm text-gray-600 dark:text-gray-400">
+              <a href="/terms" target="_blank" class="text-indigo-600 hover:underline">利用規約</a>と<a href="/privacy" target="_blank" class="text-indigo-600 hover:underline">プライバシーポリシー</a>に同意します
+            </label>
+          </div>
           <button type="submit"
             class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 rounded-lg font-medium hover:opacity-90 transition">
             <i class="fas fa-user-plus mr-2"></i>${t('auth.signup')}
@@ -8280,6 +8287,12 @@ function attachEventListeners() {
       const email = $('#signup-email').value;
       const password = $('#signup-password').value;
       const passwordConfirm = $('#signup-password-confirm').value;
+      const termsAgree = $('#signup-terms-agree')?.checked;
+      
+      if (!termsAgree) {
+        alert('利用規約とプライバシーポリシーへの同意が必要です');
+        return;
+      }
       
       if (password !== passwordConfirm) {
         alert('パスワードが一致しません');

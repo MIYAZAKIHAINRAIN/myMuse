@@ -738,16 +738,6 @@ export const landingPageHtml = `<!DOCTYPE html>
         
         <div class="bg-gray-50 rounded-2xl overflow-hidden scroll-reveal">
           <button class="w-full px-6 py-5 text-left flex items-center justify-between font-medium" onclick="toggleFaq(this)">
-            <span>返金はできますか？</span>
-            <i class="fas fa-chevron-down transition-transform"></i>
-          </button>
-          <div class="px-6 pb-5 hidden">
-            <p class="text-gray-600">購入から7日以内であれば、理由を問わず全額返金いたします。まずはベータ版で無料でお試しください。</p>
-          </div>
-        </div>
-        
-        <div class="bg-gray-50 rounded-2xl overflow-hidden scroll-reveal">
-          <button class="w-full px-6 py-5 text-left flex items-center justify-between font-medium" onclick="toggleFaq(this)">
             <span>スマートフォンでも使えますか？</span>
             <i class="fas fa-chevron-down transition-transform"></i>
           </button>
@@ -814,9 +804,9 @@ export const landingPageHtml = `<!DOCTYPE html>
         <div>
           <h4 class="text-white font-medium mb-4">法的情報</h4>
           <ul class="space-y-2 text-sm">
-            <li><a href="/app" class="hover:text-white transition">利用規約</a></li>
-            <li><a href="/app" class="hover:text-white transition">プライバシーポリシー</a></li>
-            <li><a href="/app" class="hover:text-white transition">特定商取引法に基づく表記</a></li>
+            <li><a href="/terms" class="hover:text-white transition">利用規約</a></li>
+            <li><a href="/privacy" class="hover:text-white transition">プライバシーポリシー</a></li>
+            <li><a href="https://www.ratio-lab.com/tokutei" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">特定商取引法に基づく表記</a></li>
           </ul>
         </div>
       </div>

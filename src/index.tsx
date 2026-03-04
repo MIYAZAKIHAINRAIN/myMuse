@@ -4,6 +4,7 @@ import { serveStatic } from 'hono/cloudflare-workers';
 import api from './routes/api';
 import { landingPageHtml } from './landing';
 import { adminPageHtml } from './admin';
+import { termsPageHtml, privacyPageHtml } from './legal';
 
 type Bindings = {
   DB: D1Database;
@@ -34,6 +35,15 @@ app.get('/landing', (c) => {
 // Admin page route (選択肢B: URL直接アクセス)
 app.get('/admin', (c) => {
   return c.html(adminPageHtml);
+});
+
+// Legal pages (アカウントなしでもアクセス可能)
+app.get('/terms', (c) => {
+  return c.html(termsPageHtml);
+});
+
+app.get('/privacy', (c) => {
+  return c.html(privacyPageHtml);
 });
 
 // Main App HTML

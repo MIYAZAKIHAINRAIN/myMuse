@@ -11,7 +11,7 @@
     {
       "binding": "DB",
       "database_name": "mymuse-db",
-      "database_id": "local-dev-db"
+      "database_id": "f735e96c-d812-4b9e-bc97-b83dfe8c3c70"
     }
   ]
 }
