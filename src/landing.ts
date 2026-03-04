@@ -8,6 +8,9 @@ export const landingPageHtml = `<!DOCTYPE html>
   <meta name="description" content="myMuseは小説家・作家のためのAI創作支援アプリ。執筆補助、プロット構成、キャラクター開発をAIがサポート。あなたの物語を、もっと遠くへ。">
   <meta name="keywords" content="小説, 執筆, AI, 創作支援, プロット, キャラクター, 作家, ライター">
   
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
   <!-- OGP -->
   <meta property="og:title" content="myMuse - 創作の未来をともに描くAIパートナー">
   <meta property="og:description" content="小説家・作家のためのAI創作支援アプリ。執筆補助、プロット構成、キャラクター開発をAIがサポート。">
@@ -812,11 +815,7 @@ export const landingPageHtml = `<!DOCTYPE html>
       </div>
       
       <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p class="text-sm">© 2024 myMuse. All rights reserved.</p>
-        <div class="flex items-center gap-4">
-          <a href="#" class="hover:text-white transition"><i class="fab fa-twitter text-xl"></i></a>
-          <a href="#" class="hover:text-white transition"><i class="fab fa-github text-xl"></i></a>
-        </div>
+        <p class="text-sm">© 2026 myMuse / RATIO Lab. All rights reserved.</p>
       </div>
     </div>
   </footer>
