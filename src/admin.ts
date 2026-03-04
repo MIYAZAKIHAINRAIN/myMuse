@@ -7,7 +7,7 @@ export const adminPageHtml = `<!DOCTYPE html>
   <title>myMuse 管理者ダッシュボード</title>
   
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

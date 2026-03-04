@@ -9,7 +9,7 @@ export const landingPageHtml = `<!DOCTYPE html>
   <meta name="keywords" content="小説, 執筆, AI, 創作支援, プロット, キャラクター, 作家, ライター">
   
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
   
   <!-- OGP -->
   <meta property="og:title" content="myMuse - 創作の未来をともに描くAIパートナー">

@@ -23,7 +23,7 @@ app.route('/api', api);
 app.use('/static/*', serveStatic({ root: './public' }));
 
 // Favicon
-app.use('/favicon.svg', serveStatic({ root: './public', path: '/favicon.svg' }));
+app.use('/favicon.png', serveStatic({ root: './public', path: '/favicon.png' }));
 
 // Landing page (root)
 app.get('/', (c) => {
@@ -59,7 +59,7 @@ app.get('/app', (c) => {
   <title>myMuse - 創作の未来をともに描くパートナー</title>
   
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

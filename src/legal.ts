@@ -1,7 +1,7 @@
 // Legal Pages HTML (Terms of Service and Privacy Policy)
 
 const legalPageStyles = `
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -42,7 +42,7 @@ const legalPageFooter = `
         <a href="/privacy" class="hover:text-indigo-600 transition">プライバシーポリシー</a>
         <a href="https://www.ratio-lab.com/tokutei" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition">特定商取引法に基づく表記</a>
       </div>
-      <p>© 2024 myMuse / RATIO Lab. All rights reserved.</p>
+      <p>© 2026 myMuse / RATIO Lab. All rights reserved.</p>
     </div>
   </footer>
 `;
