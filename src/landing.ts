@@ -102,9 +102,7 @@ export const landingPageHtml = `<!DOCTYPE html>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center gap-2">
-          <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-            <i class="fas fa-feather-alt text-white text-lg"></i>
-          </div>
+          <img src="/favicon.png" alt="myMuse" class="w-10 h-10 rounded-xl">
           <span class="text-xl font-bold gradient-text">myMuse</span>
         </div>
         <div class="hidden md:flex items-center gap-8">
@@ -779,9 +777,7 @@ export const landingPageHtml = `<!DOCTYPE html>
       <div class="grid md:grid-cols-4 gap-8 mb-8">
         <div>
           <div class="flex items-center gap-2 mb-4">
-            <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <i class="fas fa-feather-alt text-white"></i>
-            </div>
+            <img src="/favicon.png" alt="myMuse" class="w-10 h-10 rounded-xl">
             <span class="text-xl font-bold text-white">myMuse</span>
           </div>
           <p class="text-sm">創作の未来をともに描くAIパートナー</p>

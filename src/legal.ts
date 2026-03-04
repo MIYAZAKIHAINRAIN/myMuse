@@ -22,9 +22,7 @@ const legalPageHeader = `
   <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
     <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2">
-        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-          <i class="fas fa-feather-alt text-white text-lg"></i>
-        </div>
+        <img src="/favicon.png" alt="myMuse" class="w-10 h-10 rounded-xl">
         <span class="text-xl font-bold gradient-text">myMuse</span>
       </a>
       <a href="/app" class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:shadow-lg transition-all text-sm">
