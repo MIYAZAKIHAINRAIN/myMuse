@@ -9,7 +9,7 @@ export const landingPageHtml = `<!DOCTYPE html>
   <meta name="keywords" content="小説, 執筆, AI, 創作支援, プロット, キャラクター, 作家, ライター">
   
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/png" href="/static/favicon.png">
   
   <!-- OGP -->
   <meta property="og:title" content="myMuse - 創作の未来をともに描くAIパートナー">
@@ -102,7 +102,7 @@ export const landingPageHtml = `<!DOCTYPE html>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center gap-2">
-          <img src="/favicon.png" alt="myMuse" class="w-10 h-10 rounded-xl">
+          <img src="/static/favicon.png" alt="myMuse" class="w-10 h-10 rounded-xl">
           <span class="text-xl font-bold gradient-text">myMuse</span>
         </div>
         <div class="hidden md:flex items-center gap-8">
@@ -777,7 +777,7 @@ export const landingPageHtml = `<!DOCTYPE html>
       <div class="grid md:grid-cols-4 gap-8 mb-8">
         <div>
           <div class="flex items-center gap-2 mb-4">
-            <img src="/favicon.png" alt="myMuse" class="w-10 h-10 rounded-xl">
+            <img src="/static/favicon.png" alt="myMuse" class="w-10 h-10 rounded-xl">
             <span class="text-xl font-bold text-white">myMuse</span>
           </div>
           <p class="text-sm">創作の未来をともに描くAIパートナー</p>

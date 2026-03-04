@@ -1912,7 +1912,7 @@ function renderLoginPage() {
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in">
         <div class="text-center mb-8">
           <div class="flex items-center justify-center gap-3 mb-2">
-            <img src="/favicon.png" alt="myMuse" class="w-12 h-12 rounded-xl">
+            <img src="/static/favicon.png" alt="myMuse" class="w-12 h-12 rounded-xl">
             <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent">
               myMuse
             </h1>
@@ -2024,7 +2024,7 @@ function renderHeader() {
           <i class="fas fa-bars"></i>
         </button>
         <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent flex items-center">
-          <img src="/favicon.png" alt="myMuse" class="w-8 h-8 rounded-lg mr-2">myMuse
+          <img src="/static/favicon.png" alt="myMuse" class="w-8 h-8 rounded-lg mr-2">myMuse
         </h1>
       </div>
       
@@ -2357,7 +2357,7 @@ function renderEmptyProjectState(isMobile) {
         <!-- イラスト -->
         <div class="mb-6">
           <div class="w-24 h-24 mx-auto rounded-full flex items-center justify-center overflow-hidden">
-            <img src="/favicon.png" alt="myMuse" class="w-20 h-20">
+            <img src="/static/favicon.png" alt="myMuse" class="w-20 h-20">
           </div>
         </div>
         
@@ -6853,7 +6853,7 @@ function renderMobileProjectDrawer() {
       <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600">
         <div class="flex items-center justify-between text-white">
           <div class="flex items-center gap-2">
-            <img src="/favicon.png" alt="myMuse" class="w-6 h-6 rounded">
+            <img src="/static/favicon.png" alt="myMuse" class="w-6 h-6 rounded">
             <span class="font-bold">myMuse</span>
           </div>
           <button onclick="toggleMobileProjectDrawer()" class="p-1 hover:bg-white/20 rounded">
