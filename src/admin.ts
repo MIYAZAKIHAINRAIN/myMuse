@@ -4,7 +4,7 @@ export const adminPageHtml = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>myMuse 管理者ダッシュボード</title>
+  <title>ハザクラ 管理者ダッシュボード</title>
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="/static/favicon.png">
@@ -80,7 +80,7 @@ export const adminPageHtml = `<!DOCTYPE html>
             </a>
             <h1 class="text-xl font-bold text-gray-800">
               <i class="fas fa-cog text-muse-primary mr-2"></i>
-              myMuse 管理者ダッシュボード
+              ハザクラ 管理者ダッシュボード
             </h1>
           </div>
           <div id="admin-user" class="text-sm text-gray-600"></div>

@@ -52,7 +52,7 @@ export interface GrokResponse {
 }
 
 function buildSystemPrompt(context: GrokContext): string {
-  let prompt = `あなたは「myMuse」のメイン執筆支援AIです。作家の創作活動を全面的にサポートします。
+  let prompt = `あなたは「ハザクラ」のメイン執筆支援AIです。作家の創作活動を全面的にサポートします。
 
 【あなたの強み】
 - センシティブな内容（暴力描写、恋愛描写、ダークな展開）も創作として適切に扱えます
@@ -304,7 +304,7 @@ X（旧Twitter）の最新トレンドや、創作・小説界隈の動向を調
 
 function buildResearchPrompt(request: GrokRequest): string {
   // Legacy support for old research-only format
-  let prompt = `あなたは創作支援アプリ「myMuse」のリサーチアシスタントです。
+  let prompt = `あなたは創作支援アプリ「ハザクラ」のリサーチアシスタントです。
 X（旧Twitter）の最新情報やトレンドにアクセスできます。
 
 【回答のスタイル】

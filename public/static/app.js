@@ -1,4 +1,4 @@
-// myMuse - Next Generation Writer Support Platform
+// ハザクラ - Next Generation Writer Support Platform
 // Main Application JavaScript
 
 // ============================================
@@ -70,7 +70,7 @@ const state = {
 // ============================================
 const i18n = {
   ja: {
-    'app.title': 'myMuse', 'app.tagline': '創作の未来をともに描くパートナー',
+    'app.title': 'ハザクラ', 'app.tagline': '創作の未来をともに描くパートナー',
     'nav.home': 'ホーム', 'nav.write': '執筆', 'nav.manage': '管理', 'nav.settings': '設定',
     'sidebar.projects': 'プロジェクト', 'sidebar.newProject': '新規プロジェクト', 'sidebar.newFolder': '新規フォルダ',
     'sidebar.trash': 'ゴミ箱', 'sidebar.search': '全文検索', 'sidebar.calendar': '創作カレンダー',
@@ -108,10 +108,10 @@ const i18n = {
     'settings.deleteAccountConfirm': '削除する', 'settings.passwordChanged': 'パスワードを変更しました',
     'settings.passwordMismatch': 'パスワードが一致しません', 'settings.accountDeleted': 'アカウントを削除しました',
     'legal.terms': '利用規約', 'legal.privacy': 'プライバシーポリシー', 'legal.lastUpdated': '最終更新日',
-    'legal.termsTitle': 'myMuse 利用規約', 'legal.termsAcceptance': '規約への同意',
+    'legal.termsTitle': 'ハザクラ 利用規約', 'legal.termsAcceptance': '規約への同意',
     'legal.termsAcceptanceText': '本サービスを利用することにより、本利用規約に同意したものとみなされます。',
     'legal.termsService': 'サービスの内容',
-    'legal.termsServiceText': 'myMuseは創作活動を支援するためのAIアシスタントサービスです。執筆補助、プロット構成、キャラクター設定などの機能を提供します。',
+    'legal.termsServiceText': 'ハザクラは創作活動を支援するためのAIアシスタントサービスです。執筆補助、プロット構成、キャラクター設定などの機能を提供します。',
     'legal.termsUserContent': 'ユーザーコンテンツ',
     'legal.termsUserContentText': 'ユーザーが作成したすべてのコンテンツ（小説、設定、キャラクターなど）の著作権はユーザーに帰属します。当社はユーザーコンテンツを第三者に提供・販売することはありません。',
     'legal.termsAI': 'AI機能について',
@@ -120,7 +120,7 @@ const i18n = {
     'legal.termsProhibitedText': '違法なコンテンツの作成、他者の権利を侵害する行為、サービスの不正利用は禁止されています。',
     'legal.termsTermination': 'サービスの終了',
     'legal.termsTerminationText': 'ユーザーはいつでもアカウントを削除してサービスを終了できます。当社は事前通知の上、サービスを終了する権利を有します。',
-    'legal.privacyTitle': 'myMuse プライバシーポリシー',
+    'legal.privacyTitle': 'ハザクラ プライバシーポリシー',
     'legal.privacyCollect': '収集する情報',
     'legal.privacyCollectText': 'メールアドレス、ユーザー名、作成したコンテンツ（プロジェクト、設定など）、利用状況データを収集します。',
     'legal.privacyUse': '情報の利用目的',
@@ -167,7 +167,7 @@ const i18n = {
     'ui.adoptIdea': 'このメモを「採用したアイディア」に追加', 'ui.noPlot': 'まだプロット構成が作成されていません',
     'ui.createPlotHint': '「ネタ考案」タブで構成を作成してください', 'ui.noAdoptedIdeas': '「ネタ考案」タブでアイディアを生成・採用してください',
     'ui.cancelAI': 'AI生成をキャンセルしますか？', 'ui.aiCancelled': 'AI生成をキャンセルしました',
-    'ui.guestLogin': 'ゲストとしてログインしました！', 'ui.welcomeMsg': 'myMuseへようこそ！',
+    'ui.guestLogin': 'ゲストとしてログインしました！', 'ui.welcomeMsg': 'ハザクラへようこそ！',
     'ui.illustrationHint': 'ネタ考案タブのアウトラインと執筆内容を基に、一貫性のある挿絵を生成します',
     'ui.saveEpisodeSettings': 'この話の設定を保存', 'ui.settingsSaved': '設定を保存しました',
     'ui.seriesSettingsSaved': '共通設定を保存しました', 'ui.seriesSettingsSyncedTo': '共通設定を保存し、{count}話に反映しました',
@@ -216,7 +216,7 @@ const i18n = {
     'ui.rename': '名前を変更', 'ui.createFirstEpisode': '最初の話を作成',
   },
   en: {
-    'app.title': 'myMuse', 'app.tagline': 'Your all-knowing writing companion',
+    'app.title': 'ハザクラ', 'app.tagline': 'Your all-knowing writing companion',
     'nav.home': 'Home', 'nav.write': 'Write', 'nav.manage': 'Manage', 'nav.settings': 'Settings',
     'sidebar.projects': 'Projects', 'sidebar.newProject': 'New Project', 'sidebar.newFolder': 'New Folder',
     'sidebar.trash': 'Trash', 'sidebar.search': 'Search', 'sidebar.calendar': 'Calendar',
@@ -254,10 +254,10 @@ const i18n = {
     'settings.deleteAccountConfirm': 'Delete', 'settings.passwordChanged': 'Password changed successfully',
     'settings.passwordMismatch': 'Passwords do not match', 'settings.accountDeleted': 'Account deleted successfully',
     'legal.terms': 'Terms of Service', 'legal.privacy': 'Privacy Policy', 'legal.lastUpdated': 'Last updated',
-    'legal.termsTitle': 'myMuse Terms of Service', 'legal.termsAcceptance': 'Acceptance of Terms',
+    'legal.termsTitle': 'ハザクラ Terms of Service', 'legal.termsAcceptance': 'Acceptance of Terms',
     'legal.termsAcceptanceText': 'By using this service, you agree to these terms of service.',
     'legal.termsService': 'Service Description',
-    'legal.termsServiceText': 'myMuse is an AI assistant service for creative writing. It provides features for writing assistance, plot construction, and character development.',
+    'legal.termsServiceText': 'ハザクラ is an AI assistant service for creative writing. It provides features for writing assistance, plot construction, and character development.',
     'legal.termsUserContent': 'User Content',
     'legal.termsUserContentText': 'All content created by users (novels, settings, characters, etc.) remains the property of the user. We do not share or sell user content to third parties.',
     'legal.termsAI': 'AI Features',
@@ -266,7 +266,7 @@ const i18n = {
     'legal.termsProhibitedText': 'Creating illegal content, infringing on others rights, and misusing the service are prohibited.',
     'legal.termsTermination': 'Termination',
     'legal.termsTerminationText': 'Users may delete their account at any time. We reserve the right to terminate the service with prior notice.',
-    'legal.privacyTitle': 'myMuse Privacy Policy',
+    'legal.privacyTitle': 'ハザクラ Privacy Policy',
     'legal.privacyCollect': 'Information We Collect',
     'legal.privacyCollectText': 'We collect email addresses, usernames, created content (projects, settings, etc.), and usage data.',
     'legal.privacyUse': 'How We Use Information',
@@ -314,7 +314,7 @@ const i18n = {
     'ui.adoptIdea': 'Add this to adopted ideas', 'ui.noPlot': 'No plot structure yet',
     'ui.createPlotHint': 'Create a plot structure in the Ideas tab', 'ui.noAdoptedIdeas': 'Generate and adopt ideas in the Ideas tab',
     'ui.cancelAI': 'Cancel AI generation?', 'ui.aiCancelled': 'AI generation cancelled',
-    'ui.guestLogin': 'Logged in as guest!', 'ui.welcomeMsg': 'Welcome to myMuse!',
+    'ui.guestLogin': 'Logged in as guest!', 'ui.welcomeMsg': 'Welcome to ハザクラ!',
     'ui.illustrationHint': 'Generate consistent illustrations based on outline and content',
     'ui.saveEpisodeSettings': 'Save Episode Settings', 'ui.settingsSaved': 'Settings saved',
     'ui.seriesSettingsSaved': 'Series settings saved', 'ui.seriesSettingsSyncedTo': 'Series settings saved and synced to {count} episodes',
@@ -363,7 +363,7 @@ const i18n = {
     'ui.rename': 'Rename', 'ui.createFirstEpisode': 'Create First Episode',
   },
   zh: {
-    'app.title': 'myMuse', 'app.tagline': '全知全能的写作伙伴',
+    'app.title': 'ハザクラ', 'app.tagline': '全知全能的写作伙伴',
     'nav.home': '首页', 'nav.write': '写作', 'nav.manage': '管理', 'nav.settings': '设置',
     'sidebar.projects': '项目', 'sidebar.newProject': '新建项目', 'sidebar.newFolder': '新建文件夹',
     'sidebar.trash': '回收站', 'sidebar.search': '搜索', 'sidebar.calendar': '日历',
@@ -389,9 +389,9 @@ const i18n = {
     'settings.deleteAccountConfirm': '删除', 'settings.passwordChanged': '密码已更改',
     'settings.passwordMismatch': '密码不匹配', 'settings.accountDeleted': '账户已删除',
     'legal.terms': '服务条款', 'legal.privacy': '隐私政策', 'legal.lastUpdated': '最后更新',
-    'legal.termsTitle': 'myMuse 服务条款', 'legal.privacyTitle': 'myMuse 隐私政策',
+    'legal.termsTitle': 'ハザクラ 服务条款', 'legal.privacyTitle': 'ハザクラ 隐私政策',
     'legal.termsAcceptance': '条款接受', 'legal.termsAcceptanceText': '使用本服务即表示您同意这些服务条款。',
-    'legal.termsService': '服务说明', 'legal.termsServiceText': 'myMuse是一款AI创作助手服务，提供写作辅助、情节构建和角色开发等功能。',
+    'legal.termsService': '服务说明', 'legal.termsServiceText': 'ハザクラ是一款AI创作助手服务，提供写作辅助、情节构建和角色开发等功能。',
     'legal.termsUserContent': '用户内容', 'legal.termsUserContentText': '用户创建的所有内容（小说、设置、角色等）归用户所有。我们不会向第三方分享或出售用户内容。',
     'legal.termsAI': 'AI功能', 'legal.termsAIText': 'AI功能使用Google Gemini和xAI Grok。AI生成的内容仅供参考，用户对使用生成内容负责。',
     'legal.termsProhibited': '禁止行为', 'legal.termsProhibitedText': '禁止创建非法内容、侵犯他人权利和滥用服务。',
@@ -424,7 +424,7 @@ const i18n = {
     'ui.adoptIdea': '添加到采用的创意', 'ui.noPlot': '尚未创建情节结构',
     'ui.createPlotHint': '在创意标签页中创建情节结构', 'ui.noAdoptedIdeas': '在创意标签页中生成并采用创意',
     'ui.cancelAI': '取消AI生成？', 'ui.aiCancelled': 'AI生成已取消',
-    'ui.guestLogin': '已以访客身份登录！', 'ui.welcomeMsg': '欢迎来到myMuse！',
+    'ui.guestLogin': '已以访客身份登录！', 'ui.welcomeMsg': '欢迎来到ハザクラ！',
     'ui.illustrationHint': '基于大纲和内容生成一致的插图',
     'ui.saveEpisodeSettings': '保存本话设置', 'ui.settingsSaved': '设置已保存',
     'ui.seriesSettingsSaved': '系列设置已保存', 'ui.seriesSettingsSyncedTo': '系列设置已保存并同步到{count}话',
@@ -473,7 +473,7 @@ const i18n = {
     'ui.rename': '重命名', 'ui.createFirstEpisode': '创建第一章',
   },
   ko: {
-    'app.title': 'myMuse', 'app.tagline': '모든 것을 아는 글쓰기 동반자',
+    'app.title': 'ハザクラ', 'app.tagline': '모든 것을 아는 글쓰기 동반자',
     'nav.home': '홈', 'nav.write': '집필', 'nav.manage': '관리', 'nav.settings': '설정',
     'sidebar.projects': '프로젝트', 'sidebar.newProject': '새 프로젝트', 'sidebar.newFolder': '새 폴더',
     'sidebar.trash': '휴지통', 'sidebar.search': '검색', 'sidebar.calendar': '캘린더',
@@ -497,9 +497,9 @@ const i18n = {
     'settings.deleteAccountConfirm': '삭제', 'settings.passwordChanged': '비밀번호가 변경되었습니다',
     'settings.passwordMismatch': '비밀번호가 일치하지 않습니다', 'settings.accountDeleted': '계정이 삭제되었습니다',
     'legal.terms': '이용약관', 'legal.privacy': '개인정보 처리방침', 'legal.lastUpdated': '최종 업데이트',
-    'legal.termsTitle': 'myMuse 이용약관', 'legal.privacyTitle': 'myMuse 개인정보 처리방침',
+    'legal.termsTitle': 'ハザクラ 이용약관', 'legal.privacyTitle': 'ハザクラ 개인정보 처리방침',
     'legal.termsAcceptance': '약관 동의', 'legal.termsAcceptanceText': '본 서비스를 이용함으로써 이 이용약관에 동의하는 것입니다.',
-    'legal.termsService': '서비스 설명', 'legal.termsServiceText': 'myMuse는 창작 활동을 위한 AI 어시스턴트 서비스입니다. 글쓰기 지원, 플롯 구성, 캐릭터 개발 등의 기능을 제공합니다.',
+    'legal.termsService': '서비스 설명', 'legal.termsServiceText': 'ハザクラ는 창작 활동을 위한 AI 어시스턴트 서비스입니다. 글쓰기 지원, 플롯 구성, 캐릭터 개발 등의 기능을 제공합니다.',
     'legal.termsUserContent': '사용자 콘텐츠', 'legal.termsUserContentText': '사용자가 만든 모든 콘텐츠(소설, 설정, 캐릭터 등)는 사용자의 소유입니다. 저희는 사용자 콘텐츠를 제3자에게 공유하거나 판매하지 않습니다.',
     'legal.termsAI': 'AI 기능', 'legal.termsAIText': 'AI 기능은 Google Gemini와 xAI Grok을 사용합니다. AI 생성 콘텐츠는 참고용으로만 사용하세요. 생성된 콘텐츠의 사용에 대한 책임은 사용자에게 있습니다.',
     'legal.termsProhibited': '금지 활동', 'legal.termsProhibitedText': '불법 콘텐츠 생성, 타인의 권리 침해, 서비스 남용은 금지됩니다.',
@@ -525,7 +525,7 @@ const i18n = {
     'ui.adoptIdea': '채택한 아이디어에 추가', 'ui.noPlot': '아직 플롯 구조가 없습니다',
     'ui.createPlotHint': '아이디어 탭에서 플롯 구조를 만드세요', 'ui.noAdoptedIdeas': '아이디어 탭에서 아이디어를 생성하고 채택하세요',
     'ui.cancelAI': 'AI 생성을 취소하시겠습니까?', 'ui.aiCancelled': 'AI 생성이 취소되었습니다',
-    'ui.guestLogin': '게스트로 로그인했습니다!', 'ui.welcomeMsg': 'myMuse에 오신 것을 환영합니다!',
+    'ui.guestLogin': '게스트로 로그인했습니다!', 'ui.welcomeMsg': 'ハザクラ에 오신 것을 환영합니다!',
     'ui.illustrationHint': '개요와 내용을 기반으로 일관된 삽화 생성',
     'ui.saveEpisodeSettings': '이 화의 설정 저장', 'ui.settingsSaved': '설정이 저장되었습니다',
     'ui.seriesSettingsSaved': '시리즈 설정이 저장되었습니다', 'ui.seriesSettingsSyncedTo': '시리즈 설정이 저장되고 {count}화에 동기화되었습니다',
@@ -574,7 +574,7 @@ const i18n = {
     'ui.rename': '이름 바꾸기', 'ui.createFirstEpisode': '첫 화 만들기',
   },
   es: {
-    'app.title': 'myMuse', 'app.tagline': 'Tu compañero de escritura omnisciente',
+    'app.title': 'ハザクラ', 'app.tagline': 'Tu compañero de escritura omnisciente',
     'nav.home': 'Inicio', 'nav.write': 'Escribir', 'nav.manage': 'Gestionar', 'nav.settings': 'Ajustes',
     'sidebar.projects': 'Proyectos', 'sidebar.newProject': 'Nuevo proyecto', 'sidebar.trash': 'Papelera',
     'sidebar.search': 'Buscar', 'sidebar.calendar': 'Calendario', 'sidebar.language': 'Idioma',
@@ -589,7 +589,7 @@ const i18n = {
     'chat.placeholder': 'Escribe tu pregunta...', 'chat.empty': 'Chatea con AI',
   },
   fr: {
-    'app.title': 'myMuse', 'app.tagline': 'Votre compagnon d\'écriture omniscient',
+    'app.title': 'ハザクラ', 'app.tagline': 'Votre compagnon d\'écriture omniscient',
     'nav.home': 'Accueil', 'nav.write': 'Écrire', 'nav.manage': 'Gérer', 'nav.settings': 'Paramètres',
     'sidebar.projects': 'Projets', 'sidebar.newProject': 'Nouveau projet', 'sidebar.trash': 'Corbeille',
     'sidebar.search': 'Rechercher', 'sidebar.calendar': 'Calendrier', 'sidebar.language': 'Langue',
@@ -604,7 +604,7 @@ const i18n = {
     'chat.placeholder': 'Posez votre question...', 'chat.empty': 'Discutez avec l\'AI',
   },
   de: {
-    'app.title': 'myMuse', 'app.tagline': 'Ihr allwissender Schreibbegleiter',
+    'app.title': 'ハザクラ', 'app.tagline': 'Ihr allwissender Schreibbegleiter',
     'nav.home': 'Startseite', 'nav.write': 'Schreiben', 'nav.manage': 'Verwalten', 'nav.settings': 'Einstellungen',
     'sidebar.projects': 'Projekte', 'sidebar.newProject': 'Neues Projekt', 'sidebar.trash': 'Papierkorb',
     'sidebar.search': 'Suchen', 'sidebar.calendar': 'Kalender', 'sidebar.language': 'Sprache',
@@ -619,7 +619,7 @@ const i18n = {
     'chat.placeholder': 'Stellen Sie Ihre Frage...', 'chat.empty': 'Mit AI chatten',
   },
   pt: {
-    'app.title': 'myMuse', 'app.tagline': 'Seu companheiro de escrita onisciente',
+    'app.title': 'ハザクラ', 'app.tagline': 'Seu companheiro de escrita onisciente',
     'nav.home': 'Início', 'nav.write': 'Escrever', 'nav.manage': 'Gerenciar', 'nav.settings': 'Configurações',
     'sidebar.projects': 'Projetos', 'sidebar.newProject': 'Novo projeto', 'sidebar.trash': 'Lixeira',
     'sidebar.search': 'Pesquisar', 'sidebar.calendar': 'Calendário', 'sidebar.language': 'Idioma',
@@ -634,7 +634,7 @@ const i18n = {
     'chat.placeholder': 'Digite sua pergunta...', 'chat.empty': 'Converse com AI',
   },
   ru: {
-    'app.title': 'myMuse', 'app.tagline': 'Ваш всезнающий помощник в писательстве',
+    'app.title': 'ハザクラ', 'app.tagline': 'Ваш всезнающий помощник в писательстве',
     'nav.home': 'Главная', 'nav.write': 'Писать', 'nav.manage': 'Управление', 'nav.settings': 'Настройки',
     'sidebar.projects': 'Проекты', 'sidebar.newProject': 'Новый проект', 'sidebar.trash': 'Корзина',
     'sidebar.search': 'Поиск', 'sidebar.calendar': 'Календарь', 'sidebar.language': 'Язык',
@@ -649,7 +649,7 @@ const i18n = {
     'chat.placeholder': 'Введите вопрос...', 'chat.empty': 'Чат с AI',
   },
   ar: {
-    'app.title': 'myMuse', 'app.tagline': 'رفيقك الكتابي العليم',
+    'app.title': 'ハザクラ', 'app.tagline': 'رفيقك الكتابي العليم',
     'nav.home': 'الرئيسية', 'nav.write': 'كتابة', 'nav.manage': 'إدارة', 'nav.settings': 'الإعدادات',
     'sidebar.projects': 'المشاريع', 'sidebar.newProject': 'مشروع جديد', 'sidebar.trash': 'سلة المهملات',
     'sidebar.search': 'بحث', 'sidebar.calendar': 'التقويم', 'sidebar.language': 'اللغة',
@@ -664,7 +664,7 @@ const i18n = {
     'chat.placeholder': 'اكتب سؤالك...', 'chat.empty': 'تحدث مع AI',
   },
   hi: {
-    'app.title': 'myMuse', 'app.tagline': 'आपका सर्वज्ञ लेखन साथी',
+    'app.title': 'ハザクラ', 'app.tagline': 'आपका सर्वज्ञ लेखन साथी',
     'nav.home': 'होम', 'nav.write': 'लिखें', 'nav.manage': 'प्रबंधन', 'nav.settings': 'सेटिंग्स',
     'sidebar.projects': 'प्रोजेक्ट्स', 'sidebar.newProject': 'नया प्रोजेक्ट', 'sidebar.trash': 'ट्रैश',
     'sidebar.search': 'खोजें', 'sidebar.calendar': 'कैलेंडर', 'sidebar.language': 'भाषा',
@@ -679,7 +679,7 @@ const i18n = {
     'chat.placeholder': 'अपना प्रश्न लिखें...', 'chat.empty': 'AI से चैट करें',
   },
   th: {
-    'app.title': 'myMuse', 'app.tagline': 'ผู้ช่วยเขียนที่รอบรู้ของคุณ',
+    'app.title': 'ハザクラ', 'app.tagline': 'ผู้ช่วยเขียนที่รอบรู้ของคุณ',
     'nav.home': 'หน้าแรก', 'nav.write': 'เขียน', 'nav.manage': 'จัดการ', 'nav.settings': 'ตั้งค่า',
     'sidebar.projects': 'โปรเจกต์', 'sidebar.newProject': 'โปรเจกต์ใหม่', 'sidebar.trash': 'ถังขยะ',
     'sidebar.search': 'ค้นหา', 'sidebar.calendar': 'ปฏิทิน', 'sidebar.language': 'ภาษา',
@@ -935,7 +935,7 @@ async function signup(name, email, password) {
     localStorage.setItem('sessionId', state.sessionId);
     await loadProjects();
     render();
-    alert('アカウントを作成しました！myMuseへようこそ！');
+    alert('アカウントを作成しました！ハザクラへようこそ！');
   } catch (e) {
     if (e.response?.data?.error) {
       alert(e.response.data.error);
@@ -1912,9 +1912,9 @@ function renderLoginPage() {
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in">
         <div class="text-center mb-8">
           <div class="flex items-center justify-center gap-3 mb-2">
-            <img src="/static/favicon.png" alt="myMuse" class="w-12 h-12 rounded-xl">
+            <img src="/static/favicon.png" alt="ハザクラ" class="w-12 h-12 rounded-xl">
             <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent">
-              myMuse
+              ハザクラ
             </h1>
           </div>
           <p class="text-gray-600 dark:text-gray-400 text-sm">${t('app.tagline')}</p>
@@ -2024,7 +2024,7 @@ function renderHeader() {
           <i class="fas fa-bars"></i>
         </button>
         <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent flex items-center">
-          <img src="/static/favicon.png" alt="myMuse" class="w-8 h-8 rounded-lg mr-2">myMuse
+          <img src="/static/favicon.png" alt="ハザクラ" class="w-8 h-8 rounded-lg mr-2">ハザクラ
         </h1>
       </div>
       
@@ -2357,7 +2357,7 @@ function renderEmptyProjectState(isMobile) {
         <!-- イラスト -->
         <div class="mb-6">
           <div class="w-24 h-24 mx-auto rounded-full flex items-center justify-center overflow-hidden">
-            <img src="/static/favicon.png" alt="myMuse" class="w-20 h-20">
+            <img src="/static/favicon.png" alt="ハザクラ" class="w-20 h-20">
           </div>
         </div>
         
@@ -6853,8 +6853,8 @@ function renderMobileProjectDrawer() {
       <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600">
         <div class="flex items-center justify-between text-white">
           <div class="flex items-center gap-2">
-            <img src="/static/favicon.png" alt="myMuse" class="w-6 h-6 rounded">
-            <span class="font-bold">myMuse</span>
+            <img src="/static/favicon.png" alt="ハザクラ" class="w-6 h-6 rounded">
+            <span class="font-bold">ハザクラ</span>
           </div>
           <button onclick="toggleMobileProjectDrawer()" class="p-1 hover:bg-white/20 rounded">
             <i class="fas fa-times"></i>
@@ -7982,7 +7982,7 @@ function renderModals() {
           <p class="text-gray-500 text-xs mb-4">最終更新日: 2026年1月17日</p>
           
           <h5 class="font-semibold mt-4">第1条（適用）</h5>
-          <p>本規約は、合同会社RATIO Lab.（以下「当社」）が提供するAI統合ライティングエディター「myMuse」（以下「本サービス」）の利用に関する条件を定めるものです。</p>
+          <p>本規約は、合同会社RATIO Lab.（以下「当社」）が提供するAI統合ライティングエディター「ハザクラ」（以下「本サービス」）の利用に関する条件を定めるものです。</p>
           
           <h5 class="font-semibold mt-4">第2条（利用登録）</h5>
           <p>利用者は、本規約に同意の上、当社所定の方法により利用登録を行うものとします。</p>
