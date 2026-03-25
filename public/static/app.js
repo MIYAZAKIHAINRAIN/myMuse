@@ -1911,11 +1911,8 @@ function renderLoginPage() {
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4">
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in">
         <div class="text-center mb-8">
-          <div class="flex items-center justify-center gap-3 mb-2">
-            <img src="/static/favicon.png" alt="ハザクラ" class="w-12 h-12 rounded-xl">
-            <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent">
-              ハザクラ
-            </h1>
+          <div class="flex items-center justify-center mb-2">
+            <img src="/static/favicon.png" alt="ハザクラ" class="h-16">
           </div>
           <p class="text-gray-600 dark:text-gray-400 text-sm">${t('app.tagline')}</p>
         </div>
@@ -2023,9 +2020,7 @@ function renderHeader() {
         <button onclick="toggleSidebar('left')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
           <i class="fas fa-bars"></i>
         </button>
-        <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent flex items-center">
-          <img src="/static/favicon.png" alt="ハザクラ" class="w-8 h-8 rounded-lg mr-2">ハザクラ
-        </h1>
+        <img src="/static/favicon.png" alt="ハザクラ" class="h-8">
       </div>
       
       <div class="flex items-center gap-2">
@@ -2356,8 +2351,8 @@ function renderEmptyProjectState(isMobile) {
       <div class="text-center max-w-md">
         <!-- イラスト -->
         <div class="mb-6">
-          <div class="w-24 h-24 mx-auto rounded-full flex items-center justify-center overflow-hidden">
-            <img src="/static/favicon.png" alt="ハザクラ" class="w-20 h-20">
+          <div class="mx-auto flex items-center justify-center">
+            <img src="/static/favicon.png" alt="ハザクラ" class="h-24">
           </div>
         </div>
         
@@ -6852,9 +6847,8 @@ function renderMobileProjectDrawer() {
       <!-- ヘッダー -->
       <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600">
         <div class="flex items-center justify-between text-white">
-          <div class="flex items-center gap-2">
-            <img src="/static/favicon.png" alt="ハザクラ" class="w-6 h-6 rounded">
-            <span class="font-bold">ハザクラ</span>
+          <div class="flex items-center">
+            <img src="/static/favicon.png" alt="ハザクラ" class="h-8">
           </div>
           <button onclick="toggleMobileProjectDrawer()" class="p-1 hover:bg-white/20 rounded">
             <i class="fas fa-times"></i>

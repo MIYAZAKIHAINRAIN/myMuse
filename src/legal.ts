@@ -21,9 +21,8 @@ const legalPageStyles = `
 const legalPageHeader = `
   <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
     <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-2">
-        <img src="/static/favicon.png" alt="ハザクラ" class="w-10 h-10 rounded-xl">
-        <span class="text-xl font-bold gradient-text">ハザクラ</span>
+      <a href="/" class="flex items-center">
+        <img src="/static/favicon.png" alt="ハザクラ" class="h-10">
       </a>
       <a href="/app" class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:shadow-lg transition-all text-sm">
         アプリへ

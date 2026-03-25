@@ -101,9 +101,8 @@ export const landingPageHtml = `<!DOCTYPE html>
   <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
-        <div class="flex items-center gap-2">
-          <img src="/static/favicon.png" alt="ハザクラ" class="w-10 h-10 rounded-xl">
-          <span class="text-xl font-bold gradient-text">ハザクラ</span>
+        <div class="flex items-center">
+          <img src="/static/favicon.png" alt="ハザクラ" class="h-10">
         </div>
         <div class="hidden md:flex items-center gap-8">
           <a href="#features" class="text-gray-600 hover:text-indigo-600 transition">機能</a>
@@ -776,9 +775,8 @@ export const landingPageHtml = `<!DOCTYPE html>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid md:grid-cols-4 gap-8 mb-8">
         <div>
-          <div class="flex items-center gap-2 mb-4">
-            <img src="/static/favicon.png" alt="ハザクラ" class="w-10 h-10 rounded-xl">
-            <span class="text-xl font-bold text-white">ハザクラ</span>
+          <div class="flex items-center mb-4">
+            <img src="/static/favicon.png" alt="ハザクラ" class="h-12">
           </div>
           <p class="text-sm">創作の未来をともに描くAIパートナー</p>
         </div>
