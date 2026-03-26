@@ -37,7 +37,7 @@ export interface GeminiRequest {
 }
 
 function buildSystemPrompt(context: GeminiContext): string {
-  let prompt = `あなたは「ハザクラ」の執筆支援AIです。作家の創作活動を全面的にサポートします。
+  let prompt = `あなたは「葉桜」の執筆支援AIです。作家の創作活動を全面的にサポートします。
 ユーザーのプライバシーを尊重し、入力されたデータは学習に使用しません。
 
 【重要な指示 - アクション別の対応】

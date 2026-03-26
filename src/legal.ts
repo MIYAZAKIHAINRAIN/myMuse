@@ -22,7 +22,7 @@ const legalPageHeader = `
   <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
     <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
       <a href="/" class="flex items-center">
-        <img src="/static/favicon.png" alt="ハザクラ" class="h-10">
+        <img src="/static/favicon.png" alt="葉桜" class="h-12">
       </a>
       <a href="/app" class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:shadow-lg transition-all text-sm">
         アプリへ
@@ -39,7 +39,7 @@ const legalPageFooter = `
         <a href="/privacy" class="hover:text-indigo-600 transition">プライバシーポリシー</a>
         <a href="https://www.ratio-lab.com/tokutei" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 transition">特定商取引法に基づく表記</a>
       </div>
-      <p>© 2026 ハザクラ / RATIO Lab. All rights reserved.</p>
+      <p>© 2026 葉桜 / RATIO Lab. All rights reserved.</p>
     </div>
   </footer>
 `;
@@ -49,7 +49,7 @@ export const termsPageHtml = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>利用規約 - ハザクラ</title>
+  <title>利用規約 - 葉桜</title>
   ${legalPageStyles}
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -64,7 +64,7 @@ export const termsPageHtml = `<!DOCTYPE html>
       <section>
         <h2 class="text-xl font-bold mb-4 text-indigo-600">第1条（適用）</h2>
         <p class="text-gray-700 leading-relaxed">
-          本規約は、RATIO Lab.（以下「当社」）が提供するAI創作支援サービス「ハザクラ」（以下「本サービス」）の利用条件を定めるものです。ユーザーは、本規約に同意した上で本サービスを利用するものとします。
+          本規約は、RATIO Lab.（以下「当社」）が提供するAI創作支援サービス「葉桜」（以下「本サービス」）の利用条件を定めるものです。ユーザーは、本規約に同意した上で本サービスを利用するものとします。
         </p>
       </section>
       
@@ -165,7 +165,7 @@ export const privacyPageHtml = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>プライバシーポリシー - ハザクラ</title>
+  <title>プライバシーポリシー - 葉桜</title>
   ${legalPageStyles}
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -180,7 +180,7 @@ export const privacyPageHtml = `<!DOCTYPE html>
       <section>
         <h2 class="text-xl font-bold mb-4 text-indigo-600">1. はじめに</h2>
         <p class="text-gray-700 leading-relaxed">
-          RATIO Lab.（以下「当社」）は、AI創作支援サービス「ハザクラ」（以下「本サービス」）において、ユーザーの個人情報の保護を重要な責務と考えています。本プライバシーポリシーは、当社が収集する情報、その利用方法、およびユーザーの権利について説明します。
+          RATIO Lab.（以下「当社」）は、AI創作支援サービス「葉桜」（以下「本サービス」）において、ユーザーの個人情報の保護を重要な責務と考えています。本プライバシーポリシーは、当社が収集する情報、その利用方法、およびユーザーの権利について説明します。
         </p>
       </section>
       

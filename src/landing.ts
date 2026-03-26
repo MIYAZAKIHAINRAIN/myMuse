@@ -4,15 +4,15 @@ export const landingPageHtml = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ハザクラ - 創作の未来をともに描くAIパートナー</title>
-  <meta name="description" content="ハザクラは小説家・作家のためのAI創作支援アプリ。執筆補助、プロット構成、キャラクター開発をAIがサポート。あなたの物語を、もっと遠くへ。">
+  <title>葉桜 - 創作の未来をともに描くAIパートナー</title>
+  <meta name="description" content="葉桜は小説家・作家のためのAI創作支援アプリ。執筆補助、プロット構成、キャラクター開発をAIがサポート。あなたの物語を、もっと遠くへ。">
   <meta name="keywords" content="小説, 執筆, AI, 創作支援, プロット, キャラクター, 作家, ライター">
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="/static/favicon.png">
   
   <!-- OGP -->
-  <meta property="og:title" content="ハザクラ - 創作の未来をともに描くAIパートナー">
+  <meta property="og:title" content="葉桜 - 創作の未来をともに描くAIパートナー">
   <meta property="og:description" content="小説家・作家のためのAI創作支援アプリ。執筆補助、プロット構成、キャラクター開発をAIがサポート。">
   <meta property="og:type" content="website">
   <meta property="og:image" content="/static/og-image.png">
@@ -102,7 +102,7 @@ export const landingPageHtml = `<!DOCTYPE html>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center">
-          <img src="/static/favicon.png" alt="ハザクラ" class="h-10">
+          <img src="/static/favicon.png" alt="葉桜" class="h-14">
         </div>
         <div class="hidden md:flex items-center gap-8">
           <a href="#features" class="text-gray-600 hover:text-indigo-600 transition">機能</a>
@@ -146,7 +146,7 @@ export const landingPageHtml = `<!DOCTYPE html>
           </h1>
           
           <p class="text-lg sm:text-xl text-indigo-200 mb-8 leading-relaxed">
-            ハザクラは、小説家・作家のためのAI創作パートナー。<br class="hidden sm:block">
+            葉桜は、小説家・作家のためのAI創作パートナー。<br class="hidden sm:block">
             プロット構成からキャラクター開発、執筆まで。<br class="hidden sm:block">
             あなたの創作を、AIが全力でサポートします。
           </p>
@@ -190,7 +190,7 @@ export const landingPageHtml = `<!DOCTYPE html>
                   <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                   <div class="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
-                <div class="flex-1 text-center text-gray-400 text-sm">ハザクラ</div>
+                <div class="flex-1 text-center text-gray-400 text-sm">葉桜</div>
               </div>
               <!-- App mockup content -->
               <div class="p-4 bg-gradient-to-br from-gray-900 to-gray-800">
@@ -261,7 +261,7 @@ export const landingPageHtml = `<!DOCTYPE html>
           創作のすべてを、<span class="gradient-text">ひとつのアプリで</span>
         </h2>
         <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-          アイデア出しから執筆、分析まで。ハザクラがあなたの創作活動をトータルサポート。
+          アイデア出しから執筆、分析まで。葉桜があなたの創作活動をトータルサポート。
         </p>
       </div>
       
@@ -712,7 +712,7 @@ export const landingPageHtml = `<!DOCTYPE html>
             <i class="fas fa-chevron-down transition-transform"></i>
           </button>
           <div class="px-6 pb-5 hidden">
-            <p class="text-gray-600">AIを補助ツールとして使用し、ユーザーが創作・編集した作品の著作権はユーザーに帰属します。ハザクラはユーザーのコンテンツを一切使用・販売しません。</p>
+            <p class="text-gray-600">AIを補助ツールとして使用し、ユーザーが創作・編集した作品の著作権はユーザーに帰属します。葉桜はユーザーのコンテンツを一切使用・販売しません。</p>
           </div>
         </div>
         
@@ -742,7 +742,7 @@ export const landingPageHtml = `<!DOCTYPE html>
             <i class="fas fa-chevron-down transition-transform"></i>
           </button>
           <div class="px-6 pb-5 hidden">
-            <p class="text-gray-600">はい。ハザクラはレスポンシブデザインに対応しており、スマートフォンやタブレットでも快適にご利用いただけます。</p>
+            <p class="text-gray-600">はい。葉桜はレスポンシブデザインに対応しており、スマートフォンやタブレットでも快適にご利用いただけます。</p>
           </div>
         </div>
       </div>
@@ -776,7 +776,7 @@ export const landingPageHtml = `<!DOCTYPE html>
       <div class="grid md:grid-cols-4 gap-8 mb-8">
         <div>
           <div class="flex items-center mb-4">
-            <img src="/static/favicon.png" alt="ハザクラ" class="h-12">
+            <img src="/static/favicon.png" alt="葉桜" class="h-16">
           </div>
           <p class="text-sm">創作の未来をともに描くAIパートナー</p>
         </div>
@@ -809,7 +809,7 @@ export const landingPageHtml = `<!DOCTYPE html>
       </div>
       
       <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p class="text-sm">© 2026 ハザクラ / RATIO Lab. All rights reserved.</p>
+        <p class="text-sm">© 2026 葉桜 / RATIO Lab. All rights reserved.</p>
       </div>
     </div>
   </footer>

@@ -18,7 +18,7 @@ export type Language = keyof typeof SUPPORTED_LANGUAGES;
 
 export const translations: Record<Language, Record<string, string>> = {
   ja: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': '執筆のすべてを把握し、寄り添う全知の相棒',
     'nav.home': 'ホーム',
     'nav.write': '執筆',
@@ -84,7 +84,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.error': 'エラーが発生しました',
   },
   en: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': 'Your all-knowing writing companion',
     'nav.home': 'Home',
     'nav.write': 'Write',
@@ -150,7 +150,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.error': 'An error occurred',
   },
   zh: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': '全知全能的写作伙伴',
     'nav.home': '首页',
     'nav.write': '写作',
@@ -191,7 +191,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.error': '发生错误',
   },
   ko: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': '모든 것을 아는 글쓰기 동반자',
     'nav.home': '홈',
     'nav.write': '집필',
@@ -208,7 +208,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.delete': '삭제',
   },
   es: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': 'Tu compañero de escritura omnisciente',
     'nav.home': 'Inicio',
     'nav.write': 'Escribir',
@@ -219,7 +219,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.delete': 'Eliminar',
   },
   fr: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': 'Votre compagnon d\'écriture omniscient',
     'nav.home': 'Accueil',
     'nav.write': 'Écrire',
@@ -230,7 +230,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.delete': 'Supprimer',
   },
   de: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': 'Ihr allwissender Schreibbegleiter',
     'nav.home': 'Startseite',
     'nav.write': 'Schreiben',
@@ -241,7 +241,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.delete': 'Löschen',
   },
   pt: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': 'Seu companheiro de escrita onisciente',
     'nav.home': 'Início',
     'nav.write': 'Escrever',
@@ -252,7 +252,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.delete': 'Excluir',
   },
   ru: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': 'Ваш всезнающий помощник в писательстве',
     'nav.home': 'Главная',
     'nav.write': 'Писать',
@@ -263,7 +263,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.delete': 'Удалить',
   },
   ar: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': 'رفيقك الكتابي العليم',
     'nav.home': 'الرئيسية',
     'nav.write': 'كتابة',
@@ -274,7 +274,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.delete': 'حذف',
   },
   hi: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': 'आपका सर्वज्ञ लेखन साथी',
     'nav.home': 'होम',
     'nav.write': 'लिखें',
@@ -285,7 +285,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'common.delete': 'हटाएं',
   },
   th: {
-    'app.title': 'ハザクラ',
+    'app.title': '葉桜',
     'app.tagline': 'ผู้ช่วยเขียนที่รอบรู้ของคุณ',
     'nav.home': 'หน้าแรก',
     'nav.write': 'เขียน',

@@ -53,7 +53,7 @@ app.get('/app', (c) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ハザクラ - 創作の未来をともに描くパートナー</title>
+  <title>葉桜 - 創作の未来をともに描くパートナー</title>
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="/static/favicon.png">
