@@ -1,7 +1,10 @@
 // Legal Pages HTML (Terms of Service and Privacy Policy)
 
 const legalPageStyles = `
-  <link rel="icon" type="image/png" href="/static/favicon.png?v=2">
+  <link rel="icon" type="image/png" sizes="48x48" href="/static/favicon-48x48.png?v=2">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png?v=2">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png?v=2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -22,7 +25,7 @@ const legalPageHeader = `
   <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
     <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
       <a href="/" class="flex items-center">
-        <img src="/static/favicon.png?v=2" alt="葉桜" class="h-14">
+        <img src="/static/favicon.png?v=2" alt="葉桜" class="h-20">
       </a>
       <a href="/app" class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:shadow-lg transition-all text-sm">
         アプリへ
@@ -49,7 +52,7 @@ export const termsPageHtml = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>利用規約 - 葉桜</title>
+  <title>Terms of Service - Hazakura</title>
   ${legalPageStyles}
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -165,7 +168,7 @@ export const privacyPageHtml = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>プライバシーポリシー - 葉桜</title>
+  <title>Privacy Policy - Hazakura</title>
   ${legalPageStyles}
 </head>
 <body class="bg-gray-50 min-h-screen">
