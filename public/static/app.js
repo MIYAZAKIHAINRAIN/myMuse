@@ -1912,7 +1912,7 @@ function renderLoginPage() {
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in">
         <div class="text-center mb-8">
           <div class="flex items-center justify-center mb-2">
-            <img src="/static/favicon.png" alt="葉桜" class="h-24">
+            <img src="/static/favicon.png?v=2" alt="葉桜" class="h-28">
           </div>
           <p class="text-gray-600 dark:text-gray-400 text-sm">${t('app.tagline')}</p>
         </div>
@@ -2020,7 +2020,7 @@ function renderHeader() {
         <button onclick="toggleSidebar('left')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
           <i class="fas fa-bars"></i>
         </button>
-        <img src="/static/favicon.png" alt="葉桜" class="h-10">
+        <img src="/static/favicon.png?v=2" alt="葉桜" class="h-12">
       </div>
       
       <div class="flex items-center gap-2">
@@ -2352,7 +2352,7 @@ function renderEmptyProjectState(isMobile) {
         <!-- イラスト -->
         <div class="mb-6">
           <div class="mx-auto flex items-center justify-center">
-            <img src="/static/favicon.png" alt="葉桜" class="h-32">
+            <img src="/static/favicon.png?v=2" alt="葉桜" class="h-36">
           </div>
         </div>
         
@@ -6848,7 +6848,7 @@ function renderMobileProjectDrawer() {
       <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-purple-600">
         <div class="flex items-center justify-between text-white">
           <div class="flex items-center">
-            <img src="/static/favicon.png" alt="葉桜" class="h-10">
+            <img src="/static/favicon.png?v=2" alt="葉桜" class="h-12">
           </div>
           <button onclick="toggleMobileProjectDrawer()" class="p-1 hover:bg-white/20 rounded">
             <i class="fas fa-times"></i>

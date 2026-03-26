@@ -1,7 +1,7 @@
 // Legal Pages HTML (Terms of Service and Privacy Policy)
 
 const legalPageStyles = `
-  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <link rel="icon" type="image/png" href="/static/favicon.png?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -22,7 +22,7 @@ const legalPageHeader = `
   <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
     <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
       <a href="/" class="flex items-center">
-        <img src="/static/favicon.png" alt="葉桜" class="h-12">
+        <img src="/static/favicon.png?v=2" alt="葉桜" class="h-14">
       </a>
       <a href="/app" class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:shadow-lg transition-all text-sm">
         アプリへ

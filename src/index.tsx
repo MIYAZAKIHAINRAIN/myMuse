@@ -56,7 +56,7 @@ app.get('/app', (c) => {
   <title>葉桜 - 創作の未来をともに描くパートナー</title>
   
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <link rel="icon" type="image/png" href="/static/favicon.png?v=2">
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

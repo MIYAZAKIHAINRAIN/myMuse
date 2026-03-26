@@ -7,7 +7,7 @@ export const adminPageHtml = `<!DOCTYPE html>
   <title>葉桜 管理者ダッシュボード</title>
   
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <link rel="icon" type="image/png" href="/static/favicon.png?v=2">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
