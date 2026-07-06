@@ -241,9 +241,44 @@ const i18n = {
     'placeholder.sharedCharacters': 'シリーズ全体で登場するキャラクターの設定を記述...',
     'placeholder.sharedWorld': 'シリーズ全体の世界観、舞台設定を記述...',
     'placeholder.sharedTerminology': 'シリーズ固有の用語、ルールなどを記述...',
+    'placeholder.characterTemplate': '【主人公】\n名前: \n年齢: \n性格: \n\n【メインキャラクター】\n...',
+    'placeholder.terminologyTemplate': '【魔法体系】\n・〇〇: 説明\n\n【組織】\n・△△: 説明',
+    'placeholder.worldTemplate': '【舞台】\n・時代: \n・場所: \n\n【世界のルール】\n...',
+    'placeholder.episodeTemplate': '第1話: プロローグ\n第2話: 冒険の始まり',
+    'placeholder.storyGoalHint': 'この物語で伝えたいこと、読者に感じてほしいこと、理想の結末...',
+    'placeholder.ideasFreeform': 'ここにネタやプロットのアイデアを自由に書き込んでください...',
+    'placeholder.writeYourStory': 'ここに物語を紡いでください...',
     // Achievement texts
     'achievement.badgeHistory': 'これまでの獲得バッジ数',
     'achievement.monthlyConfirm': '今月の実績確定！「{tier}」バッジを獲得しました！',
+    'achievement.autoUpdate': '自動更新',
+    'achievement.autoTrackNote': '実績は執筆活動に基づいて自動的に更新されます',
+    'achievement.monthEndReset': '月末（25日）に実績がリセットされます',
+    'achievement.badgeRecordNote': '月末に実績を達成するとバッジが記録されます',
+    'achievement.goal.writingTitle': '今月の執筆目標',
+    'achievement.goal.writingDesc': '5,000文字以上執筆する',
+    'achievement.goal.loginTitle': 'ログイン習慣',
+    'achievement.goal.loginDesc': '週5日以上ログインする',
+    'achievement.goal.aiTitle': 'AIパートナー活用',
+    'achievement.goal.aiDesc': 'AIと10回以上相談する',
+    'achievement.goal.ideasTitle': 'アイデアコレクター',
+    'achievement.goal.ideasDesc': '3つ以上のアイデアを採用する',
+    'achievement.goal.chaptersTitle': '章の完成',
+    'achievement.goal.chaptersDesc': '3章以上を執筆する',
+    'achievement.goal.analysisTitle': '作品分析',
+    'achievement.goal.analysisDesc': '作品を1回以上分析する',
+    'achievement.progress.chars': '文字',
+    'achievement.progress.days': '日',
+    'achievement.progress.times': '回',
+    'achievement.progress.items': '個',
+    'achievement.progress.chapters': '章',
+    // UI messages for premium features
+    'ui.loginRequired': 'ログインが必要です',
+    'ui.seriesCreated': 'シリーズ「{title}」を作成しました',
+    'ui.seriesCreateFailed': 'シリーズの作成に失敗しました',
+    'ui.analysisCritique': '分析・批評',
+    'ui.consultationAI': '相談AI',
+    'ui.analyze': '分析',
   },
   en: {
     'app.title': '葉桜', 'app.tagline': 'Your all-knowing writing companion',
@@ -418,9 +453,44 @@ const i18n = {
     'placeholder.sharedCharacters': 'Describe characters appearing throughout the series...',
     'placeholder.sharedWorld': 'Describe the world setting for the entire series...',
     'placeholder.sharedTerminology': 'Series-specific terms and rules...',
+    'placeholder.characterTemplate': '【Protagonist】\nName: \nAge: \nPersonality: \n\n【Main Characters】\n...',
+    'placeholder.terminologyTemplate': '【Magic System】\n・XXX: Description\n\n【Organizations】\n・YYY: Description',
+    'placeholder.worldTemplate': '【Setting】\n・Era: \n・Location: \n\n【World Rules】\n...',
+    'placeholder.episodeTemplate': 'Episode 1: Prologue\nEpisode 2: The Beginning',
+    'placeholder.storyGoalHint': 'What you want to convey, how you want readers to feel, your ideal ending...',
+    'placeholder.ideasFreeform': 'Write your ideas and plot freely here...',
+    'placeholder.writeYourStory': 'Write your story here...',
     // Achievement texts
     'achievement.badgeHistory': 'Total Badges Earned',
     'achievement.monthlyConfirm': 'Monthly achievement confirmed! You earned a "{tier}" badge!',
+    'achievement.autoUpdate': 'Auto-update',
+    'achievement.autoTrackNote': 'Achievements are automatically updated based on your writing activity',
+    'achievement.monthEndReset': 'Achievements reset on the 25th of each month',
+    'achievement.badgeRecordNote': 'Badges are recorded when you complete achievements by month end',
+    'achievement.goal.writingTitle': 'Monthly Writing Goal',
+    'achievement.goal.writingDesc': 'Write 5,000+ characters',
+    'achievement.goal.loginTitle': 'Login Habit',
+    'achievement.goal.loginDesc': 'Log in 5+ days per week',
+    'achievement.goal.aiTitle': 'AI Partner Usage',
+    'achievement.goal.aiDesc': 'Consult AI 10+ times',
+    'achievement.goal.ideasTitle': 'Idea Collector',
+    'achievement.goal.ideasDesc': 'Adopt 3+ ideas',
+    'achievement.goal.chaptersTitle': 'Chapter Completion',
+    'achievement.goal.chaptersDesc': 'Write 3+ chapters',
+    'achievement.goal.analysisTitle': 'Work Analysis',
+    'achievement.goal.analysisDesc': 'Analyze your work 1+ times',
+    'achievement.progress.chars': 'chars',
+    'achievement.progress.days': 'days',
+    'achievement.progress.times': 'times',
+    'achievement.progress.items': 'items',
+    'achievement.progress.chapters': 'chapters',
+    // UI messages for premium features
+    'ui.loginRequired': 'Login required',
+    'ui.seriesCreated': 'Series "{title}" created',
+    'ui.seriesCreateFailed': 'Failed to create series',
+    'ui.analysisCritique': 'Analysis & Critique',
+    'ui.consultationAI': 'Consultation AI',
+    'ui.analyze': 'Analyze',
   },
   zh: {
     'app.title': '葉桜', 'app.tagline': '全知全能的写作伙伴',
@@ -558,9 +628,44 @@ const i18n = {
     'placeholder.sharedCharacters': '描述贯穿系列的角色设定...',
     'placeholder.sharedWorld': '描述整个系列的世界观...',
     'placeholder.sharedTerminology': '系列特有的术语、规则...',
+    'placeholder.characterTemplate': '【主角】\n名字: \n年龄: \n性格: \n\n【主要角色】\n...',
+    'placeholder.terminologyTemplate': '【魔法体系】\n・XXX: 说明\n\n【组织】\n・YYY: 说明',
+    'placeholder.worldTemplate': '【舞台】\n・时代: \n・地点: \n\n【世界规则】\n...',
+    'placeholder.episodeTemplate': '第1章: 序章\n第2章: 冒险开始',
+    'placeholder.storyGoalHint': '想要传达的内容、希望读者感受到的、理想的结局...',
+    'placeholder.ideasFreeform': '在这里自由写下你的创意和情节...',
+    'placeholder.writeYourStory': '在这里书写你的故事...',
     // Achievement texts
     'achievement.badgeHistory': '获得的徽章总数',
     'achievement.monthlyConfirm': '本月成就确定！获得了「{tier}」徽章！',
+    'achievement.autoUpdate': '自动更新',
+    'achievement.autoTrackNote': '成就根据写作活动自动更新',
+    'achievement.monthEndReset': '成就在每月25日重置',
+    'achievement.badgeRecordNote': '月末完成成就时会记录徽章',
+    'achievement.goal.writingTitle': '本月写作目标',
+    'achievement.goal.writingDesc': '写5,000字以上',
+    'achievement.goal.loginTitle': '登录习惯',
+    'achievement.goal.loginDesc': '每周登录5天以上',
+    'achievement.goal.aiTitle': 'AI伙伴使用',
+    'achievement.goal.aiDesc': '与AI咨询10次以上',
+    'achievement.goal.ideasTitle': '创意收集者',
+    'achievement.goal.ideasDesc': '采纳3个以上创意',
+    'achievement.goal.chaptersTitle': '章节完成',
+    'achievement.goal.chaptersDesc': '写3章以上',
+    'achievement.goal.analysisTitle': '作品分析',
+    'achievement.goal.analysisDesc': '分析作品1次以上',
+    'achievement.progress.chars': '字',
+    'achievement.progress.days': '天',
+    'achievement.progress.times': '次',
+    'achievement.progress.items': '个',
+    'achievement.progress.chapters': '章',
+    // UI messages for premium features
+    'ui.loginRequired': '需要登录',
+    'ui.seriesCreated': '系列「{title}」已创建',
+    'ui.seriesCreateFailed': '创建系列失败',
+    'ui.analysisCritique': '分析・评论',
+    'ui.consultationAI': '咨询AI',
+    'ui.analyze': '分析',
   },
   ko: {
     'app.title': '葉桜', 'app.tagline': '모든 것을 아는 글쓰기 동반자',
@@ -689,9 +794,44 @@ const i18n = {
     'placeholder.sharedCharacters': '시리즈 전체에 등장하는 캐릭터 설정...',
     'placeholder.sharedWorld': '시리즈 전체의 세계관 설정...',
     'placeholder.sharedTerminology': '시리즈 고유 용어, 규칙...',
+    'placeholder.characterTemplate': '【주인공】\n이름: \n나이: \n성격: \n\n【주요 캐릭터】\n...',
+    'placeholder.terminologyTemplate': '【마법 체계】\n・XXX: 설명\n\n【조직】\n・YYY: 설명',
+    'placeholder.worldTemplate': '【무대】\n・시대: \n・장소: \n\n【세계의 규칙】\n...',
+    'placeholder.episodeTemplate': '1화: 프롤로그\n2화: 모험의 시작',
+    'placeholder.storyGoalHint': '전달하고 싶은 것, 독자가 느꼈으면 하는 것, 이상적인 결말...',
+    'placeholder.ideasFreeform': '여기에 아이디어와 플롯을 자유롭게 적어보세요...',
+    'placeholder.writeYourStory': '여기에 이야기를 써보세요...',
     // Achievement texts
     'achievement.badgeHistory': '획득한 배지 총 수',
     'achievement.monthlyConfirm': '이달의 업적 확정! 「{tier}」 배지를 획득했습니다!',
+    'achievement.autoUpdate': '자동 업데이트',
+    'achievement.autoTrackNote': '업적은 집필 활동에 따라 자동으로 업데이트됩니다',
+    'achievement.monthEndReset': '업적은 매월 25일에 초기화됩니다',
+    'achievement.badgeRecordNote': '월말에 업적을 달성하면 배지가 기록됩니다',
+    'achievement.goal.writingTitle': '이달의 집필 목표',
+    'achievement.goal.writingDesc': '5,000자 이상 집필하기',
+    'achievement.goal.loginTitle': '로그인 습관',
+    'achievement.goal.loginDesc': '주 5일 이상 로그인하기',
+    'achievement.goal.aiTitle': 'AI 파트너 활용',
+    'achievement.goal.aiDesc': 'AI와 10회 이상 상담하기',
+    'achievement.goal.ideasTitle': '아이디어 수집가',
+    'achievement.goal.ideasDesc': '3개 이상 아이디어 채택하기',
+    'achievement.goal.chaptersTitle': '장 완성',
+    'achievement.goal.chaptersDesc': '3장 이상 집필하기',
+    'achievement.goal.analysisTitle': '작품 분석',
+    'achievement.goal.analysisDesc': '작품 1회 이상 분석하기',
+    'achievement.progress.chars': '자',
+    'achievement.progress.days': '일',
+    'achievement.progress.times': '회',
+    'achievement.progress.items': '개',
+    'achievement.progress.chapters': '장',
+    // UI messages for premium features
+    'ui.loginRequired': '로그인이 필요합니다',
+    'ui.seriesCreated': '시리즈 「{title}」을(를) 만들었습니다',
+    'ui.seriesCreateFailed': '시리즈 생성에 실패했습니다',
+    'ui.analysisCritique': '분석・비평',
+    'ui.consultationAI': '상담 AI',
+    'ui.analyze': '분석',
   },
   es: {
     'app.title': '葉桜', 'app.tagline': 'Tu compañero de escritura omnisciente',
@@ -3034,13 +3174,7 @@ function renderLibrarySectionContent(sectionId, allGenres, projectGenres, librar
         </div>
         <div class="flex-1 relative">
           <textarea id="library-characters"
-            placeholder="【主人公】
-名前: 
-年齢: 
-性格: 
-
-【メインキャラクター】
-..."
+            placeholder="${t('placeholder.characterTemplate')}"
             class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
             oninput="updateLibrarySettings('shared_characters', this.value)">${librarySettings.shared_characters || ''}</textarea>
           <button onclick="expandTextarea('library-characters', 'ui.sharedCharacters')" 
@@ -3063,11 +3197,7 @@ function renderLibrarySectionContent(sectionId, allGenres, projectGenres, librar
         </div>
         <div class="flex-1 relative">
           <textarea id="library-terminology"
-            placeholder="【魔法体系】
-・〇〇: 説明
-
-【組織】
-・△△: 説明"
+            placeholder="${t('placeholder.terminologyTemplate')}"
             class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
             oninput="updateLibrarySettings('shared_terminology', this.value)">${librarySettings.shared_terminology || ''}</textarea>
           <button onclick="expandTextarea('library-terminology', 'ui.sharedTerminology')" 
@@ -3090,12 +3220,7 @@ function renderLibrarySectionContent(sectionId, allGenres, projectGenres, librar
         </div>
         <div class="flex-1 relative">
           <textarea id="library-world"
-            placeholder="【舞台】
-・時代: 
-・場所: 
-
-【世界のルール】
-..."
+            placeholder="${t('placeholder.worldTemplate')}"
             class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
             oninput="updateLibrarySettings('shared_world_setting', this.value)">${librarySettings.shared_world_setting || ''}</textarea>
           <button onclick="expandTextarea('library-world', 'ui.sharedWorldSetting')" 
@@ -3519,12 +3644,7 @@ function renderSettingsSectionContent(sectionId, allGenres, projectGenres, story
         </div>
         <div class="flex-1 relative">
           <textarea id="settings-storyGoal"
-            placeholder="この物語で伝えたいこと、読者に感じてほしいこと、理想の結末...
-
-例:
-・テーマ: 友情と成長
-・メッセージ: 困難を乗り越える勇気
-・結末: 主人公が仲間と共に目標を達成する"
+            placeholder="${t('placeholder.storyGoalHint')}"
             class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
             oninput="updateStoryOutline('storyGoal', this.value)">${storyOutline.storyGoal || ''}</textarea>
           <button onclick="expandTextarea('settings-storyGoal', 'ui.storyGoal')" 
@@ -3656,21 +3776,7 @@ function renderSettingsSectionContent(sectionId, allGenres, projectGenres, story
         </div>
         <div class="flex-1 relative">
           <textarea id="settings-characters"
-            placeholder="【主人公】
-名前: 
-年齢: 
-性格: 
-目標: 
-特徴: 
-
-【ヒロイン/サブキャラ】
-名前: 
-関係性: 
-役割: 
-
-【敵/ライバル】
-名前: 
-動機: "
+            placeholder="${t('placeholder.characterTemplate')}"
             class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
             oninput="updateStoryOutline('characters', this.value)">${storyOutline.characters || ''}</textarea>
           <button onclick="expandTextarea('settings-characters', 'ui.charSettings')" 
@@ -3693,17 +3799,7 @@ function renderSettingsSectionContent(sectionId, allGenres, projectGenres, story
         </div>
         <div class="flex-1 relative">
           <textarea id="settings-terminology"
-            placeholder="【魔法/スキル】
-・ファイアボール: 炎の球を放つ初級魔法
-・ヒーリング: 傷を癒す回復魔法
-
-【組織/勢力】
-・騎士団: 王国を守る精鋭部隊
-・魔導士ギルド: 魔法使いの組合
-
-【独自概念】
-・マナ: 魔力の源
-・聖獣: 守護者として存在する神聖な生物"
+            placeholder="${t('placeholder.terminologyTemplate')}"
             class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
             oninput="updateStoryOutline('terminology', this.value)">${storyOutline.terminology || ''}</textarea>
           <button onclick="expandTextarea('settings-terminology', 'ui.terminologySettings')" 
@@ -3726,19 +3822,7 @@ function renderSettingsSectionContent(sectionId, allGenres, projectGenres, story
         </div>
         <div class="flex-1 relative">
           <textarea id="settings-worldSetting"
-            placeholder="【舞台】
-・時代: 中世ファンタジー / 近未来 / 現代
-・場所: 王国アルディア / 東京 / 異世界
-
-【世界のルール】
-・魔法が存在する
-・科学技術のレベル
-・政治体制
-
-【雰囲気/トーン】
-・明るい冒険活劇
-・ダークファンタジー
-・日常系コメディ"
+            placeholder="${t('placeholder.worldTemplate')}"
             class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
             oninput="updateStoryOutline('worldSetting', this.value)">${storyOutline.worldSetting || ''}</textarea>
           <button onclick="expandTextarea('settings-worldSetting', 'ui.worldSettings')" 
@@ -3761,21 +3845,7 @@ function renderSettingsSectionContent(sectionId, allGenres, projectGenres, story
         </div>
         <div class="flex-1 relative">
           <textarea id="settings-episodes"
-            placeholder="第1話: プロローグ
-- 主人公の日常を描く
-- 物語の伏線を張る
-
-第2話: 事件発生
-- 異変の始まり
-- 主人公が巻き込まれる
-
-第3話: 旅立ち
-- 冒険への決意
-- 仲間との出会い
-
-第4話: 試練
-- 最初の困難
-- 成長のきっかけ"
+            placeholder="${t('placeholder.episodeTemplate')}"
             class="w-full h-full px-4 py-3 text-sm border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none font-mono"
             oninput="updateStoryOutline('episodes', this.value)">${storyOutline.episodes || ''}</textarea>
           <button onclick="expandTextarea('settings-episodes', 'ui.episodeOutline')" 
@@ -3876,7 +3946,7 @@ function renderIdeasTab() {
             <div class="flex-1 relative">
               <textarea id="ideas-document" 
                 class="w-full h-full p-4 text-sm resize-none focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-                placeholder="ここにネタやプロットのアイデアを自由に書き込んでください...
+                placeholder="${t('placeholder.ideasFreeform')}"
 
 【使い方のヒント】
 ・右側のAIチャットで相談しながらアイデアを膨らませましょう
@@ -4143,7 +4213,7 @@ function renderConceptionIdeasContent() {
             <div class="flex-1 relative">
               <textarea id="ideas-document" 
                 class="w-full h-full p-4 text-sm resize-none focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-                placeholder="ここにネタやプロットのアイデアを自由に書き込んでください...
+                placeholder="${t('placeholder.ideasFreeform')}"
 
 【使い方のヒント】
 ・右側のAIチャットで相談しながらアイデアを膨らませましょう
@@ -5084,14 +5154,7 @@ function renderWritingTab() {
           <textarea id="editor" 
             class="w-full h-full p-6 resize-none focus:outline-none dark:bg-gray-800 ${isVertical ? (state.verticalTextMode === 'upright' ? 'writing-vertical-upright' : 'writing-vertical') : ''}"
             style="font-family: '${writing?.font_family || 'Noto Sans JP'}', sans-serif; font-size: 16px; line-height: 2; ${isVertical ? `writing-mode: vertical-rl; text-orientation: ${state.verticalTextMode === 'upright' ? 'upright' : 'mixed'}; overflow-x: auto; overflow-y: hidden;` : ''}"
-            placeholder="ここに物語を紡いでください...
-
-【見出しの書き方】
-# タイトル
-## 見出し1
-### 見出し2
-
-見出しを入力すると、左のアウトラインに自動で表示されます。"
+            placeholder="${t('placeholder.writeYourStory')}"
             oninput="autoSave(this.value); updateOutline();"
             onclick="detectAndUpdateStyleLabel()"
             onkeyup="detectAndUpdateStyleLabel()">${writing?.content || ''}</textarea>
@@ -5573,14 +5636,14 @@ function renderAnalysisChatTab() {
             ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md' 
             : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}">
           <i class="fas fa-chart-line ${isMobile ? '' : 'mr-2'}"></i>
-          ${isMobile ? '' : '分析・批評'}
+          ${isMobile ? '' : t('ui.analysisCritique')}
         </button>
         <button onclick="switchAnalysisSubTab('consultation')" 
           class="flex-1 ${isMobile ? 'px-3 py-2.5' : 'px-4 py-2'} rounded-lg text-sm font-medium transition ${analysisSubTab === 'consultation' 
             ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md' 
             : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}">
           <i class="fas fa-comments ${isMobile ? '' : 'mr-2'}"></i>
-          ${isMobile ? '' : '相談AI'}
+          ${isMobile ? '' : t('ui.consultationAI')}
         </button>
       </div>
       
@@ -5633,7 +5696,7 @@ function renderAnalysisSubContent() {
               class="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-xs hover:bg-purple-700 flex items-center gap-1"
               ${state.aiGenerating ? 'disabled' : ''}>
               ${state.aiGenerating ? '<div class="spinner w-4 h-4"></div>' : '<i class="fas fa-magic"></i>'}
-              分析
+              ${t('ui.analyze')}
             </button>
           </div>
           
@@ -6289,7 +6352,7 @@ function renderAchievementsTab() {
         <p class="text-gray-600 dark:text-gray-400 mt-2">${currentMonth}</p>
         ${shouldAutoReset ? `
           <p class="text-sm text-orange-500 mt-1">
-            <i class="fas fa-info-circle mr-1"></i>月末（25日）に実績がリセットされます
+            <i class="fas fa-info-circle mr-1"></i>${t('achievement.monthEndReset')}
           </p>
         ` : ''}
       </div>
@@ -6302,7 +6365,7 @@ function renderAchievementsTab() {
             ${t('achievement.monthly')}
           </h3>
           <span class="text-sm text-gray-500">
-            <i class="fas fa-sync-alt mr-1"></i>自動更新
+            <i class="fas fa-sync-alt mr-1"></i>${t('achievement.autoUpdate')}
           </span>
         </div>
         
@@ -6333,7 +6396,7 @@ function renderAchievementsTab() {
               <div class="flex-1">
                 <p class="font-medium ${goal.completed ? 'text-green-700 dark:text-green-300' : ''}">${goal.title}</p>
                 <p class="text-sm text-gray-500">${goal.description}</p>
-                <p class="text-xs text-gray-400 mt-1">進捗: ${goal.progress}</p>
+                <p class="text-xs text-gray-400 mt-1">${t('achievement.progress')}: ${goal.progress}</p>
               </div>
               <span class="text-2xl">${goal.emoji}</span>
             </div>
@@ -6342,7 +6405,7 @@ function renderAchievementsTab() {
         
         <p class="text-xs text-gray-500 text-center mt-4">
           <i class="fas fa-info-circle mr-1"></i>
-          実績は執筆活動に基づいて自動的に更新されます
+          ${t('achievement.autoTrackNote')}
         </p>
       </div>
       
@@ -6379,48 +6442,48 @@ function generateAutoAchievements(activityLog) {
   return [
     {
       id: 1,
-      title: '今月の執筆目標',
-      description: '5,000文字以上執筆する',
+      title: t('achievement.goal.writingTitle'),
+      description: t('achievement.goal.writingDesc'),
       emoji: '✍️',
       completed: totalWords >= 5000,
-      progress: `${totalWords.toLocaleString()} / 5,000 文字`
+      progress: `${totalWords.toLocaleString()} / 5,000 ${t('achievement.progress.chars')}`
     },
     {
       id: 2,
-      title: 'ログイン習慣',
-      description: '週5日以上ログインする',
+      title: t('achievement.goal.loginTitle'),
+      description: t('achievement.goal.loginDesc'),
       emoji: '📅',
       completed: (activityLog.loginDaysThisWeek?.length || 0) >= 5,
-      progress: `${activityLog.loginDaysThisWeek?.length || 0} / 5 日`
+      progress: `${activityLog.loginDaysThisWeek?.length || 0} / 5 ${t('achievement.progress.days')}`
     },
     {
       id: 3,
-      title: 'AIパートナー活用',
-      description: 'AIと10回以上相談する',
+      title: t('achievement.goal.aiTitle'),
+      description: t('achievement.goal.aiDesc'),
       emoji: '🤖',
       completed: (activityLog.aiConsultations || 0) >= 10,
-      progress: `${activityLog.aiConsultations || 0} / 10 回`
+      progress: `${activityLog.aiConsultations || 0} / 10 ${t('achievement.progress.times')}`
     },
     {
       id: 4,
-      title: 'アイデアコレクター',
-      description: '3つ以上のアイデアを採用する',
+      title: t('achievement.goal.ideasTitle'),
+      description: t('achievement.goal.ideasDesc'),
       emoji: '💡',
       completed: adoptedIdeas >= 3,
-      progress: `${adoptedIdeas} / 3 個`
+      progress: `${adoptedIdeas} / 3 ${t('achievement.progress.items')}`
     },
     {
       id: 5,
-      title: '章の完成',
-      description: '3章以上を執筆する',
+      title: t('achievement.goal.chaptersTitle'),
+      description: t('achievement.goal.chaptersDesc'),
       emoji: '📝',
       completed: chaptersCount >= 3,
-      progress: `${chaptersCount} / 3 章`
+      progress: `${chaptersCount} / 3 ${t('achievement.progress.chapters')}`
     },
     {
       id: 6,
-      title: '作品分析',
-      description: '作品を1回以上分析する',
+      title: t('achievement.goal.analysisTitle'),
+      description: t('achievement.goal.analysisDesc'),
       emoji: '📊',
       completed: (activityLog.analysisPerformed || 0) >= 1,
       progress: `${activityLog.analysisPerformed || 0} / 1 回`
@@ -6457,11 +6520,11 @@ function renderBadgeHistory() {
   const history = getBadgeHistory();
   
   const badges = [
-    { key: 'platinum', name: 'プラチナ', icon: 'fa-gem', color: 'text-cyan-400', bg: 'bg-cyan-100 dark:bg-cyan-900/30', count: history.platinum },
-    { key: 'gold', name: 'ゴールド', icon: 'fa-crown', color: 'text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-900/30', count: history.gold },
-    { key: 'silver', name: 'シルバー', icon: 'fa-star', color: 'text-gray-400', bg: 'bg-gray-100 dark:bg-gray-700', count: history.silver },
-    { key: 'bronze', name: 'ブロンズ', icon: 'fa-medal', color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/30', count: history.bronze },
-    { key: 'encouragement', name: '頑張ってね', icon: 'fa-heart', color: 'text-pink-400', bg: 'bg-pink-100 dark:bg-pink-900/30', count: history.encouragement },
+    { key: 'platinum', name: t('achievement.platinum'), icon: 'fa-gem', color: 'text-cyan-400', bg: 'bg-cyan-100 dark:bg-cyan-900/30', count: history.platinum },
+    { key: 'gold', name: t('achievement.gold'), icon: 'fa-crown', color: 'text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-900/30', count: history.gold },
+    { key: 'silver', name: t('achievement.silver'), icon: 'fa-star', color: 'text-gray-400', bg: 'bg-gray-100 dark:bg-gray-700', count: history.silver },
+    { key: 'bronze', name: t('achievement.bronze'), icon: 'fa-medal', color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/30', count: history.bronze },
+    { key: 'encouragement', name: t('achievement.encouragement'), icon: 'fa-heart', color: 'text-pink-400', bg: 'bg-pink-100 dark:bg-pink-900/30', count: history.encouragement },
   ];
   
   return `
@@ -6475,7 +6538,7 @@ function renderBadgeHistory() {
       `).join('')}
     </div>
     <p class="text-center text-sm text-gray-500 mt-4">
-      月末に実績を達成するとバッジが記録されます
+      ${t('achievement.badgeRecordNote')}
     </p>
   `;
 }
@@ -8741,7 +8804,7 @@ window.deleteProject = async (projectId, projectTitle) => {
 // Create a new library (parent project for series)
 window.createLibrary = async (title, description = '', genre = '') => {
   if (!state.user) {
-    alert('ログインが必要です');
+    alert(t('ui.loginRequired'));
     return;
   }
   // Check if user has standard plan for series feature
@@ -8772,10 +8835,10 @@ window.createLibrary = async (title, description = '', genre = '') => {
     state.expandedLibraries[res.data.project.id] = true;
     
     render();
-    alert(`シリーズ「${title}」を作成しました`);
+    alert(t('ui.seriesCreated').replace('{title}', title));
   } catch (e) {
     console.error('Create library error:', e);
-    alert('シリーズの作成に失敗しました: ' + e.message);
+    alert(t('ui.seriesCreateFailed') + ': ' + e.message);
   }
 };
 
