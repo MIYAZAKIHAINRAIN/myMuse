@@ -242,7 +242,7 @@ const i18n = {
     'placeholder.sharedWorld': 'シリーズ全体の世界観、舞台設定を記述...',
     'placeholder.sharedTerminology': 'シリーズ固有の用語、ルールなどを記述...',
     // Achievement texts
-    'achievement.badgeHistory': '${t('achievement.badgeHistory')}',
+    'achievement.badgeHistory': 'これまでの獲得バッジ数',
     'achievement.monthlyConfirm': '今月の実績確定！「{tier}」バッジを獲得しました！',
   },
   en: {
